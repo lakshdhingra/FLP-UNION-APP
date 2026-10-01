@@ -164,7 +164,7 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
                     child: GestureDetector(
                       onTap: () => setState(() => _activeTab = 'new'),
                       child: Container(
-                        padding: const EdgeInsets.vertical(10),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
                           color: _activeTab == 'new' ? AppColors.accent : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
@@ -186,7 +186,7 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
                     child: GestureDetector(
                       onTap: () => setState(() => _activeTab = 'history'),
                       child: Container(
-                        padding: const EdgeInsets.vertical(10),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         decoration: BoxDecoration(
                           color: _activeTab == 'history' ? AppColors.accent : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
@@ -224,7 +224,7 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
                                 child: GestureDetector(
                                   onTap: () => setState(() => _selectedType = 'ISSUE'),
                                   child: Container(
-                                    padding: const EdgeInsets.vertical(10),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: _selectedType == 'ISSUE'
                                           ? AppColors.accentSubtle
@@ -257,7 +257,7 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
                                 child: GestureDetector(
                                   onTap: () => setState(() => _selectedType = 'SUPPORT'),
                                   child: Container(
-                                    padding: const EdgeInsets.vertical(10),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
                                     decoration: BoxDecoration(
                                       color: _selectedType == 'SUPPORT'
                                           ? AppColors.accentSubtle

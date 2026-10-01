@@ -378,7 +378,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           districtsAsync.when(
                             data: (districts) => Container(
                               margin: const EdgeInsets.only(top: 4),
-                              maxHeight: 200,
+                              constraints: const BoxConstraints(maxHeight: 200),
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
                                 borderRadius: AppRadius.borderMd,

@@ -22,7 +22,7 @@ abstract class AppTheme {
         onError: AppColors.textPrimary,
         outline: AppColors.border,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.card,
         elevation: 0,
         shape: RoundedRectangleBorder(

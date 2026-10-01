@@ -111,7 +111,7 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                   children: [
                     // Profile Header Section
                     Padding(
-                      padding: const EdgeInsets.vertical(AppSpacing.lg),
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Column(
                         children: [
                           AppAvatar(name: profile.fullName, size: 80),

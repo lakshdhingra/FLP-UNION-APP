@@ -60,7 +60,7 @@ class EngineerDetailScreen extends ConsumerWidget {
                   children: [
                     // Profile Section
                     Padding(
-                      padding: const EdgeInsets.vertical(AppSpacing.lg),
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Column(
                         children: [
                           AppAvatar(name: engineer.fullName, size: 72),
@@ -205,7 +205,7 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.vertical(6.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

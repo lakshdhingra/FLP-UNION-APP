@@ -63,7 +63,7 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                     // Profile Header Section
                     Center(
                       child: Padding(
-                        padding: const EdgeInsets.vertical(AppSpacing.lg),
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                         child: Column(
                           children: [
                             AppAvatar(name: manager.fullName, size: 72),

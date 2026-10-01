@@ -9,6 +9,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/district_entity.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_text_input.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/engineer_provider.dart';
 import '../providers/manager_dashboard_provider.dart';
 
