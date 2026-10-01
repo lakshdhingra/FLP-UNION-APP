@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -87,12 +88,24 @@ class AdminDashboardScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        GestureDetector(
-                          onTap: () => _handleLogout(context, ref),
-                          child: const Padding(
-                            padding: EdgeInsets.all(AppSpacing.sm),
-                            child: Icon(LucideIcons.logOut, size: 20, color: AppColors.danger),
-                          ),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => context.push('/admin/dashboard/audit-logs'),
+                              child: const Padding(
+                                padding: EdgeInsets.all(AppSpacing.sm),
+                                child: Icon(LucideIcons.history, size: 20, color: AppColors.accent),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () => _handleLogout(context, ref),
+                              child: const Padding(
+                                padding: EdgeInsets.all(AppSpacing.sm),
+                                child: Icon(LucideIcons.logOut, size: 20, color: AppColors.danger),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

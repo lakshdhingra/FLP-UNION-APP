@@ -1,5 +1,6 @@
 import '../../../core/constants/api_constants.dart';
 import '../../../core/network/api_client.dart';
+import '../models/admin_audit_log_dto.dart';
 import '../models/admin_engineer_dto.dart';
 import '../models/admin_issue_dto.dart';
 import '../models/admin_manager_dto.dart';
@@ -86,5 +87,19 @@ class AdminService {
       '${ApiConstants.issues}/$id/status',
       data: {'status': status},
     );
+  }
+
+  Future<AdminAuditLogsResponseDto> getAuditLogs({
+    int page = 1,
+    int limit = 50,
+  }) async {
+    final response = await _apiClient.get(
+      ApiConstants.adminAuditLogs,
+      queryParameters: {
+        'page': page,
+        'limit': limit,
+      },
+    );
+    return AdminAuditLogsResponseDto.fromJson(response.data as Map<String, dynamic>);
   }
 }

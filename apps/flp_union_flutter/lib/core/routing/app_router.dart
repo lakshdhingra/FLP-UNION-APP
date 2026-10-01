@@ -19,6 +19,7 @@ import '../../features/admin/screens/admin_managers_screen.dart';
 import '../../features/admin/screens/admin_engineers_screen.dart';
 import '../../features/admin/screens/admin_issues_screen.dart';
 import '../../features/admin/screens/admin_states_screen.dart';
+import '../../features/admin/screens/admin_audit_logs_screen.dart';
 import '../../shared/models/user_role.dart';
 import '../constants/app_colors.dart';
 
@@ -157,6 +158,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/admin/dashboard',
                 builder: (context, state) => const AdminDashboardScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'audit-logs',
+                    builder: (context, state) => const AdminAuditLogsScreen(),
+                  ),
+                ],
               ),
             ],
           ),
