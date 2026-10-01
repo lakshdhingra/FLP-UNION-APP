@@ -1,0 +1,26 @@
+name: flp_union_app
+description: "TASPU - Telangana Authorized Service Centre Proprietors Union workforce management native Flutter application"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ^13.2.0
+  flutter_riverpod: ^2.5.1
+  dio: ^5.4.1
+  flutter_secure_storage: ^9.0.0
+  lucide_icons: ^0.320.0
+  google_fonts: ^6.1.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "TASPU",
+    "slug": "taspu",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "taspu",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.taspu.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Used to take profile photos",
+        "NSPhotoLibraryUsageDescription": "Used to select profile photos"
+      }
+    },
+    "android": {
+      "package": "com.taspu.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#09090B",
+        "foregroundImage": "./assets/images/adaptive-icon.png"
+      },
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE"],
+      "predictiveBackGestureEnabled": false,
+      "usesCleartextTraffic": true
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-image-picker",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#09090B",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 100
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

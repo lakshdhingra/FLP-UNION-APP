@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  MANAGER
+}
+
+enum IssueType {
+  ISSUE
+  SUPPORT_REQUEST
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum NotificationType {
+  ISSUE_UPDATE
+  ANNOUNCEMENT
+  SYSTEM
+  MANAGER_MESSAGE
+}
+
+// ─────────────────────────────────────────────
+// Core identity — login credentials, shared by Admin & Manager
+// ─────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  mobile       String   @unique
+  passwordHash String
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  managerProfile ManagerProfile?
+  refreshTokens  RefreshToken[]
+  reportedIssues Issue[]          @relation("IssueReporter")
+  notifications  Notification[]
+  auditLogs      AuditLog[]       @relation("AuditActor")
+  announcements  Announcement[]   @relation("AnnouncementAuthor")
+
+  @@index([email])
+  @@index([mobile])
+}
+
+// One row per login session's refresh token — lets us revoke sessions
+// individually and detect token reuse (§48, §5).
+model RefreshToken {
+  id             String    @id @default(uuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash      String    @unique
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  replacedByHash String?
+  createdByIp    String?
+  createdAt      DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ─────────────────────────────────────────────
+// Organizational hierarchy
+// ─────────────────────────────────────────────
+
+model State {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  districts       District[]
+  managerProfiles ManagerProfile[]
+  engineers       Engineer[]
+}
+
+model District {
+  id        String   @id @default(uuid())
+  name      String
+  stateId   String
+  state     State    @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  managerProfiles ManagerProfile[]
+  engineers       Engineer[]
+
+  // Unique WITHIN a state, not globally — "Hyderabad" can exist in both
+  // Telangana and Andhra Pradesh, but not twice within the same state.
+  @@unique([stateId, name])
+  @@index([stateId])
+}
+
+model ManagerProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName        String
+  profilePhotoUrl String?
+  stateId         String
+  state           State    @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  districtId      String
+  district        District @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  engineers Engineer[]
+
+  // Deliberately NO unique constraint on districtId — multiple managers
+  // can belong to the same district.
+  @@index([districtId])
+  @@index([stateId])
+}
+
+// ─────────────────────────────────────────────
+// Engineer — the workforce records
+// ─────────────────────────────────────────────
+
+model Engineer {
+  id              String   @id @default(uuid())
+  fullName        String
+  phone           String
+  email           String?
+  profilePhotoUrl String?
+  address         String?
+
+  stateId    String
+  state      State    @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  districtId String
+  district   District @relation(fields: [districtId], references: [id], onDelete: Restrict)
+
+  skills          String[]
+  experienceYears Decimal? @db.Decimal(4, 1)
+  designation     String?
+
+  govIdType    String?
+  govIdNumber  String?
+  salary       Decimal? @db.Decimal(12, 2)
+  privateNotes String?
+
+  managerId String
+  manager   ManagerProfile @relation(fields: [managerId], references: [id], onDelete: Cascade)
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([managerId])
+  @@index([districtId])
+  @@index([stateId])
+  @@index([createdAt])
+  @@unique([managerId, phone])
+}
+
+// ─────────────────────────────────────────────
+// Issues / Support requests
+// (merged into one model — a separate SupportRequest model would just
+// duplicate the same fields, which the spec itself says to avoid)
+// ─────────────────────────────────────────────
+
+model Issue {
+  id            String      @id @default(uuid())
+  type          IssueType   @default(ISSUE)
+  title         String
+  description   String
+  status        IssueStatus @default(OPEN)
+  attachmentUrl String?
+
+  reporterId String
+  reporter   User   @relation("IssueReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+
+  @@index([reporterId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ─────────────────────────────────────────────
+// Announcements (Admin → Managers broadcast messages)
+// ─────────────────────────────────────────────
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  isActive  Boolean  @default(true)
+  authorId  String
+  author    User     @relation("AnnouncementAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// ─────────────────────────────────────────────
+// Notifications
+// ─────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, isRead])
+}
+
+// ─────────────────────────────────────────────
+// Audit log — records important admin/security actions (§47)
+// ─────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  actor      User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}

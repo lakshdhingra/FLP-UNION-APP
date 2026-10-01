@@ -1,0 +1,24 @@
+{
+    "name": "flp-union",
+    "private": true,
+    "version": "0.1.0",
+    "description": "FLP-UNION — workforce/union management platform (React Native + NestJS monorepo)",
+    "workspaces": [
+        "apps/*",
+        "packages/*"
+    ],
+    "scripts": {
+        "api:dev": "npm run start:dev --workspace=apps/api",
+        "api:build": "npm run build --workspace=apps/api",
+        "api:prisma:migrate": "npm run prisma:migrate --workspace=apps/api",
+        "api:prisma:generate": "npm run prisma:generate --workspace=apps/api",
+        "api:prisma:seed": "npm run prisma:seed --workspace=apps/api",
+        "api:prisma:studio": "npm run prisma:studio --workspace=apps/api",
+        "mobile:start": "npm run start --workspace=apps/mobile",
+        "mobile:android": "npm run android --workspace=apps/mobile",
+        "mobile:ios": "npm run ios --workspace=apps/mobile"
+    },
+    "engines": {
+        "node": ">=20.0.0"
+    }
+}
