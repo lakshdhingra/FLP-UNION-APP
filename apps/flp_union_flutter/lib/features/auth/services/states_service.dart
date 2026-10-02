@@ -10,13 +10,33 @@ class StatesService {
 
   Future<List<StateEntity>> getAllStates() async {
     final response = await _apiClient.get(ApiConstants.states);
-    final List<dynamic> data = response.data as List<dynamic>;
-    return data.map((json) => StateEntity.fromJson(json as Map<String, dynamic>)).toList();
+    final rawData = response.data;
+    final List<dynamic> listData;
+    if (rawData is List) {
+      listData = rawData;
+    } else if (rawData is Map && rawData['data'] is List) {
+      listData = rawData['data'] as List;
+    } else {
+      listData = [];
+    }
+    return listData
+        .map((json) => StateEntity.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
   }
 
   Future<List<DistrictEntity>> getDistricts(String stateId) async {
     final response = await _apiClient.get('${ApiConstants.states}/$stateId/districts');
-    final List<dynamic> data = response.data as List<dynamic>;
-    return data.map((json) => DistrictEntity.fromJson(json as Map<String, dynamic>)).toList();
+    final rawData = response.data;
+    final List<dynamic> listData;
+    if (rawData is List) {
+      listData = rawData;
+    } else if (rawData is Map && rawData['data'] is List) {
+      listData = rawData['data'] as List;
+    } else {
+      listData = [];
+    }
+    return listData
+        .map((json) => DistrictEntity.fromJson(Map<String, dynamic>.from(json as Map)))
+        .toList();
   }
 }
