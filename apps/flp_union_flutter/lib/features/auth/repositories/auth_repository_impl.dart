@@ -58,6 +58,7 @@ class AuthRepositoryImpl implements AuthRepository {
         stateId: stateId,
         districtId: districtId,
         password: password,
+        confirmPassword: password,
       );
       await _apiClient.post(
         ApiConstants.registerManager,

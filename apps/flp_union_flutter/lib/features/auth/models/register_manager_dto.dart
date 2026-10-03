@@ -5,6 +5,7 @@ class RegisterManagerDto {
   final String stateId;
   final String districtId;
   final String password;
+  final String confirmPassword;
 
   const RegisterManagerDto({
     required this.fullName,
@@ -13,6 +14,7 @@ class RegisterManagerDto {
     required this.stateId,
     required this.districtId,
     required this.password,
+    required this.confirmPassword,
   });
 
   Map<String, dynamic> toJson() => {
@@ -22,5 +24,6 @@ class RegisterManagerDto {
         'stateId': stateId,
         'districtId': districtId,
         'password': password,
+        'confirmPassword': confirmPassword,
       };
 }
