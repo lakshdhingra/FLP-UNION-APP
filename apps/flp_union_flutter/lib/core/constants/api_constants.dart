@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart';
 abstract class ApiConstants {
   static String get baseUrl {
     if (kIsWeb) {
-      return 'http://localhost:3000/api';
+      return 'http://3.109.49.84/api';
     } else if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000/api';
+      return 'http://3.109.49.84/api';
     } else {
-      return 'http://localhost:3000/api';
+      return 'http://3.109.49.84/api';
     }
   }
 
