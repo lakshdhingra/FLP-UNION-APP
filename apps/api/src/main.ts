@@ -15,6 +15,9 @@ async function bootstrap() {
             if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
                 return callback(null, true);
             }
+            if (/^https?:\/\/([a-z0-9-]+\.)*tapsu\.in(:\d+)?$/.test(origin)) {
+                return callback(null, true);
+            }
             if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
                 return callback(null, true);
             }
