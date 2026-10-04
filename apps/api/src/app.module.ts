@@ -13,6 +13,7 @@ import { IssuesModule } from './issues/issues.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AuditModule } from './audit/audit.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { MembershipModule } from './membership/membership.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -43,6 +44,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
         AnalyticsModule,
         AuditModule,
         NotificationsModule,
+        MembershipModule,
     ],
     providers: [
         // Global JWT guard — all routes require auth unless @Public() is present

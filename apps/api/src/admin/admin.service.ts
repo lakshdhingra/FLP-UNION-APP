@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { IssueStatus } from '@prisma/client';
@@ -227,5 +228,312 @@ export class AdminService {
             this.prisma.auditLog.count(),
         ]);
         return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+    }
+
+    // ==========================================
+    // TASPU Website Admin Extensions
+    // ==========================================
+
+    async getDashboardStats() {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const [totalMembers, pendingApps, thisMonthApps, publishedNews, unreadMessages, recentApps] = await Promise.all([
+        this.prisma.member.count({ where: { status: 'ACTIVE' } }),
+        this.prisma.membershipApplication.count({ where: { status: 'PENDING' } }),
+        this.prisma.membershipApplication.count({ where: { submittedAt: { gte: startOfMonth } } }),
+        this.prisma.newsArticle.count({ where: { status: 'PUBLISHED' } }),
+        this.prisma.contactMessage.count({ where: { isRead: false } }),
+        this.prisma.membershipApplication.findMany({
+          take: 5,
+          orderBy: { submittedAt: 'desc' },
+          select: {
+            id: true,
+            fullName: true,
+            serviceCenterName: true,
+            district: true,
+            submittedAt: true,
+            status: true,
+          },
+        }),
+      ]);
+
+      return {
+        totalMembers,
+        pendingApps,
+        thisMonthApps,
+        publishedNews,
+        unreadMessages,
+        recentApps: recentApps.map(a => ({
+          id: a.id,
+          full_name: a.fullName,
+          service_center_name: a.serviceCenterName,
+          district: a.district,
+          submitted_at: a.submittedAt.toISOString(),
+          status: a.status,
+        })),
+      };
+    }
+
+    async findAllApplications(query: { status?: string; search?: string }) {
+      const where: any = {};
+      if (query.status && query.status !== 'ALL') {
+        where.status = query.status;
+      }
+      if (query.search) {
+        where.OR = [
+          { fullName: { contains: query.search, mode: 'insensitive' } },
+          { serviceCenterName: { contains: query.search, mode: 'insensitive' } },
+          { applicationNumber: { contains: query.search, mode: 'insensitive' } },
+        ];
+      }
+
+      const apps = await this.prisma.membershipApplication.findMany({
+        where,
+        orderBy: { submittedAt: 'desc' },
+      });
+
+      return apps.map(a => ({
+        id: a.id,
+        application_number: a.applicationNumber,
+        full_name: a.fullName,
+        phone: a.phone,
+        service_center_name: a.serviceCenterName,
+        submitted_at: a.submittedAt.toISOString(),
+        status: a.status,
+      }));
+    }
+
+    async findApplicationById(id: string) {
+      const app = await this.prisma.membershipApplication.findUnique({ where: { id } });
+      if (!app) return null;
+      return {
+        ...app,
+        full_name: app.fullName,
+        service_center_name: app.serviceCenterName,
+        application_number: app.applicationNumber,
+        years_experience: app.yearsExperience,
+        brands_worked_with: app.brandsWorkedWith,
+        gst_no: app.gstNo,
+        full_address: app.fullAddress,
+        reason_for_joining: app.reasonForJoining,
+        additional_info: app.additionalInfo,
+        admin_notes: app.adminNotes,
+        submitted_at: app.submittedAt.toISOString(),
+      };
+    }
+
+    async approveApplication(id: string, adminId: string) {
+      return this.prisma.$transaction(async (tx) => {
+        const app = await tx.membershipApplication.findUnique({ where: { id } });
+        if (!app) throw new BadRequestException('Application not found');
+        if (app.status === 'APPROVED') throw new BadRequestException('Application is already approved');
+
+        const settings = await tx.siteSettings.findUnique({ where: { id: 1 } });
+        const prefix = settings?.membershipIdPrefix || 'TASPU';
+        const year = settings?.membershipIdYear || new Date().getFullYear().toString();
+
+        const memberCount = await tx.member.count();
+        const membershipId = `${prefix}-${year}-${String(memberCount + 1).padStart(5, '0')}`;
+
+        await tx.membershipApplication.update({
+          where: { id },
+          data: {
+            status: 'APPROVED',
+            reviewedAt: new Date(),
+            reviewedBy: adminId || null,
+          },
+        });
+
+        const member = await tx.member.create({
+          data: {
+            membershipId,
+            applicationId: id,
+            fullName: app.fullName,
+            serviceCenterName: app.serviceCenterName,
+            district: app.district,
+            city: app.city,
+            phone: app.phone,
+            email: app.email,
+            fullAddress: app.fullAddress,
+            brandsWorkedWith: app.brandsWorkedWith,
+            gstNo: app.gstNo,
+            status: 'ACTIVE',
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorId: adminId || null,
+            action: 'APPROVE_APPLICATION',
+            targetType: 'MEMBERSHIP_APPLICATION',
+            targetId: id,
+            metadata: { membershipId, memberId: member.id },
+          },
+        });
+
+        return { success: true, membership_id: membershipId, member_id: member.id };
+      });
+    }
+
+    async updateApplicationStatus(id: string, adminId: string, dto: any) {
+      if (dto.status === 'APPROVED') {
+        return this.approveApplication(id, adminId);
+      }
+
+      await this.prisma.membershipApplication.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          reviewedAt: new Date(),
+          reviewedBy: adminId || null,
+          adminNotes: dto.adminNotes !== undefined ? dto.adminNotes : undefined,
+          rejectionReason: dto.status === 'REJECTED' ? (dto.adminNotes || null) : undefined,
+        },
+      });
+
+      return { success: true };
+    }
+
+    async saveApplicationNotes(id: string, notes: string) {
+      await this.prisma.membershipApplication.update({
+        where: { id },
+        data: { adminNotes: notes },
+      });
+      return { success: true };
+    }
+
+    async findAllMembers(query: { status?: string; search?: string }) {
+      const where: any = {};
+      if (query.status && query.status !== 'ALL') {
+        where.status = query.status;
+      }
+      if (query.search) {
+        where.OR = [
+          { fullName: { contains: query.search, mode: 'insensitive' } },
+          { serviceCenterName: { contains: query.search, mode: 'insensitive' } },
+          { membershipId: { contains: query.search, mode: 'insensitive' } },
+        ];
+      }
+
+      const members = await this.prisma.member.findMany({
+        where,
+        orderBy: { membershipDate: 'desc' },
+      });
+
+      return members.map(m => ({
+        id: m.id,
+        membership_id: m.membershipId,
+        application_id: m.applicationId,
+        full_name: m.fullName,
+        service_center_name: m.serviceCenterName,
+        district: m.district,
+        city: m.city,
+        phone: m.phone,
+        email: m.email,
+        membership_date: m.membershipDate.toISOString(),
+        status: m.status,
+      }));
+    }
+
+    async findMemberById(id: string) {
+      const member = await this.prisma.member.findUnique({
+        where: { id },
+        include: { application: true },
+      });
+      if (!member) return null;
+
+      return {
+        id: member.id,
+        membership_id: member.membershipId,
+        application_id: member.applicationId,
+        full_name: member.fullName,
+        service_center_name: member.serviceCenterName,
+        district: member.district,
+        city: member.city,
+        phone: member.phone,
+        email: member.email,
+        full_address: member.fullAddress,
+        brands_worked_with: member.brandsWorkedWith,
+        gst_no: member.gstNo,
+        membership_date: member.membershipDate.toISOString(),
+        status: member.status,
+        application: member.application ? {
+          id: member.application.id,
+          application_number: member.application.applicationNumber,
+          submitted_at: member.application.submittedAt.toISOString(),
+          status: member.application.status,
+          reason_for_joining: member.application.reasonForJoining,
+          additional_info: member.application.additionalInfo,
+          admin_notes: member.application.adminNotes,
+          designation: member.application.designation,
+          years_experience: member.application.yearsExperience,
+        } : null,
+      };
+    }
+
+    async toggleMemberSuspension(id: string, currentStatus: string) {
+      const newStatus = currentStatus === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
+      await this.prisma.member.update({
+        where: { id },
+        data: { status: newStatus },
+      });
+      return { success: true, newStatus };
+    }
+
+    async createManualMember(dto: any) {
+      await this.prisma.member.create({
+        data: {
+          membershipId: dto.membershipId,
+          fullName: dto.fullName,
+          serviceCenterName: dto.serviceCenterName,
+          brandsWorkedWith: dto.brandsWorkedWith || [],
+          gstNo: dto.gstNo || '',
+          fullAddress: dto.fullAddress || '',
+          district: dto.district,
+          city: dto.city,
+          phone: dto.phone,
+          email: dto.email,
+          status: 'ACTIVE',
+        },
+      });
+      return { success: true };
+    }
+
+    async updateMember(id: string, dto: any) {
+      await this.prisma.member.update({
+        where: { id },
+        data: {
+          membershipId: dto.membershipId,
+          fullName: dto.fullName,
+          serviceCenterName: dto.serviceCenterName,
+          brandsWorkedWith: dto.brandsWorkedWith || [],
+          gstNo: dto.gstNo || '',
+          fullAddress: dto.fullAddress || '',
+          district: dto.district,
+          city: dto.city,
+          phone: dto.phone,
+          email: dto.email,
+        },
+      });
+      return { success: true };
+    }
+
+    async getNews() {
+      return this.prisma.newsArticle.findMany({ orderBy: { createdAt: 'desc' } });
+    }
+
+    async getMessages() {
+      return this.prisma.contactMessage.findMany({ orderBy: { createdAt: 'desc' } });
+    }
+
+    async getLeadership() {
+      return this.prisma.leadership.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } });
+    }
+
+    async getSettings() {
+      const s = await this.prisma.siteSettings.findUnique({ where: { id: 1 } });
+      return s || { membershipIdPrefix: 'TASPU', membershipIdYear: '2026', appIdPrefix: 'TASPU-APP' };
     }
 }

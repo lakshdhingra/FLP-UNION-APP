@@ -56,6 +56,7 @@ model User {
   notifications  Notification[]
   auditLogs      AuditLog[]       @relation("AuditActor")
   announcements  Announcement[]   @relation("AnnouncementAuthor")
+  reviewedApplications MembershipApplication[] @relation("ApplicationReviewer")
 
   @@index([email])
   @@index([mobile])
@@ -252,4 +253,124 @@ model AuditLog {
   @@index([actorId])
   @@index([targetType, targetId])
   @@index([createdAt])
+}
+
+// ==========================================
+// TASPU Website Specific Models & Enums
+// ==========================================
+
+enum ApplicationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum MemberStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model SiteSettings {
+  id                 Int      @id @default(1)
+  membershipIdPrefix String   @default("TASPU")
+  membershipIdYear   String   @default("2026")
+  appIdPrefix        String   @default("TASPU-APP")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model MembershipApplication {
+  id                String            @id @default(uuid())
+  applicationNumber String            @unique
+  fullName          String
+  email             String
+  phone             String
+  serviceCenterName String
+  designation       String
+  yearsExperience   Int
+  district          String
+  city              String
+  address           String
+  fullAddress       String
+  brandsWorkedWith  String[]          @default([])
+  gstNo             String            @default("")
+  reasonForJoining  String?
+  additionalInfo    String?
+  status            ApplicationStatus @default(PENDING)
+  rejectionReason   String?
+  adminNotes        String?
+  submittedAt       DateTime          @default(now())
+  reviewedAt        DateTime?
+  reviewedBy        String?
+  reviewer          User?             @relation("ApplicationReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  member            Member?
+}
+
+model Member {
+  id                String                @id @default(uuid())
+  membershipId      String                @unique
+  applicationId     String?               @unique
+  application       MembershipApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  fullName          String
+  serviceCenterName String
+  district          String
+  city              String
+  phone             String
+  email             String
+  fullAddress       String                @default("")
+  brandsWorkedWith  String[]              @default([])
+  gstNo             String                @default("")
+  membershipDate    DateTime              @default(now())
+  status            MemberStatus          @default(ACTIVE)
+  publicVisibility  Boolean               @default(true)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+}
+
+model NewsArticle {
+  id             String        @id @default(uuid())
+  title          String
+  slug           String        @unique
+  category       String?
+  author         String?
+  content        String
+  coverImage     String?
+  status         ContentStatus @default(DRAFT)
+  publishedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Leadership {
+  id        String   @id @default(uuid())
+  name      String
+  role      String
+  bio       String?
+  imagePath String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

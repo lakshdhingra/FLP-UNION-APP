@@ -1,5 +1,5 @@
 import {
-    Controller, Get, Post, Patch, Delete, Body, Param,
+    Controller, Get, Post, Put, Patch, Delete, Body, Param,
     Query, UseGuards, ParseUUIDPipe, ParseEnumPipe, Request,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
@@ -132,5 +132,84 @@ export class AdminController {
             page: page ? parseInt(page, 10) : 1,
             limit: limit ? parseInt(limit, 10) : 50,
         });
+    }
+
+    // ==========================================
+    // TASPU Website Admin Controllers
+    // ==========================================
+
+    @Get('dashboard/stats')
+    getDashboardStats() {
+      return this.service.getDashboardStats();
+    }
+
+    @Get('applications')
+    findAllApplications(@Query('status') status?: string, @Query('search') search?: string) {
+      return this.service.findAllApplications({ status, search });
+    }
+
+    @Get('applications/:id')
+    findApplicationById(@Param('id') id: string) {
+      return this.service.findApplicationById(id);
+    }
+
+    @Post('applications/:id/approve')
+    approveApplication(@Request() req: any, @Param('id') id: string) {
+      return this.service.approveApplication(id, req.user?.userId);
+    }
+
+    @Patch('applications/:id/status')
+    updateApplicationStatus(@Request() req: any, @Param('id') id: string, @Body() body: any) {
+      return this.service.updateApplicationStatus(id, req.user?.userId, body);
+    }
+
+    @Patch('applications/:id/notes')
+    saveApplicationNotes(@Param('id') id: string, @Body() body: any) {
+      return this.service.saveApplicationNotes(id, body.notes);
+    }
+
+    @Get('members')
+    findAllMembers(@Query('status') status?: string, @Query('search') search?: string) {
+      return this.service.findAllMembers({ status, search });
+    }
+
+    @Get('members/:id')
+    findMemberById(@Param('id') id: string) {
+      return this.service.findMemberById(id);
+    }
+
+    @Patch('members/:id/status')
+    toggleMemberSuspension(@Param('id') id: string, @Body() body: { currentStatus: string }) {
+      return this.service.toggleMemberSuspension(id, body.currentStatus);
+    }
+
+    @Post('members')
+    createManualMember(@Body() body: any) {
+      return this.service.createManualMember(body);
+    }
+
+    @Put('members/:id')
+    updateMember(@Param('id') id: string, @Body() body: any) {
+      return this.service.updateMember(id, body);
+    }
+
+    @Get('news')
+    getNews() {
+      return this.service.getNews();
+    }
+
+    @Get('messages')
+    getMessages() {
+      return this.service.getMessages();
+    }
+
+    @Get('leadership')
+    getLeadership() {
+      return this.service.getLeadership();
+    }
+
+    @Get('settings')
+    getSettings() {
+      return this.service.getSettings();
     }
 }
