@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 
 abstract class ApiConstants {
   static const String _defaultRemoteBaseUrl = 'http://3.109.49.84/api';
-  static const String _localLanBaseUrl = 'http://10.12.55.28:3000/api';
-  static const String _localWebBaseUrl = 'http://localhost:3000/api';
+  static const String localLanBaseUrl = 'http://10.12.55.28:3000/api';
+  static const String localWebBaseUrl = 'http://localhost:3000/api';
 
   static String get baseUrl {
     const String overrideUrl = String.fromEnvironment('API_BASE_URL');
