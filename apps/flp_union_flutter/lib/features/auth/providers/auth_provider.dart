@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/providers.dart';
 import '../../../shared/models/auth_user.dart';
@@ -21,13 +22,27 @@ final statesServiceProvider = Provider<StatesService>((ref) {
 
 final statesListProvider = FutureProvider<List<StateEntity>>((ref) async {
   final service = ref.watch(statesServiceProvider);
-  return service.getAllStates();
+  try {
+    final states = await service.getAllStates();
+    debugPrint('[statesListProvider] Fetched ${states.length} states');
+    return states;
+  } catch (e, st) {
+    debugPrint('[statesListProvider] Error loading states: $e\n$st');
+    rethrow;
+  }
 });
 
 final districtsListProvider = FutureProvider.family<List<DistrictEntity>, String>((ref, stateId) async {
   if (stateId.isEmpty) return [];
   final service = ref.watch(statesServiceProvider);
-  return service.getDistricts(stateId);
+  try {
+    final districts = await service.getDistricts(stateId);
+    debugPrint('[districtsListProvider] Fetched ${districts.length} districts for stateId=$stateId');
+    return districts;
+  } catch (e, st) {
+    debugPrint('[districtsListProvider] Error loading districts for stateId=$stateId: $e\n$st');
+    rethrow;
+  }
 });
 
 class AuthState {

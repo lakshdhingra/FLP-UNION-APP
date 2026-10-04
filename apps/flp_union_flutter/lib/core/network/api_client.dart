@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
 import '../storage/secure_storage_service.dart';
@@ -25,6 +26,26 @@ class ApiClient {
         storage: storage,
         dio: dio,
         onUnauthorized: onUnauthorized,
+      ),
+    );
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          debugPrint('[ApiClient] REQUEST[${options.method}] => URL: ${options.uri}');
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          debugPrint('[ApiClient] RESPONSE[${response.statusCode}] <= URL: ${response.requestOptions.uri}');
+          debugPrint('[ApiClient] BODY: ${response.data}');
+          return handler.next(response);
+        },
+        onError: (DioException err, handler) {
+          debugPrint('[ApiClient] ERROR[${err.response?.statusCode}] <= URL: ${err.requestOptions.uri}');
+          debugPrint('[ApiClient] EXCEPTION TYPE: ${err.type} | EXCEPTION: ${err.error}');
+          debugPrint('[ApiClient] ERROR RESPONSE: ${err.response?.data}');
+          return handler.next(err);
+        },
       ),
     );
   }
