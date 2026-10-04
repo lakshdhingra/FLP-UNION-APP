@@ -5,12 +5,14 @@ import { IssueStatus } from '@prisma/client';
 import { CreateStateDto, UpdateStateDto, CreateDistrictDto, UpdateDistrictDto, AdminUpdateEngineerDto } from './dto/admin.dto';
 
 import { AuditService } from '../audit/audit.service';
+import { S3Service } from '../s3/s3.service';
 
 @Injectable()
 export class AdminService {
     constructor(
         private prisma: PrismaService,
         private audit: AuditService,
+        private s3Service: S3Service,
     ) {}
 
     // ─── States ───────────────────────────────────────────────────────────
@@ -308,6 +310,28 @@ export class AdminService {
     async findApplicationById(id: string) {
       const app = await this.prisma.membershipApplication.findUnique({ where: { id } });
       if (!app) return null;
+
+      const rawDocs = Array.isArray(app.documents) ? (app.documents as any[]) : [];
+      const documentsWithUrls = await Promise.all(
+        rawDocs.map(async (doc: any) => {
+          let url: string | null = null;
+          if (doc.key) {
+            try {
+              url = await this.s3Service.getPresignedDownloadUrl(doc.key, 3600);
+            } catch (e) {
+              // Ignore S3 error gracefully if object key is missing/unreachable
+            }
+          }
+          return {
+            name: doc.originalName || doc.name || 'Document',
+            key: doc.key,
+            size: doc.size ? `${(doc.size / 1024).toFixed(0)} KB` : '—',
+            mimeType: doc.mimeType,
+            url,
+          };
+        })
+      );
+
       return {
         ...app,
         full_name: app.fullName,
@@ -320,6 +344,7 @@ export class AdminService {
         reason_for_joining: app.reasonForJoining,
         additional_info: app.additionalInfo,
         admin_notes: app.adminNotes,
+        documents: documentsWithUrls,
         submitted_at: app.submittedAt.toISOString(),
       };
     }

@@ -1,10 +1,24 @@
 import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateApplicationDto } from './membership.dto';
+import { S3Service } from '../s3/s3.service';
+import { CreateApplicationDto, GetUploadUrlDto } from './membership.dto';
 
 @Injectable()
 export class MembershipService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private s3Service: S3Service,
+  ) {}
+
+  async getUploadUrl(dto: GetUploadUrlDto) {
+    const tempId = dto.tempId || crypto.randomUUID();
+    const folderPath = `website/membership-applications/temp-${tempId}`;
+    const result = await this.s3Service.getPresignedUploadUrl(folderPath, dto.fileName, dto.mimeType);
+    return {
+      ...result,
+      tempId,
+    };
+  }
 
   async submitApplication(dto: CreateApplicationDto) {
     // Check existing pending application
@@ -47,6 +61,7 @@ export class MembershipService {
         fullAddress: dto.fullAddress,
         reasonForJoining: dto.reasonForJoining || null,
         additionalInfo: dto.additionalInfo || null,
+        documents: (dto.documents || []) as any,
         status: 'PENDING',
       },
     });

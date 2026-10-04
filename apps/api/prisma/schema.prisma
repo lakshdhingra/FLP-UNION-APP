@@ -304,6 +304,7 @@ model MembershipApplication {
   gstNo             String            @default("")
   reasonForJoining  String?
   additionalInfo    String?
+  documents         Json?             @default("[]")
   status            ApplicationStatus @default(PENDING)
   rejectionReason   String?
   adminNotes        String?

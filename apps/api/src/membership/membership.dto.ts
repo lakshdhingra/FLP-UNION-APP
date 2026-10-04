@@ -1,4 +1,18 @@
-import { IsString, IsEmail, IsNotEmpty, IsNumber, IsOptional, Min, IsArray } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsNumber, IsOptional, Min, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class GetUploadUrlDto {
+  @IsString() @IsNotEmpty() fileName!: string;
+  @IsString() @IsNotEmpty() mimeType!: string;
+  @IsString() @IsOptional() tempId?: string;
+}
+
+export class DocumentItemDto {
+  @IsString() @IsNotEmpty() key!: string;
+  @IsString() @IsNotEmpty() originalName!: string;
+  @IsString() @IsOptional() mimeType?: string;
+  @IsNumber() @IsOptional() size?: number;
+}
 
 export class CreateApplicationDto {
   @IsString() @IsNotEmpty() fullName!: string;
@@ -15,4 +29,5 @@ export class CreateApplicationDto {
   @IsString() @IsNotEmpty() fullAddress!: string;
   @IsString() @IsOptional() reasonForJoining?: string;
   @IsString() @IsOptional() additionalInfo?: string;
+  @IsArray() @IsOptional() @ValidateNested({ each: true }) @Type(() => DocumentItemDto) documents?: DocumentItemDto[];
 }
