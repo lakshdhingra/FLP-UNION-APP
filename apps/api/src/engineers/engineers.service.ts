@@ -18,13 +18,51 @@ interface FindMineOptions {
 }
 
 import { AuditService } from '../audit/audit.service';
+import { S3Service } from '../s3/s3.service';
+import { GetEngineerUploadUrlDto } from './dto/get-upload-url.dto';
 
 @Injectable()
 export class EngineersService {
     constructor(
         private prisma: PrismaService,
         private audit: AuditService,
+        private s3Service: S3Service,
     ) {}
+
+    async getUploadUrl(dto: GetEngineerUploadUrlDto) {
+        return this.s3Service.getPresignedUploadUrl(
+            'android/sub-members',
+            dto.fileName,
+            dto.mimeType,
+        );
+    }
+
+    async getDocumentUrl(userId: string, key: string) {
+        if (!key) {
+            throw new BadRequestException('Key parameter is required');
+        }
+
+        const manager = await this.getManagerProfile(userId);
+
+        // Verify key belongs to an engineer accessible to the manager
+        const engineer = await this.prisma.engineer.findFirst({
+            where: { profilePhotoUrl: key },
+        });
+
+        if (engineer) {
+            if (engineer.stateId !== manager.stateId) {
+                throw new ForbiddenException('You do not have permission to access this document');
+            }
+        } else {
+            // For keys not yet linked to an engineer record, restrict to sub-members folder
+            if (!key.startsWith('android/sub-members/')) {
+                throw new ForbiddenException('Access denied for this key path');
+            }
+        }
+
+        const signedUrl = await this.s3Service.getPresignedDownloadUrl(key, 3600);
+        return { signedUrl };
+    }
 
     private async getManagerProfile(userId: string) {
         const profile = await this.prisma.managerProfile.findUnique({

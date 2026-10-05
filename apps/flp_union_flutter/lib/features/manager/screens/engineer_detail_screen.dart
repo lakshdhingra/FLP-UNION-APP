@@ -49,6 +49,13 @@ class EngineerDetailScreen extends ConsumerWidget {
             final isMasked = engineer.isOwned == false;
             final currencyFormat = NumberFormat('#,##,###');
 
+            final photoKey = engineer.profilePhotoUrl ?? '';
+            final avatarUrlAsync = photoKey.isNotEmpty
+                ? ref.watch(engineerDocumentUrlProvider(photoKey))
+                : const AsyncValue<String>.data('');
+            final avatarUrl = avatarUrlAsync.valueOrNull;
+            final isPdf = photoKey.toLowerCase().contains('.pdf');
+
             return RefreshIndicator(
               color: AppColors.accent,
               backgroundColor: AppColors.card,
@@ -63,7 +70,11 @@ class EngineerDetailScreen extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Column(
                         children: [
-                          AppAvatar(name: engineer.fullName, size: 72),
+                          AppAvatar(
+                            name: engineer.fullName,
+                            size: 72,
+                            url: avatarUrl,
+                          ),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
                             engineer.fullName,
@@ -89,6 +100,11 @@ class EngineerDetailScreen extends ConsumerWidget {
                                     ? AppBadgeVariant.success
                                     : AppBadgeVariant.warning,
                               ),
+                              if (photoKey.isNotEmpty)
+                                AppBadge(
+                                  label: isPdf ? 'Doc: PDF' : 'Photo Attached',
+                                  variant: AppBadgeVariant.info,
+                                ),
                               if (isMasked)
                                 const AppBadge(
                                   label: 'External Engineer',

@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -42,6 +43,10 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
   String? _selectedDistrictName;
   bool _districtPickerOpen = false;
 
+  String? _profilePhotoKey;
+  String? _selectedFileName;
+  bool _isUploadingPhoto = false;
+
   String? _fullNameError;
   String? _phoneError;
   String? _emailError;
@@ -75,11 +80,77 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
     _addressController.text = engineer.address ?? '';
     _salaryController.text = engineer.salary?.toString() ?? '';
     _notesController.text = engineer.privateNotes ?? '';
+    _profilePhotoKey = engineer.profilePhotoUrl;
     if (engineer.district != null) {
       _selectedDistrictId = engineer.district!.id;
       _selectedDistrictName = engineer.district!.name;
     }
     _isPopulated = true;
+  }
+  Future<void> _pickAndUploadPhoto() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'JPG', 'JPEG', 'PNG', 'PDF'],
+        withData: true,
+      );
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.single;
+      final bytes = file.bytes;
+      if (bytes == null) {
+        throw Exception('Unable to read selected file');
+      }
+
+      setState(() {
+        _isUploadingPhoto = true;
+        _selectedFileName = file.name;
+      });
+
+      final fileName = file.name;
+      final ext = (file.extension ?? (fileName.contains('.') ? fileName.split('.').last : '')).toLowerCase();
+
+      String mimeType = 'image/jpeg';
+      if (ext == 'png') {
+        mimeType = 'image/png';
+      } else if (ext == 'pdf') {
+        mimeType = 'application/pdf';
+      } else if (ext == 'jpg' || ext == 'jpeg') {
+        mimeType = 'image/jpeg';
+      } else {
+        throw Exception('Unsupported file format (.$ext). Please select a JPG, PNG, or PDF file.');
+      }
+
+      final key = await ref.read(engineerMutationsProvider.notifier).uploadFileToS3(
+        fileName: fileName,
+        mimeType: mimeType,
+        bytes: bytes,
+      );
+
+      setState(() {
+        _profilePhotoKey = key;
+        _isUploadingPhoto = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File uploaded to S3 successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (err) {
+      setState(() => _isUploadingPhoto = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: $err'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    }
   }
 
   bool _validate() {
@@ -157,6 +228,9 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       }
       if (_notesController.text.trim().isNotEmpty) {
         payload['privateNotes'] = _notesController.text.trim();
+      }
+      if (_profilePhotoKey != null && _profilePhotoKey!.isNotEmpty) {
+        payload['profilePhotoUrl'] = _profilePhotoKey;
       }
 
       if (widget.isEdit) {
@@ -336,6 +410,19 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                 controller: _notesController,
               ),
 
+              _PhotoPickerField(
+                profilePhotoKey: _profilePhotoKey,
+                fileName: _selectedFileName,
+                isUploading: _isUploadingPhoto,
+                onPickPhoto: _pickAndUploadPhoto,
+                onRemovePhoto: () {
+                  setState(() {
+                    _profilePhotoKey = null;
+                    _selectedFileName = null;
+                  });
+                },
+              ),
+
               const SizedBox(height: AppSpacing.md),
 
               AppButton(
@@ -395,3 +482,125 @@ class _DistrictDropdownOptions extends ConsumerWidget {
     );
   }
 }
+
+class _PhotoPickerField extends StatelessWidget {
+  final String? profilePhotoKey;
+  final String? fileName;
+  final bool isUploading;
+  final VoidCallback onPickPhoto;
+  final VoidCallback onRemovePhoto;
+
+  const _PhotoPickerField({
+    required this.profilePhotoKey,
+    required this.fileName,
+    required this.isUploading,
+    required this.onPickPhoto,
+    required this.onRemovePhoto,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasPhoto = profilePhotoKey != null && profilePhotoKey!.isNotEmpty;
+    final isPdf = (profilePhotoKey ?? '').toLowerCase().contains('.pdf') ||
+        (fileName ?? '').toLowerCase().endsWith('.pdf');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Profile Photo / Document',
+          style: TextStyle(
+            fontSize: AppFontSize.sm,
+            fontWeight: AppFontWeight.medium,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: AppRadius.borderMd,
+            border: Border.all(color: AppColors.border, width: 1),
+          ),
+          child: isUploading
+              ? const Row(
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'Uploading directly to S3...',
+                      style: TextStyle(color: AppColors.textSecondary, fontSize: AppFontSize.md),
+                    ),
+                  ],
+                )
+              : hasPhoto
+                  ? Row(
+                      children: [
+                        Icon(
+                          isPdf ? LucideIcons.fileText : LucideIcons.checkCircle2,
+                          color: AppColors.success,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isPdf ? 'PDF Document attached & uploaded' : 'Photo attached & uploaded to S3',
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontWeight: AppFontWeight.medium,
+                                  fontSize: AppFontSize.md,
+                                ),
+                              ),
+                              if (fileName != null)
+                                Text(
+                                  fileName!,
+                                  style: const TextStyle(
+                                    color: AppColors.textMuted,
+                                    fontSize: AppFontSize.xs,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(LucideIcons.trash2, color: AppColors.danger, size: 18),
+                          onPressed: onRemovePhoto,
+                          tooltip: 'Remove photo/document',
+                        ),
+                      ],
+                    )
+                  : InkWell(
+                      onTap: onPickPhoto,
+                      borderRadius: AppRadius.borderMd,
+                      child: const Row(
+                        children: [
+                          Icon(LucideIcons.uploadCloud, color: AppColors.accent, size: 22),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Tap to select JPG/PNG photo or PDF document',
+                              style: TextStyle(
+                                color: AppColors.accent,
+                                fontWeight: AppFontWeight.medium,
+                                fontSize: AppFontSize.md,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+

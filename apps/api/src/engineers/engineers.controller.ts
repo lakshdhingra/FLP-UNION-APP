@@ -5,6 +5,7 @@ import {
 import { EngineersService } from './engineers.service';
 import { CreateEngineerDto } from './dto/create-engineer.dto';
 import { UpdateEngineerDto } from './dto/update-engineer.dto';
+import { GetEngineerUploadUrlDto } from './dto/get-upload-url.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -18,6 +19,21 @@ import { ApiTags } from '@nestjs/swagger';
 @Roles(Role.MANAGER)
 export class EngineersController {
     constructor(private readonly engineersService: EngineersService) {}
+
+    /** POST /api/manager/engineers/upload-url - presigned S3 upload URL */
+    @Post('upload-url')
+    getUploadUrl(@Body() dto: GetEngineerUploadUrlDto) {
+        return this.engineersService.getUploadUrl(dto);
+    }
+
+    /** GET /api/manager/engineers/document-url - presigned S3 view/download URL */
+    @Get('document-url')
+    getDocumentUrl(
+        @CurrentUser() user: CurrentUserPayload,
+        @Query('key') key: string,
+    ) {
+        return this.engineersService.getDocumentUrl(user.userId, key);
+    }
 
     /** GET /api/manager/engineers - list own engineers */
     @Get()

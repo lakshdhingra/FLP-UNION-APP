@@ -19,6 +19,12 @@ final engineerDetailProvider = FutureProvider.family<Engineer, String>((ref, id)
   return service.getEngineer(id);
 });
 
+final engineerDocumentUrlProvider = FutureProvider.family<String, String>((ref, key) async {
+  if (key.isEmpty) return '';
+  final service = ref.watch(engineerServiceProvider);
+  return service.getDocumentUrl(key);
+});
+
 class EngineerMutationsNotifier extends StateNotifier<AsyncValue<void>> {
   final EngineerService _service;
   final Ref _ref;
@@ -55,6 +61,25 @@ class EngineerMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(myEngineersProvider);
       _ref.invalidate(managerDashboardProvider);
     });
+  }
+
+  Future<String> uploadFileToS3({
+    required String fileName,
+    required String mimeType,
+    required List<int> bytes,
+  }) async {
+    final presignedData = await _service.getPresignedUploadUrl(
+      fileName: fileName,
+      mimeType: mimeType,
+    );
+    final key = presignedData['key'] as String;
+    final signedUrl = presignedData['signedUrl'] as String;
+    await _service.uploadFileToS3(
+      signedUrl: signedUrl,
+      bytes: bytes,
+      mimeType: mimeType,
+    );
+    return key;
   }
 }
 
