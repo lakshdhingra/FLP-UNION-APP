@@ -37,13 +37,23 @@ class ApiClient {
         },
         onResponse: (response, handler) {
           debugPrint('[ApiClient] RESPONSE[${response.statusCode}] <= URL: ${response.requestOptions.uri}');
-          debugPrint('[ApiClient] BODY: ${response.data}');
           return handler.next(response);
         },
         onError: (DioException err, handler) {
-          debugPrint('[ApiClient] ERROR[${err.response?.statusCode}] <= URL: ${err.requestOptions.uri}');
-          debugPrint('[ApiClient] EXCEPTION TYPE: ${err.type} | EXCEPTION: ${err.error}');
-          debugPrint('[ApiClient] ERROR RESPONSE: ${err.response?.data}');
+          final statusCode = err.response?.statusCode ?? 'N/A';
+          final uri = err.requestOptions.uri;
+          final errorType = err.type;
+          final errorMessage = err.message ?? err.error ?? 'Unknown Dio error';
+          final responseData = err.response?.data;
+          
+          debugPrint('[ApiClient] HTTP FAILURE:');
+          debugPrint('  -> Requested URL: $uri');
+          debugPrint('  -> Status Code: $statusCode');
+          debugPrint('  -> Error Type: $errorType');
+          debugPrint('  -> Message: $errorMessage');
+          if (responseData != null) {
+            debugPrint('  -> Response Data: $responseData');
+          }
           return handler.next(err);
         },
       ),

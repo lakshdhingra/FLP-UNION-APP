@@ -24,10 +24,11 @@ final statesListProvider = FutureProvider<List<StateEntity>>((ref) async {
   final service = ref.watch(statesServiceProvider);
   try {
     final states = await service.getAllStates();
-    debugPrint('[statesListProvider] Fetched ${states.length} states');
+    debugPrint('[statesListProvider] Successfully fetched ${states.length} states');
     return states;
   } catch (e, st) {
-    debugPrint('[statesListProvider] Error loading states: $e\n$st');
+    debugPrint('[statesListProvider] Error loading states: $e');
+    debugPrint('[statesListProvider] StackTrace:\n$st');
     rethrow;
   }
 });
@@ -37,10 +38,11 @@ final districtsListProvider = FutureProvider.family<List<DistrictEntity>, String
   final service = ref.watch(statesServiceProvider);
   try {
     final districts = await service.getDistricts(stateId);
-    debugPrint('[districtsListProvider] Fetched ${districts.length} districts for stateId=$stateId');
+    debugPrint('[districtsListProvider] Successfully fetched ${districts.length} districts for stateId=$stateId');
     return districts;
   } catch (e, st) {
-    debugPrint('[districtsListProvider] Error loading districts for stateId=$stateId: $e\n$st');
+    debugPrint('[districtsListProvider] Error loading districts for stateId=$stateId: $e');
+    debugPrint('[districtsListProvider] StackTrace:\n$st');
     rethrow;
   }
 });
