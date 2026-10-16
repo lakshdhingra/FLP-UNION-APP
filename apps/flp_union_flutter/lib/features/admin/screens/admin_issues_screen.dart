@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
@@ -92,114 +93,116 @@ class AdminIssuesScreen extends ConsumerWidget {
     final filter = ref.watch(adminIssuesFilterProvider);
     final issuesAsync = ref.watch(adminIssuesProvider);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: Column(
-          children: [
-            // Header Bar & Filters
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Support Tickets',
-                    style: AppTypography.title1(color: colors.textPrimary),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Platform requests submitted by district managers',
-                    style: AppTypography.caption(color: colors.textMuted),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    children: [
-                      AppFilterChip(
-                        label: 'All Tickets',
-                        isSelected: filter.isEmpty,
-                        onTap: () {
-                          ref.read(adminIssuesFilterProvider.notifier).state =
-                              '';
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      AppFilterChip(
-                        label: 'Open Only',
-                        isSelected: filter == 'OPEN',
-                        onTap: () {
-                          ref.read(adminIssuesFilterProvider.notifier).state =
-                              'OPEN';
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Tickets List
-            Expanded(
-              child: issuesAsync.when(
-                loading: () => const AppSkeletonList(count: 5),
-                error: (err, stack) => ErrorStateWidget(
-                  message: 'Unable to load support issues.',
-                  onRetry: () => ref.refresh(adminIssuesProvider),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: Column(
+            children: [
+              // Header Bar & Filters
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.md,
                 ),
-                data: (response) {
-                  if (response.data.isEmpty) {
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Support Tickets',
+                      style: AppTypography.title1(color: colors.textPrimary),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Platform requests submitted by district managers',
+                      style: AppTypography.caption(color: colors.textMuted),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      children: [
+                        AppFilterChip(
+                          label: 'All Tickets',
+                          isSelected: filter.isEmpty,
+                          onTap: () {
+                            ref.read(adminIssuesFilterProvider.notifier).state =
+                                '';
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        AppFilterChip(
+                          label: 'Open Only',
+                          isSelected: filter == 'OPEN',
+                          onTap: () {
+                            ref.read(adminIssuesFilterProvider.notifier).state =
+                                'OPEN';
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Tickets List
+              Expanded(
+                child: issuesAsync.when(
+                  loading: () => const AppSkeletonList(count: 5),
+                  error: (err, stack) => ErrorStateWidget(
+                    message: 'Unable to load support issues.',
+                    onRetry: () => ref.refresh(adminIssuesProvider),
+                  ),
+                  data: (response) {
+                    if (response.data.isEmpty) {
+                      return RefreshIndicator(
+                        color: colors.primaryAction,
+                        backgroundColor: colors.card,
+                        onRefresh: () async =>
+                            ref.refresh(adminIssuesProvider.future),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: 420,
+                            child: EmptyStateWidget(
+                              title: 'No issues found',
+                              description: filter == 'OPEN'
+                                  ? 'No open tickets requiring resolution right now.'
+                                  : 'No support requests recorded in the system.',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
                     return RefreshIndicator(
                       color: colors.primaryAction,
                       backgroundColor: colors.card,
                       onRefresh: () async =>
                           ref.refresh(adminIssuesProvider.future),
-                      child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: SizedBox(
-                          height: 420,
-                          child: EmptyStateWidget(
-                            title: 'No issues found',
-                            description: filter == 'OPEN'
-                                ? 'No open tickets requiring resolution right now.'
-                                : 'No support requests recorded in the system.',
-                          ),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenPadding,
+                          vertical: AppSpacing.xs,
                         ),
+                        itemCount: response.data.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final item = response.data[index];
+                          return _AdminIssueCard(
+                            item: item,
+                            onUpdateStatus: () =>
+                                _handleUpdateStatus(context, ref, item),
+                          );
+                        },
                       ),
                     );
-                  }
-
-                  return RefreshIndicator(
-                    color: colors.primaryAction,
-                    backgroundColor: colors.card,
-                    onRefresh: () async =>
-                        ref.refresh(adminIssuesProvider.future),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
-                        vertical: AppSpacing.xs,
-                      ),
-                      itemCount: response.data.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        final item = response.data[index];
-                        return _AdminIssueCard(
-                          item: item,
-                          onUpdateStatus: () =>
-                              _handleUpdateStatus(context, ref, item),
-                        );
-                      },
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

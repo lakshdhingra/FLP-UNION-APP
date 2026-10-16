@@ -8,6 +8,7 @@ import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_animations.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_input.dart';
@@ -405,8 +406,9 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
     final dashboardAsync = ref.watch(managerDashboardProvider);
     final managerStateId = dashboardAsync.valueOrNull?.manager.state.id;
 
-    return Scaffold(
-      backgroundColor: colors.background,
+    return AppBackground(
+        child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: Text(widget.isEdit ? 'Edit Engineer' : 'New Engineer'),
         actions: [
@@ -726,7 +728,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
 

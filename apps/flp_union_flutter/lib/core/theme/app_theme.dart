@@ -26,7 +26,7 @@ abstract class AppTheme {
         outline: colors.border,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: colors.surface,
+        backgroundColor: Colors.transparent,
         foregroundColor: colors.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -152,7 +152,7 @@ abstract class AppTheme {
         outline: colors.border,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: colors.surface,
+        backgroundColor: Colors.transparent,
         foregroundColor: colors.textPrimary,
         elevation: 0,
         scrolledUnderElevation: 0,

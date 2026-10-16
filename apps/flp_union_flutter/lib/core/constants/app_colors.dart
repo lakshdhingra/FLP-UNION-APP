@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 
-/// Semantic colors for FLP Union matching the Apple × Linear × Enterprise design system.
+/// Semantic colors for FLP Union featuring an atmospheric graphite-to-slate gradient,
+/// solid dark cards (#272C31), crisp typography, and restrained enterprise accents.
 abstract class AppColors {
-  // Dark Palette (TASPU Charcoal & Electric Accent)
-  static const Color darkBackground = Color(0xFF111318);
-  static const Color darkSurface = Color(0xFF1B1E25);
-  static const Color darkSecondarySurface = Color(0xFF252A34);
-  static const Color darkCard = Color(0xFF1B1E25);
-  static const Color darkCardHover = Color(0xFF252A34);
-  static const Color darkCardPressed = Color(0xFF14171E);
-  static const Color darkBorder = Color(0xFF343A46);
-  static const Color darkBorderSubtle = Color(0xFF262B34);
+  // Dark Palette (Subtle Graphite-to-Slate Atmospheric System)
+  static const Color darkBackground = Color(0xFF111315);
+  static const Color darkBackgroundGradientEnd = Color(0xFF20272D);
+  static const Color darkSurface = Color(0xFF1B2025);
+  static const Color darkSecondarySurface = Color(0xFF1E2329);
+  static const Color darkCard = Color(0xFF272C31);
+  static const Color darkCardHover = Color(0xFF30363C);
+  static const Color darkCardPressed = Color(0xFF22262B);
+  static const Color darkBorder = Color(0xFF333B42);
+  static const Color darkBorderSubtle = Color(0xFF252B31);
 
-  static const Color darkTextPrimary = Color(0xFFF4F5F8);
-  static const Color darkTextSecondary = Color(0xFFA2A8B5);
+  static const Color darkTextPrimary = Color(0xFFF3F4F6);
+  static const Color darkTextSecondary = Color(0xFFA3AAB2);
   static const Color darkTextMuted = Color(0xFF6B7280);
 
   static const Color darkPrimaryAction = Color(0xFF6C8CFF);
-  static const Color darkPrimaryActionSubtle = Color(0x246C8CFF);
+  static const Color darkPrimaryActionSubtle = Color(0x226C8CFF);
   static const Color darkSuccess = Color(0xFF45D6A0);
   static const Color darkSuccessBg = Color(0x2245D6A0);
   static const Color darkWarning = Color(0xFFF0B35A);
@@ -29,15 +31,16 @@ abstract class AppColors {
 
   // Light Palette (Crisp High-Contrast Enterprise)
   static const Color lightBackground = Color(0xFFF4F5F8);
+  static const Color lightBackgroundGradientEnd = Color(0xFFECEEF2);
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSecondarySurface = Color(0xFFECEEF2);
+  static const Color lightSecondarySurface = Color(0xFFF0F2F6);
   static const Color lightCard = Color(0xFFFFFFFF);
   static const Color lightCardHover = Color(0xFFF7F8FA);
   static const Color lightCardPressed = Color(0xFFECEEF2);
   static const Color lightBorder = Color(0xFFD8DCE5);
   static const Color lightBorderSubtle = Color(0xFFE8ECF2);
 
-  static const Color lightTextPrimary = Color(0xFF111318);
+  static const Color lightTextPrimary = Color(0xFF111315);
   static const Color lightTextSecondary = Color(0xFF5B6271);
   static const Color lightTextMuted = Color(0xFF8890A0);
 
@@ -54,6 +57,7 @@ abstract class AppColors {
 
   // Common static references for backward compatibility (defaults to dark mode values)
   static const Color background = darkBackground;
+  static const Color backgroundGradientEnd = darkBackgroundGradientEnd;
   static const Color surface = darkSurface;
   static const Color secondarySurface = darkSecondarySurface;
   static const Color card = darkCard;
@@ -94,6 +98,7 @@ abstract class AppColors {
 /// ThemeExtension for semantic theme colors that update on theme switch
 class AppThemeColors extends ThemeExtension<AppThemeColors> {
   final Color background;
+  final Color backgroundGradientEnd;
   final Color surface;
   final Color secondarySurface;
   final Color card;
@@ -118,6 +123,7 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
 
   const AppThemeColors({
     required this.background,
+    required this.backgroundGradientEnd,
     required this.surface,
     required this.secondarySurface,
     required this.card,
@@ -141,8 +147,16 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     required this.overlay,
   });
 
+  /// Reusable subtle graphite-to-slate atmospheric gradient
+  LinearGradient get backgroundGradient => LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [background, backgroundGradientEnd],
+      );
+
   static const dark = AppThemeColors(
     background: AppColors.darkBackground,
+    backgroundGradientEnd: AppColors.darkBackgroundGradientEnd,
     surface: AppColors.darkSurface,
     secondarySurface: AppColors.darkSecondarySurface,
     card: AppColors.darkCard,
@@ -168,6 +182,7 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
 
   static const light = AppThemeColors(
     background: AppColors.lightBackground,
+    backgroundGradientEnd: AppColors.lightBackgroundGradientEnd,
     surface: AppColors.lightSurface,
     secondarySurface: AppColors.lightSecondarySurface,
     card: AppColors.lightCard,
@@ -194,6 +209,7 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   @override
   AppThemeColors copyWith({
     Color? background,
+    Color? backgroundGradientEnd,
     Color? surface,
     Color? secondarySurface,
     Color? card,
@@ -218,6 +234,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   }) {
     return AppThemeColors(
       background: background ?? this.background,
+      backgroundGradientEnd:
+          backgroundGradientEnd ?? this.backgroundGradientEnd,
       surface: surface ?? this.surface,
       secondarySurface: secondarySurface ?? this.secondarySurface,
       card: card ?? this.card,
@@ -247,6 +265,8 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     if (other is! AppThemeColors) return this;
     return AppThemeColors(
       background: Color.lerp(background, other.background, t)!,
+      backgroundGradientEnd:
+          Color.lerp(backgroundGradientEnd, other.backgroundGradientEnd, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       secondarySurface:
           Color.lerp(secondarySurface, other.secondarySurface, t)!,

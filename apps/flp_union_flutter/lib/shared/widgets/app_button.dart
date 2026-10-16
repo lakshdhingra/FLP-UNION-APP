@@ -137,13 +137,11 @@ class _AppButtonState extends State<AppButton> {
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           borderRadius: AppRadius.buttonRadius,
-          boxShadow: _isHovered &&
-                  !isDisabled &&
-                  widget.variant == AppButtonVariant.primary
+          boxShadow: _isHovered && !isDisabled
               ? [
                   BoxShadow(
-                    color: colors.primaryAction.withAlpha(65),
-                    blurRadius: 14,
+                    color: Colors.black.withAlpha(45),
+                    blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
                 ]

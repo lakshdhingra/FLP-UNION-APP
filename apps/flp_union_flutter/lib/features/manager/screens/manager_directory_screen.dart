@@ -8,6 +8,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/other_manager.dart';
 import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_avatar.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_search_input.dart';
@@ -44,120 +45,122 @@ class _ManagerDirectoryScreenState
     final colors = AppColors.of(context);
     final managersAsync = ref.watch(sameStateManagersProvider(_searchQuery));
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Managers Directory',
-                    style: AppTypography.title1(color: colors.textPrimary),
-                  ),
-                  const SizedBox(height: 2),
-                  managersAsync.when(
-                    data: (list) => Text(
-                      '${list.length} managers in your state',
-                      style: AppTypography.caption(color: colors.textMuted),
-                    ),
-                    loading: () => Text(
-                      'Loading directory...',
-                      style: AppTypography.caption(color: colors.textMuted),
-                    ),
-                    error: (_, __) => const SizedBox.shrink(),
-                  ),
-                ],
-              ),
-            ),
-
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: AppSearchInput(
-                controller: _searchController,
-                placeholder: 'Search managers by name, district...',
-                onChanged: _onSearchChanged,
-                onClear: () => setState(() => _searchQuery = ''),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // Directory List Content
-            Expanded(
-              child: managersAsync.when(
-                loading: () => const AppSkeletonList(count: 5),
-                error: (err, stack) => ErrorStateWidget(
-                  message: 'Unable to load manager directory.',
-                  onRetry: () =>
-                      ref.refresh(sameStateManagersProvider(_searchQuery)),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.md,
                 ),
-                data: (managers) {
-                  if (managers.isEmpty) {
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Managers Directory',
+                      style: AppTypography.title1(color: colors.textPrimary),
+                    ),
+                    const SizedBox(height: 2),
+                    managersAsync.when(
+                      data: (list) => Text(
+                        '${list.length} managers in your state',
+                        style: AppTypography.caption(color: colors.textMuted),
+                      ),
+                      loading: () => Text(
+                        'Loading directory...',
+                        style: AppTypography.caption(color: colors.textMuted),
+                      ),
+                      error: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: AppSearchInput(
+                  controller: _searchController,
+                  placeholder: 'Search managers by name, district...',
+                  onChanged: _onSearchChanged,
+                  onClear: () => setState(() => _searchQuery = ''),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Directory List Content
+              Expanded(
+                child: managersAsync.when(
+                  loading: () => const AppSkeletonList(count: 5),
+                  error: (err, stack) => ErrorStateWidget(
+                    message: 'Unable to load manager directory.',
+                    onRetry: () =>
+                        ref.refresh(sameStateManagersProvider(_searchQuery)),
+                  ),
+                  data: (managers) {
+                    if (managers.isEmpty) {
+                      return RefreshIndicator(
+                        color: colors.primaryAction,
+                        backgroundColor: colors.card,
+                        onRefresh: () async => ref.refresh(
+                            sameStateManagersProvider(_searchQuery).future),
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: 420,
+                            child: EmptyStateWidget(
+                              title: _searchQuery.isNotEmpty
+                                  ? 'No managers found'
+                                  : 'No other managers',
+                              description: _searchQuery.isNotEmpty
+                                  ? 'No managers match "$_searchQuery".'
+                                  : 'No other registered managers found in your state yet.',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
                     return RefreshIndicator(
                       color: colors.primaryAction,
                       backgroundColor: colors.card,
                       onRefresh: () async => ref.refresh(
                           sameStateManagersProvider(_searchQuery).future),
-                      child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: SizedBox(
-                          height: 420,
-                          child: EmptyStateWidget(
-                            title: _searchQuery.isNotEmpty
-                                ? 'No managers found'
-                                : 'No other managers',
-                            description: _searchQuery.isNotEmpty
-                                ? 'No managers match "$_searchQuery".'
-                                : 'No other registered managers found in your state yet.',
-                          ),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenPadding,
+                          vertical: AppSpacing.xs,
                         ),
+                        itemCount: managers.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final item = managers[index];
+                          return StaggeredSlideFade(
+                            index: index < 8 ? index : 8,
+                            child: _ManagerRowCard(
+                              manager: item,
+                              onTap: () =>
+                                  context.push('/manager/managers/${item.id}'),
+                            ),
+                          );
+                        },
                       ),
                     );
-                  }
-
-                  return RefreshIndicator(
-                    color: colors.primaryAction,
-                    backgroundColor: colors.card,
-                    onRefresh: () async => ref.refresh(
-                        sameStateManagersProvider(_searchQuery).future),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
-                        vertical: AppSpacing.xs,
-                      ),
-                      itemCount: managers.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        final item = managers[index];
-                        return StaggeredSlideFade(
-                          index: index < 8 ? index : 8,
-                          child: _ManagerRowCard(
-                            manager: item,
-                            onTap: () =>
-                                context.push('/manager/managers/${item.id}'),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

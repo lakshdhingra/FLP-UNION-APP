@@ -85,16 +85,16 @@ class _AppCardState extends State<AppCard> {
                     borderRadius: effectiveBorderRadius,
                     border: Border.all(
                       color: _isHovered
-                          ? colors.primaryAction.withAlpha(90)
+                          ? colors.textSecondary.withAlpha(80)
                           : effectiveBorderColor,
                       width: 1,
                     ),
                     boxShadow: _isHovered
                         ? [
                             BoxShadow(
-                              color: colors.primaryAction.withAlpha(24),
-                              blurRadius: 14,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withAlpha(45),
+                              blurRadius: 10,
+                              offset: const Offset(0, 3),
                             ),
                           ]
                         : null,

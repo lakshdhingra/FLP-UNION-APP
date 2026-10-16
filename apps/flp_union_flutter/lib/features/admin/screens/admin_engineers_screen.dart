@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_avatar.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_search_input.dart';
@@ -44,109 +45,112 @@ class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
     final colors = AppColors.of(context);
     final engineersAsync = ref.watch(adminEngineersProvider);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: Column(
-          children: [
-            // Header Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.md,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'All Engineers',
-                        style: AppTypography.title1(color: colors.textPrimary),
-                      ),
-                      Text(
-                        '${engineersAsync.valueOrNull?.total ?? 0} total enrolled',
-                        style: AppTypography.caption(color: colors.textMuted),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: AppSearchInput(
-                controller: _searchController,
-                placeholder: 'Search engineers across all states...',
-                onChanged: (val) {
-                  ref.read(adminEngineersSearchProvider.notifier).state = val;
-                },
-                onClear: () {
-                  ref.read(adminEngineersSearchProvider.notifier).state = '';
-                },
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // Engineers List
-            Expanded(
-              child: engineersAsync.when(
-                loading: () => const AppSkeletonList(count: 6),
-                error: (err, stack) => ErrorStateWidget(
-                  message: 'Unable to load engineers list.',
-                  onRetry: () => ref.refresh(adminEngineersProvider),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: Column(
+            children: [
+              // Header Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.md,
                 ),
-                data: (response) {
-                  if (response.data.isEmpty) {
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'All Engineers',
+                          style:
+                              AppTypography.title1(color: colors.textPrimary),
+                        ),
+                        Text(
+                          '${engineersAsync.valueOrNull?.total ?? 0} total enrolled',
+                          style: AppTypography.caption(color: colors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: AppSearchInput(
+                  controller: _searchController,
+                  placeholder: 'Search engineers across all states...',
+                  onChanged: (val) {
+                    ref.read(adminEngineersSearchProvider.notifier).state = val;
+                  },
+                  onClear: () {
+                    ref.read(adminEngineersSearchProvider.notifier).state = '';
+                  },
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Engineers List
+              Expanded(
+                child: engineersAsync.when(
+                  loading: () => const AppSkeletonList(count: 6),
+                  error: (err, stack) => ErrorStateWidget(
+                    message: 'Unable to load engineers list.',
+                    onRetry: () => ref.refresh(adminEngineersProvider),
+                  ),
+                  data: (response) {
+                    if (response.data.isEmpty) {
+                      return RefreshIndicator(
+                        color: colors.primaryAction,
+                        backgroundColor: colors.card,
+                        onRefresh: () async =>
+                            ref.refresh(adminEngineersProvider.future),
+                        child: const SingleChildScrollView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: 420,
+                            child: EmptyStateWidget(
+                              title: 'No engineers found',
+                              description:
+                                  'No engineers registered matching your query.',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
                     return RefreshIndicator(
                       color: colors.primaryAction,
                       backgroundColor: colors.card,
                       onRefresh: () async =>
                           ref.refresh(adminEngineersProvider.future),
-                      child: const SingleChildScrollView(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        child: SizedBox(
-                          height: 420,
-                          child: EmptyStateWidget(
-                            title: 'No engineers found',
-                            description:
-                                'No engineers registered matching your query.',
-                          ),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenPadding,
+                          vertical: AppSpacing.xs,
                         ),
+                        itemCount: response.data.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final item = response.data[index];
+                          return _AdminEngineerRowCard(item: item);
+                        },
                       ),
                     );
-                  }
-
-                  return RefreshIndicator(
-                    color: colors.primaryAction,
-                    backgroundColor: colors.card,
-                    onRefresh: () async =>
-                        ref.refresh(adminEngineersProvider.future),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
-                        vertical: AppSpacing.xs,
-                      ),
-                      itemCount: response.data.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        final item = response.data[index];
-                        return _AdminEngineerRowCard(item: item);
-                      },
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

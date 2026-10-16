@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_skeleton.dart';
@@ -109,93 +110,98 @@ class AdminStatesScreen extends ConsumerWidget {
     final colors = AppColors.of(context);
     final statesAsync = ref.watch(adminStatesProvider);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: Column(
-          children: [
-            // Header Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.md,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'States & Regions',
-                        style: AppTypography.title1(color: colors.textPrimary),
-                      ),
-                      statesAsync.when(
-                        data: (list) => Text(
-                          '${list.length} regional jurisdictions',
-                          style: AppTypography.caption(color: colors.textMuted),
-                        ),
-                        loading: () => Text(
-                          'Loading regions...',
-                          style: AppTypography.caption(color: colors.textMuted),
-                        ),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _showAddStateNotice(context),
-                    icon: const Icon(LucideIcons.plus, size: 16),
-                    label: const Text('Add State'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primaryAction,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      minimumSize: const Size(0, 38),
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // States List
-            Expanded(
-              child: statesAsync.when(
-                loading: () => const AppSkeletonList(count: 4),
-                error: (err, stack) => ErrorStateWidget(
-                  message: 'Unable to load regional jurisdictions.',
-                  onRetry: () => ref.refresh(adminStatesProvider),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: Column(
+            children: [
+              // Header Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.md,
                 ),
-                data: (states) {
-                  return RefreshIndicator(
-                    color: colors.primaryAction,
-                    backgroundColor: colors.card,
-                    onRefresh: () async =>
-                        ref.refresh(adminStatesProvider.future),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
-                        vertical: AppSpacing.xs,
-                      ),
-                      itemCount: states.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        final item = states[index];
-                        return _StateCard(
-                          item: item,
-                          onToggle: () => _handleToggle(context, ref, item),
-                        );
-                      },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'States & Regions',
+                          style:
+                              AppTypography.title1(color: colors.textPrimary),
+                        ),
+                        statesAsync.when(
+                          data: (list) => Text(
+                            '${list.length} regional jurisdictions',
+                            style:
+                                AppTypography.caption(color: colors.textMuted),
+                          ),
+                          loading: () => Text(
+                            'Loading regions...',
+                            style:
+                                AppTypography.caption(color: colors.textMuted),
+                          ),
+                          error: (_, __) => const SizedBox.shrink(),
+                        ),
+                      ],
                     ),
-                  );
-                },
+                    ElevatedButton.icon(
+                      onPressed: () => _showAddStateNotice(context),
+                      icon: const Icon(LucideIcons.plus, size: 16),
+                      label: const Text('Add State'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colors.primaryAction,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        minimumSize: const Size(0, 38),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // States List
+              Expanded(
+                child: statesAsync.when(
+                  loading: () => const AppSkeletonList(count: 4),
+                  error: (err, stack) => ErrorStateWidget(
+                    message: 'Unable to load regional jurisdictions.',
+                    onRetry: () => ref.refresh(adminStatesProvider),
+                  ),
+                  data: (states) {
+                    return RefreshIndicator(
+                      color: colors.primaryAction,
+                      backgroundColor: colors.card,
+                      onRefresh: () async =>
+                          ref.refresh(adminStatesProvider.future),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenPadding,
+                          vertical: AppSpacing.xs,
+                        ),
+                        itemCount: states.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final item = states[index];
+                          return _StateCard(
+                            item: item,
+                            onToggle: () => _handleToggle(context, ref, item),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

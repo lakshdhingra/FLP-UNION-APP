@@ -8,6 +8,7 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/issue.dart';
 import '../../../shared/widgets/app_animations.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -153,215 +154,218 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
     final colors = AppColors.of(context);
     final issuesAsync = ref.watch(myIssuesProvider);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.md,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Help & Support',
-                    style: AppTypography.title1(color: colors.textPrimary),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Submit inquiries or review existing requests',
-                    style: AppTypography.caption(color: colors.textMuted),
-                  ),
-                ],
-              ),
-            ),
-
-            // Apple-style Segmented Control Tabs
-            Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                color: colors.secondarySurface,
-                borderRadius: AppRadius.inputRadius,
-                border: Border.all(color: colors.border, width: 1),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _SegmentTab(
-                      label: 'New Request',
-                      isSelected: _activeTab == 'new',
-                      icon: LucideIcons.send,
-                      onTap: () => setState(() => _activeTab = 'new'),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Help & Support',
+                      style: AppTypography.title1(color: colors.textPrimary),
                     ),
-                  ),
-                  Expanded(
-                    child: _SegmentTab(
-                      label: 'My Reports',
-                      isSelected: _activeTab == 'history',
-                      icon: LucideIcons.fileText,
-                      onTap: () => setState(() => _activeTab = 'history'),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Submit inquiries or review existing requests',
+                      style: AppTypography.caption(color: colors.textMuted),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
 
-            // Tab Content Body
-            Expanded(
-              child: _activeTab == 'new'
-                  ? SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
+              // Segmented Control Tabs
+              Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: colors.secondarySurface,
+                  borderRadius: AppRadius.inputRadius,
+                  border: Border.all(color: colors.border, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _SegmentTab(
+                        label: 'New Request',
+                        isSelected: _activeTab == 'new',
+                        icon: LucideIcons.send,
+                        onTap: () => setState(() => _activeTab = 'new'),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Type Toggle Row
-                          Text(
-                            'Request Type',
-                            style: AppTypography.subhead(
-                              color: colors.textSecondary,
-                              weight: AppFontWeight.medium,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _TypeOption(
-                                  label: 'Technical Issue',
-                                  icon: LucideIcons.alertCircle,
-                                  isSelected: _selectedType == 'ISSUE',
-                                  onTap: () =>
-                                      setState(() => _selectedType = 'ISSUE'),
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              Expanded(
-                                child: _TypeOption(
-                                  label: 'General Support',
-                                  icon: LucideIcons.helpCircle,
-                                  isSelected: _selectedType == 'SUPPORT',
-                                  onTap: () =>
-                                      setState(() => _selectedType = 'SUPPORT'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
+                    ),
+                    Expanded(
+                      child: _SegmentTab(
+                        label: 'My Reports',
+                        isSelected: _activeTab == 'history',
+                        icon: LucideIcons.fileText,
+                        onTap: () => setState(() => _activeTab = 'history'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
 
-                          // Form Card
-                          AppCard(
-                            padding:
-                                const EdgeInsets.all(AppSpacing.cardPadding),
-                            child: Column(
+              // Tab Content Body
+              Expanded(
+                child: _activeTab == 'new'
+                    ? SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenPadding,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Type Toggle Row
+                            Text(
+                              'Request Type',
+                              style: AppTypography.subhead(
+                                color: colors.textSecondary,
+                                weight: AppFontWeight.medium,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
                               children: [
-                                AppTextInput(
-                                  label: 'Subject / Title *',
-                                  placeholder: 'Brief summary of the inquiry',
-                                  controller: _titleController,
-                                  error: _titleError,
-                                  prefixIcon: Icon(LucideIcons.messageSquare,
-                                      size: 16, color: colors.textMuted),
+                                Expanded(
+                                  child: _TypeOption(
+                                    label: 'Technical Issue',
+                                    icon: LucideIcons.alertCircle,
+                                    isSelected: _selectedType == 'ISSUE',
+                                    onTap: () =>
+                                        setState(() => _selectedType = 'ISSUE'),
+                                  ),
                                 ),
-                                AppTextInput(
-                                  label: 'Detailed Description *',
-                                  placeholder:
-                                      'Provide comprehensive details or steps...',
-                                  multiline: true,
-                                  maxLines: 5,
-                                  controller: _descriptionController,
-                                  error: _descriptionError,
+                                const SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: _TypeOption(
+                                    label: 'General Support',
+                                    icon: LucideIcons.helpCircle,
+                                    isSelected: _selectedType == 'SUPPORT',
+                                    onTap: () => setState(
+                                        () => _selectedType = 'SUPPORT'),
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
+                            const SizedBox(height: AppSpacing.lg),
 
-                          AppButton(
-                            label: 'Submit Ticket',
-                            onPress: _onSubmit,
-                            loading: _isSubmitting,
-                            icon: const Icon(LucideIcons.send, size: 16),
-                          ),
-                          const SizedBox(height: AppSpacing.xxl),
-                        ],
-                      ),
-                    )
-                  : issuesAsync.when(
-                      loading: () => const AppSkeletonList(count: 4),
-                      error: (err, stack) => ErrorStateWidget(
-                        message: 'Unable to load tickets.',
-                        onRetry: () => ref.refresh(myIssuesProvider),
-                      ),
-                      data: (issues) {
-                        if (issues.isEmpty) {
+                            // Form Card
+                            AppCard(
+                              padding:
+                                  const EdgeInsets.all(AppSpacing.cardPadding),
+                              child: Column(
+                                children: [
+                                  AppTextInput(
+                                    label: 'Subject / Title *',
+                                    placeholder: 'Brief summary of the inquiry',
+                                    controller: _titleController,
+                                    error: _titleError,
+                                    prefixIcon: Icon(LucideIcons.messageSquare,
+                                        size: 16, color: colors.textMuted),
+                                  ),
+                                  AppTextInput(
+                                    label: 'Detailed Description *',
+                                    placeholder:
+                                        'Provide comprehensive details or steps...',
+                                    multiline: true,
+                                    maxLines: 5,
+                                    controller: _descriptionController,
+                                    error: _descriptionError,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+
+                            AppButton(
+                              label: 'Submit Ticket',
+                              onPress: _onSubmit,
+                              loading: _isSubmitting,
+                              icon: const Icon(LucideIcons.send, size: 16),
+                            ),
+                            const SizedBox(height: AppSpacing.xxl),
+                          ],
+                        ),
+                      )
+                    : issuesAsync.when(
+                        loading: () => const AppSkeletonList(count: 4),
+                        error: (err, stack) => ErrorStateWidget(
+                          message: 'Unable to load tickets.',
+                          onRetry: () => ref.refresh(myIssuesProvider),
+                        ),
+                        data: (issues) {
+                          if (issues.isEmpty) {
+                            return RefreshIndicator(
+                              color: colors.primaryAction,
+                              backgroundColor: colors.card,
+                              onRefresh: () async =>
+                                  ref.refresh(myIssuesProvider.future),
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: SizedBox(
+                                  height: 420,
+                                  child: EmptyStateWidget(
+                                    title: 'No requests yet',
+                                    description:
+                                        'Tickets submitted by you will be tracked here.',
+                                    actionLabel: 'Create Request',
+                                    onAction: () =>
+                                        setState(() => _activeTab = 'new'),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          final dateFormat =
+                              DateFormat('MMM dd, yyyy • hh:mm a');
+
                           return RefreshIndicator(
                             color: colors.primaryAction,
                             backgroundColor: colors.card,
                             onRefresh: () async =>
                                 ref.refresh(myIssuesProvider.future),
-                            child: SingleChildScrollView(
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              child: SizedBox(
-                                height: 420,
-                                child: EmptyStateWidget(
-                                  title: 'No requests yet',
-                                  description:
-                                      'Tickets submitted by you will be tracked here.',
-                                  actionLabel: 'Create Request',
-                                  onAction: () =>
-                                      setState(() => _activeTab = 'new'),
-                                ),
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.screenPadding,
+                                vertical: AppSpacing.xs,
                               ),
+                              itemCount: issues.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(height: AppSpacing.sm),
+                              itemBuilder: (context, index) {
+                                final issue = issues[index];
+                                return StaggeredSlideFade(
+                                  index: index < 8 ? index : 8,
+                                  child: _IssueCard(
+                                    issue: issue,
+                                    formattedDate:
+                                        dateFormat.format(issue.createdAt),
+                                    statusVariant: _statusVariant(issue.status),
+                                  ),
+                                );
+                              },
                             ),
                           );
-                        }
-
-                        final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
-
-                        return RefreshIndicator(
-                          color: colors.primaryAction,
-                          backgroundColor: colors.card,
-                          onRefresh: () async =>
-                              ref.refresh(myIssuesProvider.future),
-                          child: ListView.separated(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.screenPadding,
-                              vertical: AppSpacing.xs,
-                            ),
-                            itemCount: issues.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: AppSpacing.sm),
-                            itemBuilder: (context, index) {
-                              final issue = issues[index];
-                              return StaggeredSlideFade(
-                                index: index < 8 ? index : 8,
-                                child: _IssueCard(
-                                  issue: issue,
-                                  formattedDate:
-                                      dateFormat.format(issue.createdAt),
-                                  statusVariant: _statusVariant(issue.status),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

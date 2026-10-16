@@ -5,6 +5,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_avatar.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_search_input.dart';
@@ -44,109 +45,112 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
     final colors = AppColors.of(context);
     final managersAsync = ref.watch(adminManagersProvider);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      body: SafeArea(
-        top: true,
-        bottom: false,
-        child: Column(
-          children: [
-            // Header Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.md,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'District Managers',
-                        style: AppTypography.title1(color: colors.textPrimary),
-                      ),
-                      Text(
-                        '${managersAsync.valueOrNull?.total ?? 0} registered managers',
-                        style: AppTypography.caption(color: colors.textMuted),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-              ),
-              child: AppSearchInput(
-                controller: _searchController,
-                placeholder: 'Search managers by name, district, state...',
-                onChanged: (val) {
-                  ref.read(adminManagersSearchProvider.notifier).state = val;
-                },
-                onClear: () {
-                  ref.read(adminManagersSearchProvider.notifier).state = '';
-                },
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // Content List
-            Expanded(
-              child: managersAsync.when(
-                loading: () => const AppSkeletonList(count: 6),
-                error: (err, stack) => ErrorStateWidget(
-                  message: 'Unable to load managers.',
-                  onRetry: () => ref.refresh(adminManagersProvider),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: Column(
+            children: [
+              // Header Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.md,
                 ),
-                data: (response) {
-                  if (response.data.isEmpty) {
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'District Managers',
+                          style:
+                              AppTypography.title1(color: colors.textPrimary),
+                        ),
+                        Text(
+                          '${managersAsync.valueOrNull?.total ?? 0} registered managers',
+                          style: AppTypography.caption(color: colors.textMuted),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                ),
+                child: AppSearchInput(
+                  controller: _searchController,
+                  placeholder: 'Search managers by name, district, state...',
+                  onChanged: (val) {
+                    ref.read(adminManagersSearchProvider.notifier).state = val;
+                  },
+                  onClear: () {
+                    ref.read(adminManagersSearchProvider.notifier).state = '';
+                  },
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Content List
+              Expanded(
+                child: managersAsync.when(
+                  loading: () => const AppSkeletonList(count: 6),
+                  error: (err, stack) => ErrorStateWidget(
+                    message: 'Unable to load managers.',
+                    onRetry: () => ref.refresh(adminManagersProvider),
+                  ),
+                  data: (response) {
+                    if (response.data.isEmpty) {
+                      return RefreshIndicator(
+                        color: colors.primaryAction,
+                        backgroundColor: colors.card,
+                        onRefresh: () async =>
+                            ref.refresh(adminManagersProvider.future),
+                        child: const SingleChildScrollView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          child: SizedBox(
+                            height: 420,
+                            child: EmptyStateWidget(
+                              title: 'No managers found',
+                              description:
+                                  'No district managers registered matching your search criteria.',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
                     return RefreshIndicator(
                       color: colors.primaryAction,
                       backgroundColor: colors.card,
                       onRefresh: () async =>
                           ref.refresh(adminManagersProvider.future),
-                      child: const SingleChildScrollView(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        child: SizedBox(
-                          height: 420,
-                          child: EmptyStateWidget(
-                            title: 'No managers found',
-                            description:
-                                'No district managers registered matching your search criteria.',
-                          ),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.screenPadding,
+                          vertical: AppSpacing.xs,
                         ),
+                        itemCount: response.data.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final item = response.data[index];
+                          return _AdminManagerRowCard(item: item);
+                        },
                       ),
                     );
-                  }
-
-                  return RefreshIndicator(
-                    color: colors.primaryAction,
-                    backgroundColor: colors.card,
-                    onRefresh: () async =>
-                        ref.refresh(adminManagersProvider.future),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
-                        vertical: AppSpacing.xs,
-                      ),
-                      itemCount: response.data.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        final item = response.data[index];
-                        return _AdminManagerRowCard(item: item);
-                      },
-                    ),
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

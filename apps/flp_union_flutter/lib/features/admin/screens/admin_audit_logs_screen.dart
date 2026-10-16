@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_skeleton.dart';
@@ -21,59 +22,62 @@ class AdminAuditLogsScreen extends ConsumerWidget {
     final colors = AppColors.of(context);
     final auditLogsAsync = ref.watch(adminAuditLogsProvider);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: AppBar(
-        title: const Text('System Audit Logs'),
-      ),
-      body: SafeArea(
-        top: false,
-        child: auditLogsAsync.when(
-          loading: () => const AppSkeletonList(count: 6),
-          error: (err, stack) => ErrorStateWidget(
-            message: 'Unable to load audit logs.',
-            onRetry: () => ref.refresh(adminAuditLogsProvider),
-          ),
-          data: (response) {
-            if (response.data.isEmpty) {
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('System Audit Logs'),
+        ),
+        body: SafeArea(
+          top: false,
+          child: auditLogsAsync.when(
+            loading: () => const AppSkeletonList(count: 6),
+            error: (err, stack) => ErrorStateWidget(
+              message: 'Unable to load audit logs.',
+              onRetry: () => ref.refresh(adminAuditLogsProvider),
+            ),
+            data: (response) {
+              if (response.data.isEmpty) {
+                return RefreshIndicator(
+                  color: colors.primaryAction,
+                  backgroundColor: colors.card,
+                  onRefresh: () async =>
+                      ref.refresh(adminAuditLogsProvider.future),
+                  child: const SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: 420,
+                      child: EmptyStateWidget(
+                        title: 'No activity logs',
+                        description:
+                            'No system audit logs recorded in this period.',
+                      ),
+                    ),
+                  ),
+                );
+              }
+
               return RefreshIndicator(
                 color: colors.primaryAction,
                 backgroundColor: colors.card,
                 onRefresh: () async =>
                     ref.refresh(adminAuditLogsProvider.future),
-                child: const SingleChildScrollView(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  child: SizedBox(
-                    height: 420,
-                    child: EmptyStateWidget(
-                      title: 'No activity logs',
-                      description:
-                          'No system audit logs recorded in this period.',
-                    ),
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding,
+                    vertical: AppSpacing.md,
                   ),
+                  itemCount: response.data.length,
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: AppSpacing.sm),
+                  itemBuilder: (context, index) {
+                    final log = response.data[index];
+                    return _AuditLogRowCard(log: log);
+                  },
                 ),
               );
-            }
-
-            return RefreshIndicator(
-              color: colors.primaryAction,
-              backgroundColor: colors.card,
-              onRefresh: () async => ref.refresh(adminAuditLogsProvider.future),
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPadding,
-                  vertical: AppSpacing.md,
-                ),
-                itemCount: response.data.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: AppSpacing.sm),
-                itemBuilder: (context, index) {
-                  final log = response.data[index];
-                  return _AuditLogRowCard(log: log);
-                },
-              ),
-            );
-          },
+            },
+          ),
         ),
       ),
     );

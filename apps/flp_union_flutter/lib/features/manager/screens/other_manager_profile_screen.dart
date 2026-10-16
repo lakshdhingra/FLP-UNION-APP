@@ -8,6 +8,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/engineer.dart';
 import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_avatar.dart';
+import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_skeleton.dart';
@@ -28,225 +29,231 @@ class OtherManagerProfileScreen extends ConsumerWidget {
     final managerAsync = ref.watch(managerProfileByIdProvider(id));
     final engineersAsync = ref.watch(otherManagerEngineersProvider(id));
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      appBar: AppBar(
-        title: managerAsync.when(
-          data: (mgr) => Text(mgr.fullName),
-          loading: () => const Text('Loading...'),
-          error: (_, __) => const Text('Manager Profile'),
-        ),
-      ),
-      body: SafeArea(
-        top: false,
-        child: managerAsync.when(
-          loading: () => const AppDetailSkeleton(),
-          error: (err, stack) => ErrorStateWidget(
-            title: 'Manager Not Found',
-            message: 'Unable to load profile information.',
-            onRetry: () => ref.refresh(managerProfileByIdProvider(id)),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: managerAsync.when(
+            data: (mgr) => Text(mgr.fullName),
+            loading: () => const Text('Loading...'),
+            error: (_, __) => const Text('Manager Profile'),
           ),
-          data: (manager) {
-            return RefreshIndicator(
-              color: colors.primaryAction,
-              backgroundColor: colors.card,
-              onRefresh: () async {
-                ref.invalidate(managerProfileByIdProvider(id));
-                ref.invalidate(otherManagerEngineersProvider(id));
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPadding,
-                  vertical: AppSpacing.md,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Profile Header Card
-                    StaggeredSlideFade(
-                      index: 0,
-                      child: AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
-                        child: Column(
-                          children: [
-                            Center(
-                              child: Hero(
-                                tag: 'manager-avatar-${manager.id}',
-                                child:
-                                    AppAvatar(name: manager.fullName, size: 72),
+        ),
+        body: SafeArea(
+          top: false,
+          child: managerAsync.when(
+            loading: () => const AppDetailSkeleton(),
+            error: (err, stack) => ErrorStateWidget(
+              title: 'Manager Not Found',
+              message: 'Unable to load profile information.',
+              onRetry: () => ref.refresh(managerProfileByIdProvider(id)),
+            ),
+            data: (manager) {
+              return RefreshIndicator(
+                color: colors.primaryAction,
+                backgroundColor: colors.card,
+                onRefresh: () async {
+                  ref.invalidate(managerProfileByIdProvider(id));
+                  ref.invalidate(otherManagerEngineersProvider(id));
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Profile Header Card
+                      StaggeredSlideFade(
+                        index: 0,
+                        child: AppCard(
+                          padding:
+                              const EdgeInsets.all(AppSpacing.cardPaddingLg),
+                          child: Column(
+                            children: [
+                              Center(
+                                child: Hero(
+                                  tag: 'manager-avatar-${manager.id}',
+                                  child: AppAvatar(
+                                      name: manager.fullName, size: 72),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              manager.fullName,
-                              style: AppTypography.title1(
-                                  color: colors.textPrimary),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              manager.email,
-                              style: AppTypography.subhead(
-                                  color: colors.textSecondary),
-                            ),
-                            const SizedBox(height: 10),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              spacing: 8,
-                              runSpacing: 6,
-                              children: [
-                                AppBadge(
-                                  label: manager.district.name.isNotEmpty
-                                      ? manager.district.name
-                                      : 'District',
-                                  variant: AppBadgeVariant.defaultValue,
-                                ),
-                                AppBadge(
-                                  label: manager.state.name.isNotEmpty
-                                      ? manager.state.name
-                                      : 'State',
-                                  variant: AppBadgeVariant.info,
-                                ),
-                                AppBadge(
-                                  label: '${manager.totalEngineers} engineers',
-                                  variant: AppBadgeVariant.success,
-                                  showDot: true,
-                                ),
-                              ],
-                            ),
-                          ],
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                manager.fullName,
+                                style: AppTypography.title1(
+                                    color: colors.textPrimary),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                manager.email,
+                                style: AppTypography.subhead(
+                                    color: colors.textSecondary),
+                              ),
+                              const SizedBox(height: 10),
+                              Wrap(
+                                alignment: WrapAlignment.center,
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: [
+                                  AppBadge(
+                                    label: manager.district.name.isNotEmpty
+                                        ? manager.district.name
+                                        : 'District',
+                                    variant: AppBadgeVariant.defaultValue,
+                                  ),
+                                  AppBadge(
+                                    label: manager.state.name.isNotEmpty
+                                        ? manager.state.name
+                                        : 'State',
+                                    variant: AppBadgeVariant.info,
+                                  ),
+                                  AppBadge(
+                                    label:
+                                        '${manager.totalEngineers} engineers',
+                                    variant: AppBadgeVariant.success,
+                                    showDot: true,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
+                      const SizedBox(height: AppSpacing.lg),
 
-                    // Contact Details Section
-                    StaggeredSlideFade(
-                      index: 1,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Contact Information',
-                            style:
-                                AppTypography.title3(color: colors.textPrimary),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          AppCard(
-                            padding:
-                                const EdgeInsets.all(AppSpacing.cardPadding),
-                            child: Column(
-                              children: [
-                                _ContactRow(
-                                  icon: LucideIcons.phone,
-                                  label: 'Mobile',
-                                  value: manager.mobile.isNotEmpty
-                                      ? manager.mobile
-                                      : 'Not available',
-                                  onTap: manager.mobile.isNotEmpty
-                                      ? () {
-                                          Clipboard.setData(ClipboardData(
-                                              text: manager.mobile));
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text(
-                                                    'Phone number copied')),
-                                          );
-                                        }
-                                      : null,
-                                ),
-                                const Divider(height: 16),
-                                _ContactRow(
-                                  icon: LucideIcons.mail,
-                                  label: 'Email',
-                                  value: manager.email.isNotEmpty
-                                      ? manager.email
-                                      : 'Not available',
-                                  onTap: manager.email.isNotEmpty
-                                      ? () {
-                                          Clipboard.setData(ClipboardData(
-                                              text: manager.email));
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text('Email copied')),
-                                          );
-                                        }
-                                      : null,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Managed Engineers Section
-                    engineersAsync.when(
-                      loading: () => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(24.0),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      error: (_, __) => const SizedBox.shrink(),
-                      data: (engineers) {
-                        return Column(
+                      // Contact Details Section
+                      StaggeredSlideFade(
+                        index: 1,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Engineers in District',
-                                  style: AppTypography.title3(
-                                      color: colors.textPrimary),
-                                ),
-                                Text(
-                                  '${engineers.length} total',
-                                  style: AppTypography.caption(
-                                      color: colors.textMuted),
-                                ),
-                              ],
+                            Text(
+                              'Contact Information',
+                              style: AppTypography.title3(
+                                  color: colors.textPrimary),
                             ),
                             const SizedBox(height: AppSpacing.sm),
-                            if (engineers.isEmpty)
-                              AppCard(
-                                padding: const EdgeInsets.all(
-                                    AppSpacing.cardPaddingLg),
-                                child: Center(
-                                  child: Text(
-                                    'No engineers currently assigned to this manager.',
-                                    style: AppTypography.subhead(
+                            AppCard(
+                              padding:
+                                  const EdgeInsets.all(AppSpacing.cardPadding),
+                              child: Column(
+                                children: [
+                                  _ContactRow(
+                                    icon: LucideIcons.phone,
+                                    label: 'Mobile',
+                                    value: manager.mobile.isNotEmpty
+                                        ? manager.mobile
+                                        : 'Not available',
+                                    onTap: manager.mobile.isNotEmpty
+                                        ? () {
+                                            Clipboard.setData(ClipboardData(
+                                                text: manager.mobile));
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text(
+                                                      'Phone number copied')),
+                                            );
+                                          }
+                                        : null,
+                                  ),
+                                  const Divider(height: 16),
+                                  _ContactRow(
+                                    icon: LucideIcons.mail,
+                                    label: 'Email',
+                                    value: manager.email.isNotEmpty
+                                        ? manager.email
+                                        : 'Not available',
+                                    onTap: manager.email.isNotEmpty
+                                        ? () {
+                                            Clipboard.setData(ClipboardData(
+                                                text: manager.email));
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content:
+                                                      Text('Email copied')),
+                                            );
+                                          }
+                                        : null,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+
+                      // Managed Engineers Section
+                      engineersAsync.when(
+                        loading: () => const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                        error: (_, __) => const SizedBox.shrink(),
+                        data: (engineers) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Engineers in District',
+                                    style: AppTypography.title3(
+                                        color: colors.textPrimary),
+                                  ),
+                                  Text(
+                                    '${engineers.length} total',
+                                    style: AppTypography.caption(
                                         color: colors.textMuted),
                                   ),
-                                ),
-                              )
-                            else
-                              ListView.separated(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: engineers.length,
-                                separatorBuilder: (_, __) =>
-                                    const SizedBox(height: AppSpacing.sm),
-                                itemBuilder: (context, index) {
-                                  final eng = engineers[index];
-                                  return _OtherEngineerCard(engineer: eng);
-                                },
+                                ],
                               ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.xxl),
-                  ],
+                              const SizedBox(height: AppSpacing.sm),
+                              if (engineers.isEmpty)
+                                AppCard(
+                                  padding: const EdgeInsets.all(
+                                      AppSpacing.cardPaddingLg),
+                                  child: Center(
+                                    child: Text(
+                                      'No engineers currently assigned to this manager.',
+                                      style: AppTypography.subhead(
+                                          color: colors.textMuted),
+                                    ),
+                                  ),
+                                )
+                              else
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: engineers.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(height: AppSpacing.sm),
+                                  itemBuilder: (context, index) {
+                                    final eng = engineers[index];
+                                    return _OtherEngineerCard(engineer: eng);
+                                  },
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
