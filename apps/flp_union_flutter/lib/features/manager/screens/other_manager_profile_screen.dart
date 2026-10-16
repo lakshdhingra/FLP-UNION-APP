@@ -6,9 +6,11 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/engineer.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../providers/manager_directory_provider.dart';
 
@@ -38,9 +40,7 @@ class OtherManagerProfileScreen extends ConsumerWidget {
       body: SafeArea(
         top: false,
         child: managerAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          loading: () => const AppDetailSkeleton(),
           error: (err, stack) => ErrorStateWidget(
             title: 'Manager Not Found',
             message: 'Unable to load profile information.',
@@ -64,100 +64,120 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Profile Header Card
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
-                      child: Column(
-                        children: [
-                          Center(
-                            child: AppAvatar(name: manager.fullName, size: 72),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Text(
-                            manager.fullName,
-                            style:
-                                AppTypography.title1(color: colors.textPrimary),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            manager.email,
-                            style: AppTypography.subhead(
-                                color: colors.textSecondary),
-                          ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: [
-                              AppBadge(
-                                label: manager.district.name.isNotEmpty
-                                    ? manager.district.name
-                                    : 'District',
-                                variant: AppBadgeVariant.defaultValue,
+                    StaggeredSlideFade(
+                      index: 0,
+                      child: AppCard(
+                        padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
+                        child: Column(
+                          children: [
+                            Center(
+                              child: Hero(
+                                tag: 'manager-avatar-${manager.id}',
+                                child:
+                                    AppAvatar(name: manager.fullName, size: 72),
                               ),
-                              AppBadge(
-                                label: manager.state.name.isNotEmpty
-                                    ? manager.state.name
-                                    : 'State',
-                                variant: AppBadgeVariant.info,
-                              ),
-                              AppBadge(
-                                label: '${manager.totalEngineers} engineers',
-                                variant: AppBadgeVariant.success,
-                                showDot: true,
-                              ),
-                            ],
-                          ),
-                        ],
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              manager.fullName,
+                              style: AppTypography.title1(
+                                  color: colors.textPrimary),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              manager.email,
+                              style: AppTypography.subhead(
+                                  color: colors.textSecondary),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              alignment: WrapAlignment.center,
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                AppBadge(
+                                  label: manager.district.name.isNotEmpty
+                                      ? manager.district.name
+                                      : 'District',
+                                  variant: AppBadgeVariant.defaultValue,
+                                ),
+                                AppBadge(
+                                  label: manager.state.name.isNotEmpty
+                                      ? manager.state.name
+                                      : 'State',
+                                  variant: AppBadgeVariant.info,
+                                ),
+                                AppBadge(
+                                  label: '${manager.totalEngineers} engineers',
+                                  variant: AppBadgeVariant.success,
+                                  showDot: true,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
                     // Contact Details Section
-                    Text(
-                      'Contact Information',
-                      style: AppTypography.title3(color: colors.textPrimary),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                    StaggeredSlideFade(
+                      index: 1,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _ContactRow(
-                            icon: LucideIcons.phone,
-                            label: 'Mobile',
-                            value: manager.mobile.isNotEmpty
-                                ? manager.mobile
-                                : 'Not available',
-                            onTap: manager.mobile.isNotEmpty
-                                ? () {
-                                    Clipboard.setData(
-                                        ClipboardData(text: manager.mobile));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('Phone number copied')),
-                                    );
-                                  }
-                                : null,
+                          Text(
+                            'Contact Information',
+                            style:
+                                AppTypography.title3(color: colors.textPrimary),
                           ),
-                          const Divider(height: 16),
-                          _ContactRow(
-                            icon: LucideIcons.mail,
-                            label: 'Email',
-                            value: manager.email.isNotEmpty
-                                ? manager.email
-                                : 'Not available',
-                            onTap: manager.email.isNotEmpty
-                                ? () {
-                                    Clipboard.setData(
-                                        ClipboardData(text: manager.email));
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('Email copied')),
-                                    );
-                                  }
-                                : null,
+                          const SizedBox(height: AppSpacing.sm),
+                          AppCard(
+                            padding:
+                                const EdgeInsets.all(AppSpacing.cardPadding),
+                            child: Column(
+                              children: [
+                                _ContactRow(
+                                  icon: LucideIcons.phone,
+                                  label: 'Mobile',
+                                  value: manager.mobile.isNotEmpty
+                                      ? manager.mobile
+                                      : 'Not available',
+                                  onTap: manager.mobile.isNotEmpty
+                                      ? () {
+                                          Clipboard.setData(ClipboardData(
+                                              text: manager.mobile));
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text(
+                                                    'Phone number copied')),
+                                          );
+                                        }
+                                      : null,
+                                ),
+                                const Divider(height: 16),
+                                _ContactRow(
+                                  icon: LucideIcons.mail,
+                                  label: 'Email',
+                                  value: manager.email.isNotEmpty
+                                      ? manager.email
+                                      : 'Not available',
+                                  onTap: manager.email.isNotEmpty
+                                      ? () {
+                                          Clipboard.setData(ClipboardData(
+                                              text: manager.email));
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                                content: Text('Email copied')),
+                                          );
+                                        }
+                                      : null,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),

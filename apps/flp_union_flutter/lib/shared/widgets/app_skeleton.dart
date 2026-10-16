@@ -182,3 +182,54 @@ class AppDashboardSkeleton extends StatelessWidget {
     );
   }
 }
+
+class AppDetailSkeleton extends StatelessWidget {
+  const AppDetailSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenPadding,
+        vertical: AppSpacing.md,
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
+            decoration: BoxDecoration(
+              color: colors.card,
+              borderRadius: AppRadius.cardRadius,
+              border: Border.all(color: colors.border, width: 1),
+            ),
+            child: const Column(
+              children: [
+                Center(child: AppSkeleton.circle(size: 72)),
+                SizedBox(height: AppSpacing.md),
+                AppSkeleton(width: 160, height: 18),
+                SizedBox(height: 8),
+                AppSkeleton(width: 110, height: 12),
+                SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    AppSkeleton(width: 70, height: 20),
+                    SizedBox(width: 8),
+                    AppSkeleton(width: 90, height: 20),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const AppSkeletonCard(height: 120),
+          const SizedBox(height: AppSpacing.md),
+          const AppSkeletonCard(height: 140),
+        ],
+      ),
+    );
+  }
+}

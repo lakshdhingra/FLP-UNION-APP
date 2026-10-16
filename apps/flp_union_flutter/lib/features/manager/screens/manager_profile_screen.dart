@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -7,10 +8,12 @@ import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/theme/theme_provider.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/manager_profile_provider.dart';
@@ -111,7 +114,7 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
         top: true,
         bottom: false,
         child: profileAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const AppDetailSkeleton(),
           error: (err, stack) => ErrorStateWidget(
             message: 'Unable to load profile information.',
             onRetry: () => ref.refresh(managerProfileProvider),
@@ -131,146 +134,160 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Profile Top Card
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
-                      child: Column(
-                        children: [
-                          Center(
-                            child: AppAvatar(name: profile.fullName, size: 76),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
+                    StaggeredSlideFade(
+                      index: 0,
+                      child: AppCard(
+                        padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
+                        child: Column(
+                          children: [
+                            Center(
+                              child:
+                                  AppAvatar(name: profile.fullName, size: 76),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
 
-                          // Inline Name Editor
-                          if (_editing)
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 220,
-                                  child: TextField(
-                                    controller: _nameController,
-                                    style: AppTypography.title2(
-                                        color: colors.textPrimary),
-                                    cursorColor: colors.primaryAction,
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 8),
-                                      hintText: 'Enter name',
-                                      border: OutlineInputBorder(
-                                        borderRadius: AppRadius.inputRadius,
-                                        borderSide: BorderSide(
-                                            color: colors.primaryAction),
+                            // Inline Name Editor
+                            if (_editing)
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 220,
+                                    child: TextField(
+                                      controller: _nameController,
+                                      style: AppTypography.title2(
+                                          color: colors.textPrimary),
+                                      cursorColor: colors.primaryAction,
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 12, vertical: 8),
+                                        hintText: 'Enter name',
+                                        border: OutlineInputBorder(
+                                          borderRadius: AppRadius.inputRadius,
+                                          borderSide: BorderSide(
+                                              color: colors.primaryAction),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                IconButton(
-                                  icon: Icon(LucideIcons.check,
-                                      size: 20, color: colors.success),
-                                  onPressed: _saveEdit,
-                                ),
-                                IconButton(
-                                  icon: Icon(LucideIcons.x,
-                                      size: 20, color: colors.textMuted),
-                                  onPressed: () =>
-                                      setState(() => _editing = false),
-                                ),
-                              ],
-                            )
-                          else
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: Icon(LucideIcons.check,
+                                        size: 20, color: colors.success),
+                                    onPressed: _saveEdit,
+                                  ),
+                                  IconButton(
+                                    icon: Icon(LucideIcons.x,
+                                        size: 20, color: colors.textMuted),
+                                    onPressed: () =>
+                                        setState(() => _editing = false),
+                                  ),
+                                ],
+                              )
+                            else
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    profile.fullName,
+                                    style: AppTypography.title1(
+                                        color: colors.textPrimary),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () => _startEdit(profile.fullName),
+                                    child: Icon(
+                                      LucideIcons.pencil,
+                                      size: 15,
+                                      color: colors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                            const SizedBox(height: 3),
+                            Text(
+                              profile.email,
+                              style: AppTypography.subhead(
+                                  color: colors.textSecondary),
+                            ),
+                            const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  profile.fullName,
-                                  style: AppTypography.title1(
-                                      color: colors.textPrimary),
+                                const AppBadge(
+                                  label: 'District Manager',
+                                  variant: AppBadgeVariant.info,
+                                  showDot: true,
                                 ),
                                 const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () => _startEdit(profile.fullName),
-                                  child: Icon(
-                                    LucideIcons.pencil,
-                                    size: 15,
-                                    color: colors.textMuted,
-                                  ),
+                                AppBadge(
+                                  label: profile.state.name.isNotEmpty
+                                      ? profile.state.name
+                                      : 'State',
+                                  variant: AppBadgeVariant.defaultValue,
                                 ),
                               ],
                             ),
-
-                          const SizedBox(height: 3),
-                          Text(
-                            profile.email,
-                            style: AppTypography.subhead(
-                                color: colors.textSecondary),
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const AppBadge(
-                                label: 'District Manager',
-                                variant: AppBadgeVariant.info,
-                                showDot: true,
-                              ),
-                              const SizedBox(width: 8),
-                              AppBadge(
-                                label: profile.state.name.isNotEmpty
-                                    ? profile.state.name
-                                    : 'State',
-                                variant: AppBadgeVariant.defaultValue,
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
                     // Organization & Contact Section
-                    Text(
-                      'Account & Region Details',
-                      style: AppTypography.title3(color: colors.textPrimary),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                    StaggeredSlideFade(
+                      index: 1,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _ProfileInfoRow(
-                            icon: LucideIcons.phone,
-                            label: 'Mobile',
-                            value: profile.mobile.isNotEmpty
-                                ? profile.mobile
-                                : 'N/A',
+                          Text(
+                            'Account & Region Details',
+                            style:
+                                AppTypography.title3(color: colors.textPrimary),
                           ),
-                          const Divider(height: 16),
-                          _ProfileInfoRow(
-                            icon: LucideIcons.mail,
-                            label: 'Official Email',
-                            value: profile.email,
-                          ),
-                          const Divider(height: 16),
-                          _ProfileInfoRow(
-                            icon: LucideIcons.building2,
-                            label: 'Assigned State',
-                            value: profile.state.name,
-                          ),
-                          const Divider(height: 16),
-                          _ProfileInfoRow(
-                            icon: LucideIcons.mapPin,
-                            label: 'Assigned District',
-                            value: profile.district.name,
-                          ),
-                          const Divider(height: 16),
-                          _ProfileInfoRow(
-                            icon: LucideIcons.users,
-                            label: 'Managed Engineers',
-                            value: '${profile.totalEngineers}',
+                          const SizedBox(height: AppSpacing.sm),
+                          AppCard(
+                            padding:
+                                const EdgeInsets.all(AppSpacing.cardPadding),
+                            child: Column(
+                              children: [
+                                _ProfileInfoRow(
+                                  icon: LucideIcons.phone,
+                                  label: 'Mobile',
+                                  value: profile.mobile.isNotEmpty
+                                      ? profile.mobile
+                                      : 'N/A',
+                                ),
+                                const Divider(height: 16),
+                                _ProfileInfoRow(
+                                  icon: LucideIcons.mail,
+                                  label: 'Official Email',
+                                  value: profile.email,
+                                ),
+                                const Divider(height: 16),
+                                _ProfileInfoRow(
+                                  icon: LucideIcons.building2,
+                                  label: 'Assigned State',
+                                  value: profile.state.name,
+                                ),
+                                const Divider(height: 16),
+                                _ProfileInfoRow(
+                                  icon: LucideIcons.mapPin,
+                                  label: 'Assigned District',
+                                  value: profile.district.name,
+                                ),
+                                const Divider(height: 16),
+                                _ProfileInfoRow(
+                                  icon: LucideIcons.users,
+                                  label: 'Managed Engineers',
+                                  value: '${profile.totalEngineers}',
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -278,103 +295,128 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                     const SizedBox(height: AppSpacing.lg),
 
                     // Support & Assistance Section
-                    Text(
-                      'Support & Assistance',
-                      style: AppTypography.title3(color: colors.textPrimary),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                      onTap: () => context.push('/manager/help'),
-                      child: Row(
+                    StaggeredSlideFade(
+                      index: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: colors.primaryActionSubtle,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              LucideIcons.helpCircle,
-                              size: 18,
-                              color: colors.primaryAction,
-                            ),
+                          Text(
+                            'Support & Assistance',
+                            style:
+                                AppTypography.title3(color: colors.textPrimary),
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(height: AppSpacing.sm),
+                          AppCard(
+                            padding:
+                                const EdgeInsets.all(AppSpacing.cardPadding),
+                            onTap: () => context.push('/manager/help'),
+                            child: Row(
                               children: [
-                                Text(
-                                  'Help & Support Center',
-                                  style: AppTypography.body(
-                                    color: colors.textPrimary,
-                                    weight: AppFontWeight.medium,
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: colors.primaryActionSubtle,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    LucideIcons.helpCircle,
+                                    size: 18,
+                                    color: colors.primaryAction,
                                   ),
                                 ),
-                                Text(
-                                  'Report system issues and track support tickets',
-                                  style: AppTypography.caption(
-                                      color: colors.textMuted),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Help & Support Center',
+                                        style: AppTypography.body(
+                                          color: colors.textPrimary,
+                                          weight: AppFontWeight.medium,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Report system issues and track support tickets',
+                                        style: AppTypography.caption(
+                                            color: colors.textMuted),
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                Icon(LucideIcons.chevronRight,
+                                    size: 16, color: colors.textMuted),
                               ],
                             ),
                           ),
-                          Icon(LucideIcons.chevronRight,
-                              size: 16, color: colors.textMuted),
                         ],
                       ),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
                     // Preferences & Theme Section
-                    Text(
-                      'Preferences',
-                      style: AppTypography.title3(color: colors.textPrimary),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    StaggeredSlideFade(
+                      index: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                isDark ? LucideIcons.moon : LucideIcons.sun,
-                                size: 18,
-                                color: colors.primaryAction,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Dark Appearance',
-                                    style: AppTypography.body(
-                                      color: colors.textPrimary,
-                                      weight: AppFontWeight.medium,
-                                    ),
-                                  ),
-                                  Text(
-                                    isDark
-                                        ? 'Dark theme active'
-                                        : 'Light theme active',
-                                    style: AppTypography.caption(
-                                        color: colors.textMuted),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          Text(
+                            'Preferences',
+                            style:
+                                AppTypography.title3(color: colors.textPrimary),
                           ),
-                          Switch.adaptive(
-                            value: isDark,
-                            activeTrackColor: colors.primaryAction,
-                            onChanged: (val) {
-                              ref
-                                  .read(themeModeProvider.notifier)
-                                  .toggleTheme();
-                            },
+                          const SizedBox(height: AppSpacing.sm),
+                          AppCard(
+                            padding:
+                                const EdgeInsets.all(AppSpacing.cardPadding),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      isDark
+                                          ? LucideIcons.moon
+                                          : LucideIcons.sun,
+                                      size: 18,
+                                      color: colors.primaryAction,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Dark Appearance',
+                                          style: AppTypography.body(
+                                            color: colors.textPrimary,
+                                            weight: AppFontWeight.medium,
+                                          ),
+                                        ),
+                                        Text(
+                                          isDark
+                                              ? 'Dark theme active'
+                                              : 'Light theme active',
+                                          style: AppTypography.caption(
+                                              color: colors.textMuted),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Switch.adaptive(
+                                  value: isDark,
+                                  activeTrackColor: colors.primaryAction,
+                                  onChanged: (val) {
+                                    HapticFeedback.lightImpact();
+                                    ref
+                                        .read(themeModeProvider.notifier)
+                                        .toggleTheme();
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -382,11 +424,14 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                     const SizedBox(height: AppSpacing.xl),
 
                     // Sign Out Button (Separated from regular settings)
-                    AppButton(
-                      label: 'Sign Out',
-                      icon: const Icon(LucideIcons.logOut, size: 16),
-                      onPress: _handleLogout,
-                      variant: AppButtonVariant.danger,
+                    StaggeredSlideFade(
+                      index: 4,
+                      child: AppButton(
+                        label: 'Sign Out',
+                        icon: const Icon(LucideIcons.logOut, size: 16),
+                        onPress: _handleLogout,
+                        variant: AppButtonVariant.danger,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.xxl),
                   ],

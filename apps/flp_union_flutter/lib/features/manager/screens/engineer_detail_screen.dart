@@ -8,10 +8,12 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../providers/engineer_provider.dart';
 
@@ -152,9 +154,7 @@ class EngineerDetailScreen extends ConsumerWidget {
       body: SafeArea(
         top: false,
         child: engineerAsync.when(
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          loading: () => const AppDetailSkeleton(),
           error: (err, stack) => ErrorStateWidget(
             title: 'Engineer Not Found',
             message: 'Could not load details for this engineer.',
@@ -186,93 +186,100 @@ class EngineerDetailScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Hero Profile Card
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
-                      child: Column(
-                        children: [
-                          Center(
-                            child: AppAvatar(
-                              name: engineer.fullName,
-                              size: 72,
-                              url: avatarUrl,
+                    StaggeredSlideFade(
+                      index: 0,
+                      child: AppCard(
+                        padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
+                        child: Column(
+                          children: [
+                            Center(
+                              child: Hero(
+                                tag: 'engineer-avatar-${engineer.id}',
+                                child: AppAvatar(
+                                  name: engineer.fullName,
+                                  size: 72,
+                                  url: avatarUrl,
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          Text(
-                            engineer.fullName,
-                            style:
-                                AppTypography.title1(color: colors.textPrimary),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            (engineer.designation != null &&
-                                    engineer.designation!.isNotEmpty)
-                                ? engineer.designation!
-                                : 'Field Engineer',
-                            style: AppTypography.subhead(
-                                color: colors.textSecondary),
-                          ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            alignment: WrapAlignment.center,
-                            children: [
-                              AppBadge(
-                                label: engineer.isActive
-                                    ? 'Active Status'
-                                    : 'Inactive Status',
-                                variant: engineer.isActive
-                                    ? AppBadgeVariant.success
-                                    : AppBadgeVariant.warning,
-                                showDot: true,
-                              ),
-                              if (photoKey.isNotEmpty)
-                                AppBadge(
-                                  label:
-                                      isPdf ? 'PDF Attached' : 'Photo Attached',
-                                  variant: AppBadgeVariant.info,
-                                  icon: Icon(
-                                    isPdf
-                                        ? LucideIcons.fileText
-                                        : LucideIcons.image,
-                                    size: 11,
-                                    color: colors.info,
-                                  ),
-                                ),
-                              if (isMasked)
-                                const AppBadge(
-                                  label: 'External Engineer',
-                                  variant: AppBadgeVariant.defaultValue,
-                                ),
-                            ],
-                          ),
-                          if (isMasked) ...[
                             const SizedBox(height: AppSpacing.md),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: colors.secondarySurface,
-                                borderRadius: AppRadius.inputRadius,
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(LucideIcons.lock,
-                                      size: 14, color: colors.textMuted),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Private fields hidden (belongs to another manager).',
-                                      style: AppTypography.caption(
-                                          color: colors.textMuted),
+                            Text(
+                              engineer.fullName,
+                              style: AppTypography.title1(
+                                  color: colors.textPrimary),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              (engineer.designation != null &&
+                                      engineer.designation!.isNotEmpty)
+                                  ? engineer.designation!
+                                  : 'Field Engineer',
+                              style: AppTypography.subhead(
+                                  color: colors.textSecondary),
+                            ),
+                            const SizedBox(height: 10),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              alignment: WrapAlignment.center,
+                              children: [
+                                AppBadge(
+                                  label: engineer.isActive
+                                      ? 'Active Status'
+                                      : 'Inactive Status',
+                                  variant: engineer.isActive
+                                      ? AppBadgeVariant.success
+                                      : AppBadgeVariant.warning,
+                                  showDot: true,
+                                ),
+                                if (photoKey.isNotEmpty)
+                                  AppBadge(
+                                    label: isPdf
+                                        ? 'PDF Attached'
+                                        : 'Photo Attached',
+                                    variant: AppBadgeVariant.info,
+                                    icon: Icon(
+                                      isPdf
+                                          ? LucideIcons.fileText
+                                          : LucideIcons.image,
+                                      size: 11,
+                                      color: colors.info,
                                     ),
                                   ),
-                                ],
-                              ),
+                                if (isMasked)
+                                  const AppBadge(
+                                    label: 'External Engineer',
+                                    variant: AppBadgeVariant.defaultValue,
+                                  ),
+                              ],
                             ),
+                            if (isMasked) ...[
+                              const SizedBox(height: AppSpacing.md),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: colors.secondarySurface,
+                                  borderRadius: AppRadius.inputRadius,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(LucideIcons.lock,
+                                        size: 14, color: colors.textMuted),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Private fields hidden (belongs to another manager).',
+                                        style: AppTypography.caption(
+                                            color: colors.textMuted),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -339,121 +346,145 @@ class EngineerDetailScreen extends ConsumerWidget {
                     ],
 
                     // Contact Information Section
-                    Text(
-                      'Contact Information',
-                      style: AppTypography.title3(color: colors.textPrimary),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                    StaggeredSlideFade(
+                      index: 2,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _DetailRow(
-                            icon: LucideIcons.phone,
-                            label: 'Phone',
-                            value: engineer.phone,
-                            onTap: () {
-                              Clipboard.setData(
-                                  ClipboardData(text: engineer.phone));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Phone number copied')),
-                              );
-                            },
+                          Text(
+                            'Contact Information',
+                            style:
+                                AppTypography.title3(color: colors.textPrimary),
                           ),
-                          if (engineer.email != null &&
-                              engineer.email!.isNotEmpty) ...[
-                            const Divider(height: 16),
-                            _DetailRow(
-                              icon: LucideIcons.mail,
-                              label: 'Email',
-                              value: engineer.email!,
-                              onTap: () {
-                                Clipboard.setData(
-                                    ClipboardData(text: engineer.email!));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Email copied')),
-                                );
-                              },
+                          const SizedBox(height: AppSpacing.sm),
+                          AppCard(
+                            padding:
+                                const EdgeInsets.all(AppSpacing.cardPadding),
+                            child: Column(
+                              children: [
+                                _DetailRow(
+                                  icon: LucideIcons.phone,
+                                  label: 'Phone',
+                                  value: engineer.phone,
+                                  onTap: () {
+                                    Clipboard.setData(
+                                        ClipboardData(text: engineer.phone));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Phone number copied')),
+                                    );
+                                  },
+                                ),
+                                if (engineer.email != null &&
+                                    engineer.email!.isNotEmpty) ...[
+                                  const Divider(height: 16),
+                                  _DetailRow(
+                                    icon: LucideIcons.mail,
+                                    label: 'Email',
+                                    value: engineer.email!,
+                                    onTap: () {
+                                      Clipboard.setData(
+                                          ClipboardData(text: engineer.email!));
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text('Email copied')),
+                                      );
+                                    },
+                                  ),
+                                ],
+                                if (!isMasked &&
+                                    engineer.address != null &&
+                                    engineer.address!.isNotEmpty) ...[
+                                  const Divider(height: 16),
+                                  _DetailRow(
+                                    icon: LucideIcons.home,
+                                    label: 'Address',
+                                    value: engineer.address!,
+                                  ),
+                                ],
+                              ],
                             ),
-                          ],
-                          if (!isMasked &&
-                              engineer.address != null &&
-                              engineer.address!.isNotEmpty) ...[
-                            const Divider(height: 16),
-                            _DetailRow(
-                              icon: LucideIcons.home,
-                              label: 'Address',
-                              value: engineer.address!,
-                            ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
 
                     // Professional & Regional Information Section
-                    Text(
-                      'Professional & Regional',
-                      style: AppTypography.title3(color: colors.textPrimary),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                    StaggeredSlideFade(
+                      index: 3,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _DetailRow(
-                            icon: LucideIcons.mapPin,
-                            label: 'District',
-                            value: engineer.district?.name ?? 'Not assigned',
+                          Text(
+                            'Professional & Regional',
+                            style:
+                                AppTypography.title3(color: colors.textPrimary),
                           ),
-                          const Divider(height: 16),
-                          _DetailRow(
-                            icon: LucideIcons.building2,
-                            label: 'State',
-                            value: engineer.state?.name ?? 'Not assigned',
-                          ),
-                          if (engineer.experienceYears != null) ...[
-                            const Divider(height: 16),
-                            _DetailRow(
-                              icon: LucideIcons.briefcase,
-                              label: 'Experience',
-                              value: '${engineer.experienceYears} years',
-                            ),
-                          ],
-                          if (engineer.skills.isNotEmpty) ...[
-                            const Divider(height: 16),
-                            Text(
-                              'Technical Skills',
-                              style: AppTypography.caption(
-                                  color: colors.textMuted),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: engineer.skills.map((skill) {
-                                return Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: colors.secondarySurface,
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                        color: colors.border, width: 1),
+                          const SizedBox(height: AppSpacing.sm),
+                          AppCard(
+                            padding:
+                                const EdgeInsets.all(AppSpacing.cardPadding),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _DetailRow(
+                                  icon: LucideIcons.mapPin,
+                                  label: 'District',
+                                  value:
+                                      engineer.district?.name ?? 'Not assigned',
+                                ),
+                                const Divider(height: 16),
+                                _DetailRow(
+                                  icon: LucideIcons.building2,
+                                  label: 'State',
+                                  value: engineer.state?.name ?? 'Not assigned',
+                                ),
+                                if (engineer.experienceYears != null) ...[
+                                  const Divider(height: 16),
+                                  _DetailRow(
+                                    icon: LucideIcons.briefcase,
+                                    label: 'Experience',
+                                    value: '${engineer.experienceYears} years',
                                   ),
-                                  child: Text(
-                                    skill,
+                                ],
+                                if (engineer.skills.isNotEmpty) ...[
+                                  const Divider(height: 16),
+                                  Text(
+                                    'Technical Skills',
                                     style: AppTypography.caption(
-                                      color: colors.textPrimary,
-                                      weight: AppFontWeight.medium,
-                                    ),
+                                        color: colors.textMuted),
                                   ),
-                                );
-                              }).toList(),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 6,
+                                    children: engineer.skills.map((skill) {
+                                      return Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: colors.secondarySurface,
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                          border: Border.all(
+                                              color: colors.border, width: 1),
+                                        ),
+                                        child: Text(
+                                          skill,
+                                          style: AppTypography.caption(
+                                            color: colors.textPrimary,
+                                            weight: AppFontWeight.medium,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
+                              ],
                             ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
@@ -465,39 +496,49 @@ class EngineerDetailScreen extends ConsumerWidget {
                             (engineer.privateNotes != null &&
                                 engineer.privateNotes!.isNotEmpty) ||
                             engineer.govIdType != null)) ...[
-                      Text(
-                        'Confidential Records',
-                        style: AppTypography.title3(color: colors.textPrimary),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      StaggeredSlideFade(
+                        index: 4,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (engineer.salary != null)
-                              _DetailRow(
-                                icon: LucideIcons.indianRupee,
-                                label: 'Monthly Compensation',
-                                value:
-                                    '₹ ${currencyFormat.format(engineer.salary)}',
+                            Text(
+                              'Confidential Records',
+                              style: AppTypography.title3(
+                                  color: colors.textPrimary),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            AppCard(
+                              padding:
+                                  const EdgeInsets.all(AppSpacing.cardPadding),
+                              child: Column(
+                                children: [
+                                  if (engineer.salary != null)
+                                    _DetailRow(
+                                      icon: LucideIcons.indianRupee,
+                                      label: 'Monthly Compensation',
+                                      value:
+                                          '₹ ${currencyFormat.format(engineer.salary)}',
+                                    ),
+                                  if (engineer.govIdType != null) ...[
+                                    const Divider(height: 16),
+                                    _DetailRow(
+                                      icon: LucideIcons.creditCard,
+                                      label: engineer.govIdType!,
+                                      value: engineer.govIdNumber ?? 'On file',
+                                    ),
+                                  ],
+                                  if (engineer.privateNotes != null &&
+                                      engineer.privateNotes!.isNotEmpty) ...[
+                                    const Divider(height: 16),
+                                    _DetailRow(
+                                      icon: LucideIcons.lock,
+                                      label: 'Private Notes',
+                                      value: engineer.privateNotes!,
+                                    ),
+                                  ],
+                                ],
                               ),
-                            if (engineer.govIdType != null) ...[
-                              const Divider(height: 16),
-                              _DetailRow(
-                                icon: LucideIcons.creditCard,
-                                label: engineer.govIdType!,
-                                value: engineer.govIdNumber ?? 'On file',
-                              ),
-                            ],
-                            if (engineer.privateNotes != null &&
-                                engineer.privateNotes!.isNotEmpty) ...[
-                              const Divider(height: 16),
-                              _DetailRow(
-                                icon: LucideIcons.lock,
-                                label: 'Private Notes',
-                                value: engineer.privateNotes!,
-                              ),
-                            ],
+                            ),
                           ],
                         ),
                       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../shared/widgets/app_animations.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
@@ -60,17 +61,27 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) => buildAppTransitionPage(
+          key: state.pageKey,
+          child: const LoginScreen(),
+        ),
       ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => const RegisterScreen(),
+        pageBuilder: (context, state) => buildAppTransitionPage(
+          key: state.pageKey,
+          child: const RegisterScreen(),
+        ),
       ),
 
-      // Manager Shell Router
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return ManagerShellScreen(navigationShell: navigationShell);
+      // Manager Shell Router with smooth animated page switching
+      StatefulShellRoute(
+        builder: (context, state, navigationShell) => navigationShell,
+        navigatorContainerBuilder: (context, navigationShell, children) {
+          return ManagerShellScreen(
+            navigationShell: navigationShell,
+            children: children,
+          );
         },
         branches: [
           StatefulShellBranch(
@@ -89,20 +100,29 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: 'create',
-                    builder: (context, state) => const EngineerFormScreen(),
+                    pageBuilder: (context, state) => buildAppTransitionPage(
+                      key: state.pageKey,
+                      child: const EngineerFormScreen(),
+                    ),
                   ),
                   GoRoute(
                     path: 'edit',
-                    builder: (context, state) {
+                    pageBuilder: (context, state) {
                       final id = state.uri.queryParameters['id'];
-                      return EngineerFormScreen(engineerId: id);
+                      return buildAppTransitionPage(
+                        key: state.pageKey,
+                        child: EngineerFormScreen(engineerId: id),
+                      );
                     },
                   ),
                   GoRoute(
                     path: ':id',
-                    builder: (context, state) {
+                    pageBuilder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return EngineerDetailScreen(id: id);
+                      return buildAppTransitionPage(
+                        key: state.pageKey,
+                        child: EngineerDetailScreen(id: id),
+                      );
                     },
                   ),
                 ],
@@ -117,9 +137,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                 routes: [
                   GoRoute(
                     path: ':id',
-                    builder: (context, state) {
+                    pageBuilder: (context, state) {
                       final id = state.pathParameters['id']!;
-                      return OtherManagerProfileScreen(id: id);
+                      return buildAppTransitionPage(
+                        key: state.pageKey,
+                        child: OtherManagerProfileScreen(id: id),
+                      );
                     },
                   ),
                 ],

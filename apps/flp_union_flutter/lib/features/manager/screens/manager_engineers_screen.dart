@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/engineer.dart';
@@ -133,17 +135,17 @@ class _ManagerEngineersScreenState
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
-                    onPressed: () => context.push('/manager/engineers/create'),
-                    icon: const Icon(LucideIcons.plus, size: 16),
-                    label: const Text('Add Engineer'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: colors.primaryAction,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      minimumSize: const Size(0, 38),
-                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                  IconButton(
+                    tooltip: 'Refresh',
+                    icon: Icon(
+                      LucideIcons.refreshCw,
+                      size: 18,
+                      color: colors.textSecondary,
                     ),
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      ref.invalidate(myEngineersProvider(_searchQuery));
+                    },
                   ),
                 ],
               ),
@@ -301,9 +303,11 @@ class _ManagerEngineersScreenState
                     onRefresh: () async =>
                         ref.refresh(myEngineersProvider(_searchQuery).future),
                     child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.screenPadding,
-                        vertical: AppSpacing.sm,
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.screenPadding,
+                        right: AppSpacing.screenPadding,
+                        top: AppSpacing.sm,
+                        bottom: 84,
                       ),
                       itemCount: engineers.length,
                       separatorBuilder: (context, index) =>
@@ -329,6 +333,31 @@ class _ManagerEngineersScreenState
               ),
             ),
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          HapticFeedback.lightImpact();
+          context.push('/manager/engineers/create');
+        },
+        backgroundColor: colors.primaryAction,
+        foregroundColor: Colors.white,
+        elevation: 3,
+        highlightElevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.button),
+          side: BorderSide(
+            color: Colors.white.withAlpha(40),
+            width: 1,
+          ),
+        ),
+        icon: const Icon(LucideIcons.plus, size: 18),
+        label: Text(
+          'Add Engineer',
+          style: AppTypography.body(
+            color: Colors.white,
+            weight: AppFontWeight.semibold,
+          ),
         ),
       ),
     );
@@ -358,7 +387,10 @@ class _EngineerRowCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          AppAvatar(name: engineer.fullName, size: 44),
+          Hero(
+            tag: 'engineer-avatar-${engineer.id}',
+            child: AppAvatar(name: engineer.fullName, size: 44),
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

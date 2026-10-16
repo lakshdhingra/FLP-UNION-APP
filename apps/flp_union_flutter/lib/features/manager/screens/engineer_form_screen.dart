@@ -7,6 +7,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_input.dart';
@@ -438,39 +439,47 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Section 1: Basic & Contact Information
-              const _FormSectionHeader(
-                title: 'Basic & Contact Information',
-                subtitle: 'Essential identity and contact credentials',
-              ),
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+              StaggeredSlideFade(
+                index: 0,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppTextInput(
-                      label: 'Full Name *',
-                      placeholder: 'e.g. Rahul Sharma',
-                      controller: _fullNameController,
-                      error: _fullNameError,
-                      prefixIcon: Icon(LucideIcons.user,
-                          size: 16, color: colors.textMuted),
+                    const _FormSectionHeader(
+                      title: 'Basic & Contact Information',
+                      subtitle: 'Essential identity and contact credentials',
                     ),
-                    AppTextInput(
-                      label: 'Phone Number *',
-                      placeholder: '+91 9876543210',
-                      keyboardType: TextInputType.phone,
-                      controller: _phoneController,
-                      error: _phoneError,
-                      prefixIcon: Icon(LucideIcons.phone,
-                          size: 16, color: colors.textMuted),
-                    ),
-                    AppTextInput(
-                      label: 'Email Address',
-                      placeholder: 'rahul.sharma@example.com',
-                      keyboardType: TextInputType.emailAddress,
-                      controller: _emailController,
-                      error: _emailError,
-                      prefixIcon: Icon(LucideIcons.mail,
-                          size: 16, color: colors.textMuted),
+                    AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      child: Column(
+                        children: [
+                          AppTextInput(
+                            label: 'Full Name *',
+                            placeholder: 'e.g. Rahul Sharma',
+                            controller: _fullNameController,
+                            error: _fullNameError,
+                            prefixIcon: Icon(LucideIcons.user,
+                                size: 16, color: colors.textMuted),
+                          ),
+                          AppTextInput(
+                            label: 'Phone Number *',
+                            placeholder: '+91 9876543210',
+                            keyboardType: TextInputType.phone,
+                            controller: _phoneController,
+                            error: _phoneError,
+                            prefixIcon: Icon(LucideIcons.phone,
+                                size: 16, color: colors.textMuted),
+                          ),
+                          AppTextInput(
+                            label: 'Email Address',
+                            placeholder: 'rahul.sharma@example.com',
+                            keyboardType: TextInputType.emailAddress,
+                            controller: _emailController,
+                            error: _emailError,
+                            prefixIcon: Icon(LucideIcons.mail,
+                                size: 16, color: colors.textMuted),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -478,36 +487,45 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
               const SizedBox(height: AppSpacing.lg),
 
               // Section 2: Professional Profile
-              const _FormSectionHeader(
-                title: 'Professional Details',
-                subtitle: 'Role, experience level, and technical skills',
-              ),
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+              StaggeredSlideFade(
+                index: 1,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppTextInput(
-                      label: 'Designation / Title',
-                      placeholder: 'e.g. Senior Hardware Engineer',
-                      controller: _designationController,
-                      prefixIcon: Icon(LucideIcons.briefcase,
-                          size: 16, color: colors.textMuted),
+                    const _FormSectionHeader(
+                      title: 'Professional Details',
+                      subtitle: 'Role, experience level, and technical skills',
                     ),
-                    AppTextInput(
-                      label: 'Experience (in years)',
-                      placeholder: 'e.g. 4.5',
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      controller: _experienceController,
-                      prefixIcon: Icon(LucideIcons.calendar,
-                          size: 16, color: colors.textMuted),
-                    ),
-                    AppTextInput(
-                      label: 'Technical Skills (comma separated)',
-                      placeholder: 'e.g. PCB Repair, Soldering, Diagnostics',
-                      controller: _skillsController,
-                      prefixIcon: Icon(LucideIcons.wrench,
-                          size: 16, color: colors.textMuted),
+                    AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      child: Column(
+                        children: [
+                          AppTextInput(
+                            label: 'Designation / Title',
+                            placeholder: 'e.g. Senior Hardware Engineer',
+                            controller: _designationController,
+                            prefixIcon: Icon(LucideIcons.briefcase,
+                                size: 16, color: colors.textMuted),
+                          ),
+                          AppTextInput(
+                            label: 'Experience (in years)',
+                            placeholder: 'e.g. 4.5',
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            controller: _experienceController,
+                            prefixIcon: Icon(LucideIcons.calendar,
+                                size: 16, color: colors.textMuted),
+                          ),
+                          AppTextInput(
+                            label: 'Technical Skills (comma separated)',
+                            placeholder:
+                                'e.g. PCB Repair, Soldering, Diagnostics',
+                            controller: _skillsController,
+                            prefixIcon: Icon(LucideIcons.wrench,
+                                size: 16, color: colors.textMuted),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -515,141 +533,168 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
               const SizedBox(height: AppSpacing.lg),
 
               // Section 3: Location & Assignment
-              const _FormSectionHeader(
-                title: 'Location & Assignment',
-                subtitle: 'Jurisdiction and regional district assignment',
-              ),
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+              StaggeredSlideFade(
+                index: 2,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Assigned District *',
-                      style: AppTypography.subhead(
-                        color: colors.textSecondary,
-                        weight: AppFontWeight.medium,
-                      ),
+                    const _FormSectionHeader(
+                      title: 'Location & Assignment',
+                      subtitle: 'Jurisdiction and regional district assignment',
                     ),
-                    const SizedBox(height: 6),
-                    GestureDetector(
-                      onTap: () {
-                        if (managerStateId != null) {
-                          _openDistrictPicker(context, managerStateId);
-                        }
-                      },
-                      child: Container(
-                        height: 48,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: colors.card,
-                          borderRadius: AppRadius.inputRadius,
-                          border: Border.all(
-                            color: _districtError != null
-                                ? colors.danger
-                                : colors.border,
-                            width: 1,
+                    AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Assigned District *',
+                            style: AppTypography.subhead(
+                              color: colors.textSecondary,
+                              weight: AppFontWeight.medium,
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                          const SizedBox(height: 6),
+                          GestureDetector(
+                            onTap: () {
+                              if (managerStateId != null) {
+                                _openDistrictPicker(context, managerStateId);
+                              }
+                            },
+                            child: Container(
+                              height: 48,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: colors.card,
+                                borderRadius: AppRadius.inputRadius,
+                                border: Border.all(
+                                  color: _districtError != null
+                                      ? colors.danger
+                                      : colors.border,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(LucideIcons.mapPin,
+                                          size: 16, color: colors.textMuted),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        _selectedDistrictName ??
+                                            'Select assigned district',
+                                        style: AppTypography.body(
+                                          color: _selectedDistrictName != null
+                                              ? colors.textPrimary
+                                              : colors.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Icon(LucideIcons.chevronDown,
+                                      size: 18, color: colors.textMuted),
+                                ],
+                              ),
+                            ),
+                          ),
+                          if (_districtError != null) ...[
+                            const SizedBox(height: 5),
                             Row(
                               children: [
-                                Icon(LucideIcons.mapPin,
-                                    size: 16, color: colors.textMuted),
-                                const SizedBox(width: 8),
+                                Icon(LucideIcons.alertCircle,
+                                    size: 13, color: colors.danger),
+                                const SizedBox(width: 4),
                                 Text(
-                                  _selectedDistrictName ??
-                                      'Select assigned district',
-                                  style: AppTypography.body(
-                                    color: _selectedDistrictName != null
-                                        ? colors.textPrimary
-                                        : colors.textMuted,
-                                  ),
+                                  _districtError!,
+                                  style: AppTypography.caption(
+                                      color: colors.danger),
                                 ),
                               ],
                             ),
-                            Icon(LucideIcons.chevronDown,
-                                size: 18, color: colors.textMuted),
                           ],
-                        ),
-                      ),
-                    ),
-                    if (_districtError != null) ...[
-                      const SizedBox(height: 5),
-                      Row(
-                        children: [
-                          Icon(LucideIcons.alertCircle,
-                              size: 13, color: colors.danger),
-                          const SizedBox(width: 4),
-                          Text(
-                            _districtError!,
-                            style: AppTypography.caption(color: colors.danger),
-                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
 
               // Section 4: Identity Document & Photo Upload (AWS S3)
-              const _FormSectionHeader(
-                title: 'Photo / Certification Document',
-                subtitle: 'Uploads securely to AWS S3 bucket',
-              ),
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.cardPadding),
-                child: _PhotoPickerSection(
-                  profilePhotoKey: _profilePhotoKey,
-                  fileName: _selectedFileName,
-                  isUploading: _isUploadingPhoto,
-                  onPickPhoto: _pickAndUploadPhoto,
-                  onRemovePhoto: () {
-                    setState(() {
-                      _profilePhotoKey = null;
-                      _selectedFileName = null;
-                    });
-                  },
+              StaggeredSlideFade(
+                index: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _FormSectionHeader(
+                      title: 'Photo / Certification Document',
+                      subtitle: 'Uploads securely to AWS S3 bucket',
+                    ),
+                    AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      child: _PhotoPickerSection(
+                        profilePhotoKey: _profilePhotoKey,
+                        fileName: _selectedFileName,
+                        isUploading: _isUploadingPhoto,
+                        onPickPhoto: _pickAndUploadPhoto,
+                        onRemovePhoto: () {
+                          setState(() {
+                            _profilePhotoKey = null;
+                            _selectedFileName = null;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
 
               // Section 5: Confidential & Additional Details
-              const _FormSectionHeader(
-                title: 'Internal & Confidential Records',
-                subtitle:
-                    'Private data visible only to the managing supervisor',
-              ),
-              AppCard(
-                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+              StaggeredSlideFade(
+                index: 4,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppTextInput(
-                      label: 'Full Address',
-                      placeholder: 'Street, door no, city, pincode',
-                      multiline: true,
-                      maxLines: 2,
-                      controller: _addressController,
+                    const _FormSectionHeader(
+                      title: 'Internal & Confidential Records',
+                      subtitle:
+                          'Private data visible only to the managing supervisor',
                     ),
-                    AppTextInput(
-                      label: 'Monthly Compensation / Salary (₹)',
-                      placeholder: 'e.g. 45000',
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      controller: _salaryController,
-                      prefixIcon: Icon(LucideIcons.indianRupee,
-                          size: 16, color: colors.textMuted),
-                    ),
-                    AppTextInput(
-                      label: 'Private Internal Notes',
-                      placeholder:
-                          'Private supervisor notes (never shared externally)',
-                      multiline: true,
-                      maxLines: 3,
-                      controller: _notesController,
+                    AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      child: Column(
+                        children: [
+                          AppTextInput(
+                            label: 'Full Address',
+                            placeholder: 'Street, door no, city, pincode',
+                            multiline: true,
+                            maxLines: 2,
+                            controller: _addressController,
+                          ),
+                          AppTextInput(
+                            label: 'Monthly Compensation / Salary (₹)',
+                            placeholder: 'e.g. 45000',
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            controller: _salaryController,
+                            prefixIcon: Icon(LucideIcons.indianRupee,
+                                size: 16, color: colors.textMuted),
+                          ),
+                          AppTextInput(
+                            label: 'Private Internal Notes',
+                            placeholder:
+                                'Private supervisor notes (never shared externally)',
+                            multiline: true,
+                            maxLines: 3,
+                            controller: _notesController,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -657,17 +702,24 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
               const SizedBox(height: AppSpacing.xl),
 
               // Submit & Cancel Buttons
-              AppButton(
-                label: widget.isEdit ? 'Save Changes' : 'Create Engineer',
-                onPress: _onSubmit,
-                loading: _isLoading,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppButton(
-                label: 'Cancel',
-                onPress: () => context.pop(),
-                variant: AppButtonVariant.ghost,
-                disabled: _isLoading,
+              StaggeredSlideFade(
+                index: 5,
+                child: Column(
+                  children: [
+                    AppButton(
+                      label: widget.isEdit ? 'Save Changes' : 'Create Engineer',
+                      onPress: _onSubmit,
+                      loading: _isLoading,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppButton(
+                      label: 'Cancel',
+                      onPress: () => context.pop(),
+                      variant: AppButtonVariant.ghost,
+                      disabled: _isLoading,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.xxl),
             ],

@@ -45,15 +45,18 @@ class AppAvatar extends StatelessWidget {
       avatarContent = _buildInitials(colors);
     }
 
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border:
-            showBorder ? Border.all(color: colors.border, width: 1.2) : null,
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border:
+              showBorder ? Border.all(color: colors.border, width: 1.2) : null,
+        ),
+        child: ClipOval(child: avatarContent),
       ),
-      child: ClipOval(child: avatarContent),
     );
   }
 

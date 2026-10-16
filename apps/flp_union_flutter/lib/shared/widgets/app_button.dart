@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_radius.dart';
 import '../../core/constants/app_typography.dart';
@@ -35,6 +36,7 @@ class AppButton extends StatefulWidget {
 
 class _AppButtonState extends State<AppButton> {
   bool _isPressed = false;
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,12 @@ class _AppButtonState extends State<AppButton> {
       case AppButtonVariant.secondary:
         backgroundColor = colors.card;
         textColor = colors.textPrimary;
-        borderSide = BorderSide(color: colors.border, width: 1);
+        borderSide = BorderSide(
+          color: _isHovered && !isDisabled
+              ? colors.primaryAction.withAlpha(120)
+              : colors.border,
+          width: 1,
+        );
         break;
       case AppButtonVariant.danger:
         backgroundColor = colors.danger;
@@ -62,7 +69,12 @@ class _AppButtonState extends State<AppButton> {
       case AppButtonVariant.ghost:
         backgroundColor = Colors.transparent;
         textColor = colors.primaryAction;
-        borderSide = BorderSide(color: colors.border, width: 1);
+        borderSide = BorderSide(
+          color: _isHovered && !isDisabled
+              ? colors.primaryAction.withAlpha(120)
+              : colors.border,
+          width: 1,
+        );
         break;
     }
 
@@ -113,26 +125,59 @@ class _AppButtonState extends State<AppButton> {
       shadowColor: Colors.transparent,
     );
 
-    return AnimatedScale(
-      scale: _isPressed && !isDisabled ? 0.975 : 1.0,
-      duration: const Duration(milliseconds: 100),
-      curve: Curves.easeOutCubic,
-      child: Listener(
-        onPointerDown: (_) {
-          if (!isDisabled) setState(() => _isPressed = true);
-        },
-        onPointerUp: (_) {
-          if (_isPressed) setState(() => _isPressed = false);
-        },
-        onPointerCancel: (_) {
-          if (_isPressed) setState(() => _isPressed = false);
-        },
-        child: Opacity(
-          opacity: isDisabled ? 0.65 : 1.0,
-          child: ElevatedButton(
-            onPressed: isDisabled ? null : widget.onPress,
-            style: buttonStyle,
-            child: content,
+    return MouseRegion(
+      onEnter: (_) {
+        if (!isDisabled) setState(() => _isHovered = true);
+      },
+      onExit: (_) {
+        if (_isHovered) setState(() => _isHovered = false);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.buttonRadius,
+          boxShadow: _isHovered &&
+                  !isDisabled &&
+                  widget.variant == AppButtonVariant.primary
+              ? [
+                  BoxShadow(
+                    color: colors.primaryAction.withAlpha(65),
+                    blurRadius: 14,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: AnimatedScale(
+          scale: _isPressed && !isDisabled
+              ? 0.975
+              : (_isHovered && !isDisabled ? 1.01 : 1.0),
+          duration: const Duration(milliseconds: 110),
+          curve: Curves.easeOutCubic,
+          child: Listener(
+            onPointerDown: (_) {
+              if (!isDisabled) setState(() => _isPressed = true);
+            },
+            onPointerUp: (_) {
+              if (_isPressed) setState(() => _isPressed = false);
+            },
+            onPointerCancel: (_) {
+              if (_isPressed) setState(() => _isPressed = false);
+            },
+            child: Opacity(
+              opacity: isDisabled ? 0.65 : 1.0,
+              child: ElevatedButton(
+                onPressed: isDisabled
+                    ? null
+                    : () {
+                        HapticFeedback.lightImpact();
+                        widget.onPress();
+                      },
+                style: buttonStyle,
+                child: content,
+              ),
+            ),
           ),
         ),
       ),

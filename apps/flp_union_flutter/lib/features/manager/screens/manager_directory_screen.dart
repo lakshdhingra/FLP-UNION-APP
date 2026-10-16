@@ -182,7 +182,10 @@ class _ManagerRowCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: Row(
         children: [
-          AppAvatar(name: manager.fullName, size: 48),
+          Hero(
+            tag: 'manager-avatar-${manager.id}',
+            child: AppAvatar(name: manager.fullName, size: 48),
+          ),
           const SizedBox(width: 14),
           Expanded(
             child: Column(

@@ -5,13 +5,16 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../shared/widgets/app_animations.dart';
 
 class ManagerShellScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
+  final List<Widget>? children;
 
   const ManagerShellScreen({
     super.key,
     required this.navigationShell,
+    this.children,
   });
 
   void _onTap(int branchIndex) {
@@ -181,7 +184,14 @@ class ManagerShellScreen extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(child: navigationShell),
+            Expanded(
+              child: children != null
+                  ? AnimatedBranchContainer(
+                      currentIndex: navigationShell.currentIndex,
+                      children: children!,
+                    )
+                  : navigationShell,
+            ),
           ],
         ),
       );
@@ -190,7 +200,12 @@ class ManagerShellScreen extends StatelessWidget {
     // Phone Mobile-First Animated Bottom Navigation Bar
     return Scaffold(
       backgroundColor: colors.background,
-      body: navigationShell,
+      body: children != null
+          ? AnimatedBranchContainer(
+              currentIndex: navigationShell.currentIndex,
+              children: children!,
+            )
+          : navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: colors.surface,

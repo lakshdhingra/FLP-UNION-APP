@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_radius.dart';
 import '../../core/constants/app_spacing.dart';
@@ -29,6 +30,7 @@ class AppCard extends StatefulWidget {
 
 class _AppCardState extends State<AppCard> {
   bool _isPressed = false;
+  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,30 +53,54 @@ class _AppCardState extends State<AppCard> {
     if (widget.onTap != null) {
       return Padding(
         padding: widget.margin ?? EdgeInsets.zero,
-        child: AnimatedScale(
-          scale: _isPressed ? 0.985 : 1.0,
-          duration: const Duration(milliseconds: 120),
-          curve: Curves.easeOutCubic,
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: effectiveBorderRadius,
-            child: InkWell(
-              onTap: widget.onTap,
-              onHighlightChanged: (val) {
-                if (mounted) setState(() => _isPressed = val);
-              },
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _isHovered = true),
+          onExit: (_) => setState(() => _isHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: AnimatedScale(
+            scale: _isPressed ? 0.985 : (_isHovered ? 1.006 : 1.0),
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOutCubic,
+            child: Material(
+              color: Colors.transparent,
               borderRadius: effectiveBorderRadius,
-              splashColor: colors.cardPressed,
-              highlightColor: colors.cardHover,
-              child: Container(
-                padding: widget.padding ??
-                    const EdgeInsets.all(AppSpacing.cardPadding),
-                decoration: BoxDecoration(
-                  color: effectiveColor,
-                  borderRadius: effectiveBorderRadius,
-                  border: Border.all(color: effectiveBorderColor, width: 1),
+              child: InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  widget.onTap!();
+                },
+                onHighlightChanged: (val) {
+                  if (mounted) setState(() => _isPressed = val);
+                },
+                borderRadius: effectiveBorderRadius,
+                splashColor: colors.cardPressed,
+                highlightColor: colors.cardHover,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOutCubic,
+                  padding: widget.padding ??
+                      const EdgeInsets.all(AppSpacing.cardPadding),
+                  decoration: BoxDecoration(
+                    color: effectiveColor,
+                    borderRadius: effectiveBorderRadius,
+                    border: Border.all(
+                      color: _isHovered
+                          ? colors.primaryAction.withAlpha(90)
+                          : effectiveBorderColor,
+                      width: 1,
+                    ),
+                    boxShadow: _isHovered
+                        ? [
+                            BoxShadow(
+                              color: colors.primaryAction.withAlpha(24),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: widget.child,
                 ),
-                child: widget.child,
               ),
             ),
           ),
