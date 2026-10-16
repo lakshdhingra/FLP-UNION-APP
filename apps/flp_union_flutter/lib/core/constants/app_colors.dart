@@ -2,55 +2,55 @@ import 'package:flutter/material.dart';
 
 /// Semantic colors for FLP Union matching the Apple × Linear × Enterprise design system.
 abstract class AppColors {
-  // Dark Palette (Default)
-  static const Color darkBackground = Color(0xFF000000);
-  static const Color darkSurface = Color(0xFF1C1C1E);
-  static const Color darkSecondarySurface = Color(0xFF2C2C2E);
-  static const Color darkCard = Color(0xFF1C1C1E);
-  static const Color darkCardHover = Color(0xFF242426);
-  static const Color darkCardPressed = Color(0xFF161618);
-  static const Color darkBorder = Color(0xFF38383A);
-  static const Color darkBorderSubtle = Color(0xFF28282A);
+  // Dark Palette (TASPU Charcoal & Electric Accent)
+  static const Color darkBackground = Color(0xFF111318);
+  static const Color darkSurface = Color(0xFF1B1E25);
+  static const Color darkSecondarySurface = Color(0xFF252A34);
+  static const Color darkCard = Color(0xFF1B1E25);
+  static const Color darkCardHover = Color(0xFF252A34);
+  static const Color darkCardPressed = Color(0xFF14171E);
+  static const Color darkBorder = Color(0xFF343A46);
+  static const Color darkBorderSubtle = Color(0xFF262B34);
 
-  static const Color darkTextPrimary = Color(0xFFF5F5F7);
-  static const Color darkTextSecondary = Color(0xFF98989D);
-  static const Color darkTextMuted = Color(0xFF636366);
+  static const Color darkTextPrimary = Color(0xFFF4F5F8);
+  static const Color darkTextSecondary = Color(0xFFA2A8B5);
+  static const Color darkTextMuted = Color(0xFF6B7280);
 
-  static const Color darkPrimaryAction = Color(0xFF0A84FF);
-  static const Color darkPrimaryActionSubtle = Color(0xFF143055);
-  static const Color darkSuccess = Color(0xFF30D158);
-  static const Color darkSuccessBg = Color(0xFF0F3818);
-  static const Color darkWarning = Color(0xFFFF9F0A);
-  static const Color darkWarningBg = Color(0xFF3B2505);
-  static const Color darkDanger = Color(0xFFFF453A);
-  static const Color darkDangerBg = Color(0xFF3A1210);
-  static const Color darkInfo = Color(0xFF64D2FF);
-  static const Color darkInfoBg = Color(0xFF0C2B3E);
+  static const Color darkPrimaryAction = Color(0xFF6C8CFF);
+  static const Color darkPrimaryActionSubtle = Color(0x246C8CFF);
+  static const Color darkSuccess = Color(0xFF45D6A0);
+  static const Color darkSuccessBg = Color(0x2245D6A0);
+  static const Color darkWarning = Color(0xFFF0B35A);
+  static const Color darkWarningBg = Color(0x22F0B35A);
+  static const Color darkDanger = Color(0xFFFF5C5C);
+  static const Color darkDangerBg = Color(0x22FF5C5C);
+  static const Color darkInfo = Color(0xFF6C8CFF);
+  static const Color darkInfoBg = Color(0x226C8CFF);
 
-  // Light Palette
-  static const Color lightBackground = Color(0xFFF5F5F7);
+  // Light Palette (Crisp High-Contrast Enterprise)
+  static const Color lightBackground = Color(0xFFF4F5F8);
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightSecondarySurface = Color(0xFFF2F2F7);
+  static const Color lightSecondarySurface = Color(0xFFECEEF2);
   static const Color lightCard = Color(0xFFFFFFFF);
-  static const Color lightCardHover = Color(0xFFF8F8FA);
-  static const Color lightCardPressed = Color(0xFFEEEEF0);
-  static const Color lightBorder = Color(0xFFE5E5EA);
-  static const Color lightBorderSubtle = Color(0xFFEFEFF4);
+  static const Color lightCardHover = Color(0xFFF7F8FA);
+  static const Color lightCardPressed = Color(0xFFECEEF2);
+  static const Color lightBorder = Color(0xFFD8DCE5);
+  static const Color lightBorderSubtle = Color(0xFFE8ECF2);
 
-  static const Color lightTextPrimary = Color(0xFF1D1D1F);
-  static const Color lightTextSecondary = Color(0xFF6E6E73);
-  static const Color lightTextMuted = Color(0xFF8E8E93);
+  static const Color lightTextPrimary = Color(0xFF111318);
+  static const Color lightTextSecondary = Color(0xFF5B6271);
+  static const Color lightTextMuted = Color(0xFF8890A0);
 
-  static const Color lightPrimaryAction = Color(0xFF007AFF);
-  static const Color lightPrimaryActionSubtle = Color(0xFFEBF5FF);
-  static const Color lightSuccess = Color(0xFF34C759);
-  static const Color lightSuccessBg = Color(0xFFEBF9EE);
-  static const Color lightWarning = Color(0xFFFF9500);
-  static const Color lightWarningBg = Color(0xFFFFF6EB);
-  static const Color lightDanger = Color(0xFFFF3B30);
-  static const Color lightDangerBg = Color(0xFFFFEBEA);
-  static const Color lightInfo = Color(0xFF007AFF);
-  static const Color lightInfoBg = Color(0xFFEBF5FF);
+  static const Color lightPrimaryAction = Color(0xFF4E6EE2);
+  static const Color lightPrimaryActionSubtle = Color(0x184E6EE2);
+  static const Color lightSuccess = Color(0xFF1DB57A);
+  static const Color lightSuccessBg = Color(0x181DB57A);
+  static const Color lightWarning = Color(0xFFD99436);
+  static const Color lightWarningBg = Color(0x18D99436);
+  static const Color lightDanger = Color(0xFFE03E3E);
+  static const Color lightDangerBg = Color(0x18E03E3E);
+  static const Color lightInfo = Color(0xFF4E6EE2);
+  static const Color lightInfoBg = Color(0x184E6EE2);
 
   // Common static references for backward compatibility (defaults to dark mode values)
   static const Color background = darkBackground;

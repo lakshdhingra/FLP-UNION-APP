@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
@@ -271,6 +272,56 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                             label: 'Managed Engineers',
                             value: '${profile.totalEngineers}',
                           ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Support & Assistance Section
+                    Text(
+                      'Support & Assistance',
+                      style: AppTypography.title3(color: colors.textPrimary),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      onTap: () => context.push('/manager/help'),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: colors.primaryActionSubtle,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              LucideIcons.helpCircle,
+                              size: 18,
+                              color: colors.primaryAction,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Help & Support Center',
+                                  style: AppTypography.body(
+                                    color: colors.textPrimary,
+                                    weight: AppFontWeight.medium,
+                                  ),
+                                ),
+                                Text(
+                                  'Report system issues and track support tickets',
+                                  style: AppTypography.caption(
+                                      color: colors.textMuted),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(LucideIcons.chevronRight,
+                              size: 16, color: colors.textMuted),
                         ],
                       ),
                     ),

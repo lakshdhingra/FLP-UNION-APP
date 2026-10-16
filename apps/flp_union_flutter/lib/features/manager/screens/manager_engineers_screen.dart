@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/engineer.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -29,6 +30,7 @@ class _ManagerEngineersScreenState
   final _searchController = TextEditingController();
   String _searchQuery = '';
   String _statusFilter = 'ALL'; // 'ALL' | 'ACTIVE' | 'INACTIVE'
+  String _sortBy = 'NAME'; // 'NAME' | 'EXPERIENCE'
 
   @override
   void dispose() {
@@ -195,6 +197,39 @@ class _ManagerEngineersScreenState
                         count: inactiveCount,
                         onTap: () => setState(() => _statusFilter = 'INACTIVE'),
                       ),
+                      const SizedBox(width: 12),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _sortBy = _sortBy == 'NAME' ? 'EXPERIENCE' : 'NAME';
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: colors.card,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: colors.border, width: 1),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(LucideIcons.arrowUpDown,
+                                  size: 13, color: colors.primaryAction),
+                              const SizedBox(width: 4),
+                              Text(
+                                _sortBy == 'NAME' ? 'By Name' : 'By Experience',
+                                style: AppTypography.caption(
+                                  color: colors.textPrimary,
+                                  weight: AppFontWeight.medium,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -218,6 +253,16 @@ class _ManagerEngineersScreenState
                     if (_statusFilter == 'INACTIVE') return !e.isActive;
                     return true;
                   }).toList();
+
+                  // Apply sorting
+                  if (_sortBy == 'EXPERIENCE') {
+                    engineers.sort((a, b) => (b.experienceYears ?? 0)
+                        .compareTo(a.experienceYears ?? 0));
+                  } else {
+                    engineers.sort((a, b) => a.fullName
+                        .toLowerCase()
+                        .compareTo(b.fullName.toLowerCase()));
+                  }
 
                   if (engineers.isEmpty) {
                     return RefreshIndicator(
@@ -265,13 +310,17 @@ class _ManagerEngineersScreenState
                           const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = engineers[index];
-                        return _EngineerRowCard(
-                          engineer: item,
-                          onTap: () =>
-                              context.push('/manager/engineers/${item.id}'),
-                          onEdit: () => context
-                              .push('/manager/engineers/edit?id=${item.id}'),
-                          onDelete: () => _handleDelete(item.id, item.fullName),
+                        return StaggeredSlideFade(
+                          index: index < 8 ? index : 8,
+                          child: _EngineerRowCard(
+                            engineer: item,
+                            onTap: () =>
+                                context.push('/manager/engineers/${item.id}'),
+                            onEdit: () => context
+                                .push('/manager/engineers/edit?id=${item.id}'),
+                            onDelete: () =>
+                                _handleDelete(item.id, item.fullName),
+                          ),
                         );
                       },
                     ),

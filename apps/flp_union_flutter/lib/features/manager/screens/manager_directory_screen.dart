@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/other_manager.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -142,10 +143,13 @@ class _ManagerDirectoryScreenState
                           const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = managers[index];
-                        return _ManagerRowCard(
-                          manager: item,
-                          onTap: () =>
-                              context.push('/manager/managers/${item.id}'),
+                        return StaggeredSlideFade(
+                          index: index < 8 ? index : 8,
+                          child: _ManagerRowCard(
+                            manager: item,
+                            onTap: () =>
+                                context.push('/manager/managers/${item.id}'),
+                          ),
                         );
                       },
                     ),

@@ -5,7 +5,7 @@ import '../../core/constants/app_typography.dart';
 
 enum AppButtonVariant { primary, secondary, danger, ghost }
 
-class AppButton extends StatelessWidget {
+class AppButton extends StatefulWidget {
   final String label;
   final VoidCallback onPress;
   final bool loading;
@@ -30,15 +30,22 @@ class AppButton extends StatelessWidget {
   });
 
   @override
+  State<AppButton> createState() => _AppButtonState();
+}
+
+class _AppButtonState extends State<AppButton> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final isDisabled = disabled || loading;
+    final isDisabled = widget.disabled || widget.loading;
 
     Color backgroundColor;
     Color textColor;
     BorderSide borderSide = BorderSide.none;
 
-    switch (variant) {
+    switch (widget.variant) {
       case AppButtonVariant.primary:
         backgroundColor = colors.primaryAction;
         textColor = Colors.white;
@@ -59,29 +66,30 @@ class AppButton extends StatelessWidget {
         break;
     }
 
-    Widget content = loading
+    Widget content = widget.loading
         ? SizedBox(
             height: 18,
             width: 18,
             child: CircularProgressIndicator(
               strokeWidth: 2.2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                variant == AppButtonVariant.ghost
+                widget.variant == AppButtonVariant.ghost
                     ? colors.primaryAction
                     : textColor,
               ),
             ),
           )
         : Row(
-            mainAxisSize: fullWidth ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisSize:
+                widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (icon != null) ...[
-                icon!,
+              if (widget.icon != null) ...[
+                widget.icon!,
                 const SizedBox(width: 8),
               ],
               Text(
-                label,
+                widget.label,
                 style: AppTypography.body(
                   color: textColor,
                   weight: AppFontWeight.semibold,
@@ -95,8 +103,8 @@ class AppButton extends StatelessWidget {
       foregroundColor: textColor,
       disabledBackgroundColor: backgroundColor.withAlpha(128),
       disabledForegroundColor: textColor.withAlpha(128),
-      minimumSize: Size(fullWidth ? double.infinity : 0, height),
-      padding: padding ?? const EdgeInsets.symmetric(horizontal: 20),
+      minimumSize: Size(widget.fullWidth ? double.infinity : 0, widget.height),
+      padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 20),
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.buttonRadius,
         side: borderSide,
@@ -105,12 +113,28 @@ class AppButton extends StatelessWidget {
       shadowColor: Colors.transparent,
     );
 
-    return Opacity(
-      opacity: isDisabled ? 0.65 : 1.0,
-      child: ElevatedButton(
-        onPressed: isDisabled ? null : onPress,
-        style: buttonStyle,
-        child: content,
+    return AnimatedScale(
+      scale: _isPressed && !isDisabled ? 0.975 : 1.0,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.easeOutCubic,
+      child: Listener(
+        onPointerDown: (_) {
+          if (!isDisabled) setState(() => _isPressed = true);
+        },
+        onPointerUp: (_) {
+          if (_isPressed) setState(() => _isPressed = false);
+        },
+        onPointerCancel: (_) {
+          if (_isPressed) setState(() => _isPressed = false);
+        },
+        child: Opacity(
+          opacity: isDisabled ? 0.65 : 1.0,
+          child: ElevatedButton(
+            onPressed: isDisabled ? null : widget.onPress,
+            style: buttonStyle,
+            child: content,
+          ),
+        ),
       ),
     );
   }

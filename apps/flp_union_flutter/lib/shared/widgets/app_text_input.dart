@@ -96,11 +96,22 @@ class _AppTextInputState extends State<AppTextInput> {
           const SizedBox(height: 6),
         ],
         AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
           decoration: BoxDecoration(
             color: colors.card,
             borderRadius: AppRadius.inputRadius,
             border: Border.all(color: borderColor, width: borderWidth),
+            boxShadow: _isFocused
+                ? [
+                    BoxShadow(
+                      color: (hasError ? colors.danger : colors.primaryAction)
+                          .withAlpha(28),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             crossAxisAlignment: widget.multiline

@@ -7,6 +7,7 @@ import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/issue.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -345,11 +346,14 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
                                 const SizedBox(height: AppSpacing.sm),
                             itemBuilder: (context, index) {
                               final issue = issues[index];
-                              return _IssueCard(
-                                issue: issue,
-                                formattedDate:
-                                    dateFormat.format(issue.createdAt),
-                                statusVariant: _statusVariant(issue.status),
+                              return StaggeredSlideFade(
+                                index: index < 8 ? index : 8,
+                                child: _IssueCard(
+                                  issue: issue,
+                                  formattedDate:
+                                      dateFormat.format(issue.createdAt),
+                                  statusVariant: _statusVariant(issue.status),
+                                ),
                               );
                             },
                           ),

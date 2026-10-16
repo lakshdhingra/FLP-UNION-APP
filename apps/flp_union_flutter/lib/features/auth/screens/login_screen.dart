@@ -5,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
+import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_input.dart';
@@ -104,117 +105,129 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // App Brand Logo & Headline
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: colors.primaryAction,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colors.primaryAction.withAlpha(60),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: const Text(
-                      'T',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: AppFontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'TASPU UNION',
-                    style: AppTypography.title1(color: colors.textPrimary),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Workforce Management Platform',
-                    style: AppTypography.subhead(color: colors.textSecondary),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Login Card
-                  AppCard(
-                    padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Sign In',
-                            style:
-                                AppTypography.title2(color: colors.textPrimary),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Enter your manager or administrator credentials',
-                            style:
-                                AppTypography.caption(color: colors.textMuted),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-
-                          AppTextInput(
-                            label: 'Email Address',
-                            placeholder: 'name@taspu.in',
-                            keyboardType: TextInputType.emailAddress,
-                            controller: _emailController,
-                            error: _emailError,
-                            prefixIcon: Icon(LucideIcons.mail,
-                                size: 16, color: colors.textMuted),
-                          ),
-
-                          AppTextInput(
-                            label: 'Password',
-                            placeholder: 'Enter your password',
-                            isPassword: true,
-                            controller: _passwordController,
-                            error: _passwordError,
-                            prefixIcon: Icon(LucideIcons.lock,
-                                size: 16, color: colors.textMuted),
-                          ),
-
-                          const SizedBox(height: AppSpacing.sm),
-
-                          AppButton(
-                            label: 'Sign In',
-                            onPress: _onSubmit,
-                            loading: _isLoading,
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-
-                          // Register Navigation Link
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Need a manager account? ',
-                                style: AppTypography.subhead(
-                                    color: colors.textSecondary),
-                              ),
-                              GestureDetector(
-                                onTap: () => context.push('/register'),
-                                child: Text(
-                                  'Register here',
-                                  style: AppTypography.subhead(
-                                    color: colors.primaryAction,
-                                    weight: AppFontWeight.semibold,
-                                  ),
-                                ),
+                  // App Brand Logo & Headline with Staggered Entrance
+                  StaggeredSlideFade(
+                    index: 0,
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 58,
+                          height: 58,
+                          decoration: BoxDecoration(
+                            color: colors.primaryAction,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: colors.primaryAction.withAlpha(70),
+                                blurRadius: 20,
+                                offset: const Offset(0, 6),
                               ),
                             ],
                           ),
-                        ],
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'T',
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: AppFontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'TASPU FLP UNION',
+                          style:
+                              AppTypography.title1(color: colors.textPrimary),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Workforce Management Platform',
+                          style: AppTypography.subhead(
+                              color: colors.textSecondary),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // Login Card with Staggered Entrance
+                  StaggeredSlideFade(
+                    index: 1,
+                    child: AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sign In',
+                              style: AppTypography.title2(
+                                  color: colors.textPrimary),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Enter your manager or administrator credentials',
+                              style: AppTypography.caption(
+                                  color: colors.textMuted),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+
+                            AppTextInput(
+                              label: 'Email Address',
+                              placeholder: 'name@taspu.in',
+                              keyboardType: TextInputType.emailAddress,
+                              controller: _emailController,
+                              error: _emailError,
+                              prefixIcon: Icon(LucideIcons.mail,
+                                  size: 16, color: colors.textMuted),
+                            ),
+
+                            AppTextInput(
+                              label: 'Password',
+                              placeholder: 'Enter your password',
+                              isPassword: true,
+                              controller: _passwordController,
+                              error: _passwordError,
+                              prefixIcon: Icon(LucideIcons.lock,
+                                  size: 16, color: colors.textMuted),
+                            ),
+
+                            const SizedBox(height: AppSpacing.sm),
+
+                            AppButton(
+                              label: 'Sign In',
+                              onPress: _onSubmit,
+                              loading: _isLoading,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+
+                            // Register Navigation Link
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Need a manager account? ',
+                                  style: AppTypography.subhead(
+                                      color: colors.textSecondary),
+                                ),
+                                GestureDetector(
+                                  onTap: () => context.push('/register'),
+                                  child: Text(
+                                    'Register here',
+                                    style: AppTypography.subhead(
+                                      color: colors.primaryAction,
+                                      weight: AppFontWeight.semibold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

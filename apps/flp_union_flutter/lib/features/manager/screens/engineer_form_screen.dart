@@ -472,80 +472,6 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                       prefixIcon: Icon(LucideIcons.mail,
                           size: 16, color: colors.textMuted),
                     ),
-
-                    // District Selector Field
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'District *',
-                          style: AppTypography.subhead(
-                            color: colors.textSecondary,
-                            weight: AppFontWeight.medium,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        GestureDetector(
-                          onTap: () {
-                            if (managerStateId != null) {
-                              _openDistrictPicker(context, managerStateId);
-                            }
-                          },
-                          child: Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: colors.card,
-                              borderRadius: AppRadius.inputRadius,
-                              border: Border.all(
-                                color: _districtError != null
-                                    ? colors.danger
-                                    : colors.border,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(LucideIcons.mapPin,
-                                        size: 16, color: colors.textMuted),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      _selectedDistrictName ??
-                                          'Select assigned district',
-                                      style: AppTypography.body(
-                                        color: _selectedDistrictName != null
-                                            ? colors.textPrimary
-                                            : colors.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Icon(LucideIcons.chevronDown,
-                                    size: 18, color: colors.textMuted),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (_districtError != null) ...[
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              Icon(LucideIcons.alertCircle,
-                                  size: 13, color: colors.danger),
-                              const SizedBox(width: 4),
-                              Text(
-                                _districtError!,
-                                style:
-                                    AppTypography.caption(color: colors.danger),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -588,7 +514,88 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Section 3: Identity Document & Photo Upload (AWS S3)
+              // Section 3: Location & Assignment
+              const _FormSectionHeader(
+                title: 'Location & Assignment',
+                subtitle: 'Jurisdiction and regional district assignment',
+              ),
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Assigned District *',
+                      style: AppTypography.subhead(
+                        color: colors.textSecondary,
+                        weight: AppFontWeight.medium,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    GestureDetector(
+                      onTap: () {
+                        if (managerStateId != null) {
+                          _openDistrictPicker(context, managerStateId);
+                        }
+                      },
+                      child: Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: colors.card,
+                          borderRadius: AppRadius.inputRadius,
+                          border: Border.all(
+                            color: _districtError != null
+                                ? colors.danger
+                                : colors.border,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(LucideIcons.mapPin,
+                                    size: 16, color: colors.textMuted),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _selectedDistrictName ??
+                                      'Select assigned district',
+                                  style: AppTypography.body(
+                                    color: _selectedDistrictName != null
+                                        ? colors.textPrimary
+                                        : colors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Icon(LucideIcons.chevronDown,
+                                size: 18, color: colors.textMuted),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (_districtError != null) ...[
+                      const SizedBox(height: 5),
+                      Row(
+                        children: [
+                          Icon(LucideIcons.alertCircle,
+                              size: 13, color: colors.danger),
+                          const SizedBox(width: 4),
+                          Text(
+                            _districtError!,
+                            style: AppTypography.caption(color: colors.danger),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Section 4: Identity Document & Photo Upload (AWS S3)
               const _FormSectionHeader(
                 title: 'Photo / Certification Document',
                 subtitle: 'Uploads securely to AWS S3 bucket',
@@ -610,7 +617,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Section 4: Confidential & Additional Details
+              // Section 5: Confidential & Additional Details
               const _FormSectionHeader(
                 title: 'Internal & Confidential Records',
                 subtitle:
