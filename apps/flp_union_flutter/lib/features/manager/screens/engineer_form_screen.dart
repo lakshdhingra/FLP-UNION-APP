@@ -1,7 +1,9 @@
+import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
@@ -15,6 +17,7 @@ import '../../../shared/widgets/app_text_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/engineer_provider.dart';
 import '../providers/manager_dashboard_provider.dart';
+import '../providers/manager_profile_provider.dart';
 
 class EngineerFormScreen extends ConsumerStatefulWidget {
   final String? engineerId;
@@ -108,9 +111,16 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       if (result == null || result.files.isEmpty) return;
 
       final file = result.files.single;
-      final bytes = file.bytes;
+      Uint8List? bytes = file.bytes;
+      if (bytes == null && file.path != null && file.path!.isNotEmpty) {
+        bytes = await XFile(file.path!).readAsBytes();
+      }
       if (bytes == null) {
         throw Exception('Unable to read selected file');
+      }
+      if (bytes.length > 10 * 1024 * 1024) {
+        throw Exception(
+            'File size exceeds the 10MB limit. Please select a smaller file.');
       }
 
       setState(() {
@@ -404,7 +414,9 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
     }
 
     final dashboardAsync = ref.watch(managerDashboardProvider);
-    final managerStateId = dashboardAsync.valueOrNull?.manager.state.id;
+    final profileAsync = ref.watch(managerProfileProvider);
+    final managerStateId = dashboardAsync.valueOrNull?.manager.state.id ??
+        profileAsync.valueOrNull?.state.id;
 
     return AppBackground(
         child: Scaffold(
@@ -559,8 +571,16 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                           const SizedBox(height: 6),
                           GestureDetector(
                             onTap: () {
-                              if (managerStateId != null) {
+                              if (managerStateId != null &&
+                                  managerStateId.isNotEmpty) {
                                 _openDistrictPicker(context, managerStateId);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Loading manager territory data. Please try again in a moment.'),
+                                  ),
+                                );
                               }
                             },
                             child: Container(

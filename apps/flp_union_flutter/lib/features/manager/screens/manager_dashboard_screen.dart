@@ -199,7 +199,7 @@ class _ManagerDashboardScreenState
                                 icon: LucideIcons.helpCircle,
                                 label: 'Support',
                                 isPrimary: false,
-                                onTap: () => context.push('/manager/help'),
+                                onTap: () => context.go('/manager/help'),
                               ),
                             ),
                           ],

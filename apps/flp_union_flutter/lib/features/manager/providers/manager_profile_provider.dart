@@ -27,6 +27,7 @@ class ManagerProfileMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(managerProfileProvider);
       _ref.invalidate(managerDashboardProvider);
     });
+    if (state.hasError) throw state.error!;
   }
 }
 

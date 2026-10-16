@@ -25,6 +25,7 @@ class AdminIssueStatusNotifier extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(adminIssuesProvider);
       _ref.invalidate(adminSummaryProvider);
     });
+    if (state.hasError) throw state.error!;
   }
 }
 

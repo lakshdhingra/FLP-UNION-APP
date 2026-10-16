@@ -344,13 +344,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   statesAsync.when(
                                     data: (states) => Container(
                                       margin: const EdgeInsets.only(top: 4),
+                                      constraints:
+                                          const BoxConstraints(maxHeight: 200),
                                       decoration: BoxDecoration(
                                         color: colors.secondarySurface,
                                         borderRadius: AppRadius.cardRadius,
                                         border: Border.all(
                                             color: colors.border, width: 1),
                                       ),
-                                      child: Column(
+                                      child: ListView(
+                                        shrinkWrap: true,
                                         children: states
                                             .map((s) => ListTile(
                                                   title: Text(s.name,

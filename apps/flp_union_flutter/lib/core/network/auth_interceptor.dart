@@ -25,7 +25,9 @@ class AuthInterceptor extends Interceptor {
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
     }
-    options.headers['Content-Type'] = 'application/json';
+    if (options.headers['Content-Type'] == null && options.data is! FormData) {
+      options.headers['Content-Type'] = 'application/json';
+    }
     return handler.next(options);
   }
 
@@ -40,6 +42,8 @@ class AuthInterceptor extends Interceptor {
 
     if (err.response?.statusCode == 401 && !_isRefreshing && !isAuthEndpoint) {
       _isRefreshing = true;
+      String? newAccess;
+
       try {
         final refreshToken = await _storage.getRefreshToken();
         if (refreshToken == null || refreshToken.isEmpty) {
@@ -48,27 +52,25 @@ class AuthInterceptor extends Interceptor {
           return handler.next(err);
         }
 
-        // Call refresh endpoint
+        // Call refresh endpoint directly
         final refreshResponse = await _dio.post(
           ApiConstants.refresh,
           data: {'refreshToken': refreshToken},
         );
 
-        final newAccess = refreshResponse.data['accessToken'] as String?;
-        final newRefresh = refreshResponse.data['refreshToken'] as String?;
+        final access = refreshResponse.data['accessToken'] as String?;
+        final refresh = refreshResponse.data['refreshToken'] as String?;
 
-        if (newAccess != null && newRefresh != null) {
+        if (access != null && refresh != null) {
           await _storage.setTokens(
-              accessToken: newAccess, refreshToken: newRefresh);
-
-          // Retry original request
-          final options = err.requestOptions;
-          options.headers['Authorization'] = 'Bearer $newAccess';
-          final response = await _dio.fetch(options);
-          return handler.resolve(response);
+            accessToken: access,
+            refreshToken: refresh,
+          );
+          newAccess = access;
         } else {
           await _storage.clearTokens();
           _onUnauthorized();
+          return handler.next(err);
         }
       } catch (refreshErr) {
         if (refreshErr is DioException &&
@@ -77,8 +79,21 @@ class AuthInterceptor extends Interceptor {
           await _storage.clearTokens();
           _onUnauthorized();
         }
+        return handler.next(err);
       } finally {
         _isRefreshing = false;
+      }
+
+      // Retry original request outside of refresh error handling
+      try {
+        final options = err.requestOptions;
+        options.headers['Authorization'] = 'Bearer $newAccess';
+        final response = await _dio.fetch(options);
+        return handler.resolve(response);
+      } on DioException catch (retryErr) {
+        return handler.next(retryErr);
+      } catch (retryErr) {
+        return handler.next(err);
       }
     }
     return handler.next(err);

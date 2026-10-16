@@ -45,25 +45,31 @@ class DashboardStats {
     required this.designationDistribution,
   });
 
+  static int _parseInt(dynamic val) {
+    if (val is num) return val.toInt();
+    if (val is String) return int.tryParse(val) ?? 0;
+    return 0;
+  }
+
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
     final expMap = <String, int>{};
     if (json['experienceDistribution'] is Map) {
       (json['experienceDistribution'] as Map).forEach((key, value) {
-        expMap[key.toString()] = (value as num).toInt();
+        expMap[key.toString()] = _parseInt(value);
       });
     }
 
     final desigMap = <String, int>{};
     if (json['designationDistribution'] is Map) {
       (json['designationDistribution'] as Map).forEach((key, value) {
-        desigMap[key.toString()] = (value as num).toInt();
+        desigMap[key.toString()] = _parseInt(value);
       });
     }
 
     return DashboardStats(
-      totalEngineers: (json['totalEngineers'] as num?)?.toInt() ?? 0,
-      activeEngineers: (json['activeEngineers'] as num?)?.toInt() ?? 0,
-      inactiveEngineers: (json['inactiveEngineers'] as num?)?.toInt() ?? 0,
+      totalEngineers: _parseInt(json['totalEngineers']),
+      activeEngineers: _parseInt(json['activeEngineers']),
+      inactiveEngineers: _parseInt(json['inactiveEngineers']),
       experienceDistribution: expMap,
       designationDistribution: desigMap,
     );

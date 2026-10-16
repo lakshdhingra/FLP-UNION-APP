@@ -22,6 +22,7 @@ class AdminStatesMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(adminStatesProvider);
       _ref.invalidate(adminSummaryProvider);
     });
+    if (state.hasError) throw state.error!;
   }
 }
 

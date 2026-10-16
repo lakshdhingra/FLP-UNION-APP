@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../../../core/constants/api_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../../../shared/models/engineer.dart';
@@ -93,16 +94,25 @@ class EngineerService {
     required String mimeType,
   }) async {
     final s3Dio = Dio();
-    await s3Dio.put(
-      signedUrl,
-      data: Stream.fromIterable([bytes]),
-      options: Options(
-        headers: {
-          'Content-Type': mimeType,
-          'Content-Length': bytes.length,
-        },
-      ),
-    );
+    final data = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
+    try {
+      await s3Dio.put(
+        signedUrl,
+        data: data,
+        options: Options(
+          headers: {
+            'Content-Type': mimeType,
+          },
+        ),
+      );
+    } on DioException catch (e) {
+      if (kIsWeb) {
+        throw Exception(
+          'Upload to storage failed (${e.type.name}). If testing Flutter Web locally, please verify that AWS S3 CORS allows your current port (e.g. http://localhost:*).',
+        );
+      }
+      throw Exception('Upload to storage failed: ${e.message ?? e.toString()}');
+    }
   }
 
   Future<String> getDocumentUrl(String key) async {
@@ -113,7 +123,15 @@ class EngineerService {
       '${ApiConstants.managerEngineers}/document-url',
       queryParameters: {'key': key},
     );
-    final data = response.data as Map;
-    return data['signedUrl'] as String;
+    if (response.data is Map) {
+      final map = response.data as Map;
+      final url = map['signedUrl'] ??
+          map['url'] ??
+          (map['data'] is Map ? map['data']['signedUrl'] : null);
+      if (url is String && url.isNotEmpty) {
+        return url;
+      }
+    }
+    return key;
   }
 }

@@ -40,6 +40,7 @@ class IssueMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       );
       _ref.invalidate(myIssuesProvider);
     });
+    if (state.hasError) throw state.error!;
   }
 }
 

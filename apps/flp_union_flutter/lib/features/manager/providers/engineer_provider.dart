@@ -46,6 +46,7 @@ class EngineerMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(myEngineersProvider);
       _ref.invalidate(managerDashboardProvider);
     });
+    if (state.hasError) throw state.error!;
   }
 
   Future<void> updateEngineer(String id, Map<String, dynamic> data) async {
@@ -54,7 +55,9 @@ class EngineerMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       await _service.updateEngineer(id, data);
       _ref.invalidate(myEngineersProvider);
       _ref.invalidate(engineerDetailProvider(id));
+      _ref.invalidate(managerDashboardProvider);
     });
+    if (state.hasError) throw state.error!;
   }
 
   Future<void> deleteEngineer(String id) async {
@@ -64,6 +67,7 @@ class EngineerMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       _ref.invalidate(myEngineersProvider);
       _ref.invalidate(managerDashboardProvider);
     });
+    if (state.hasError) throw state.error!;
   }
 
   Future<String> uploadFileToS3({
