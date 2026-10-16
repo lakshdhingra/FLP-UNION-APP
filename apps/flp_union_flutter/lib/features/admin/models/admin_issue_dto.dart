@@ -22,7 +22,8 @@ class AdminIssueDto {
     String repName = 'Unknown';
     if (reporterObj is Map) {
       final profileObj = reporterObj['managerProfile'];
-      if (profileObj is Map && (profileObj['fullName'] as String?)?.isNotEmpty == true) {
+      if (profileObj is Map &&
+          (profileObj['fullName'] as String?)?.isNotEmpty == true) {
         repName = profileObj['fullName'];
       } else if ((reporterObj['email'] as String?)?.isNotEmpty == true) {
         repName = reporterObj['email'];
@@ -61,7 +62,9 @@ class AdminIssuesResponseDto {
   factory AdminIssuesResponseDto.fromJson(Map<String, dynamic> json) {
     final rawData = json['data'];
     final List<AdminIssueDto> list = rawData is List
-        ? rawData.map((item) => AdminIssueDto.fromJson(item as Map<String, dynamic>)).toList()
+        ? rawData
+            .map((item) => AdminIssueDto.fromJson(item as Map<String, dynamic>))
+            .toList()
         : [];
     final meta = json['meta'] as Map<String, dynamic>? ?? {};
 

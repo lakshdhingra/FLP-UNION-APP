@@ -60,7 +60,9 @@ class Engineer {
       profilePhotoUrl: json['profilePhotoUrl'],
       address: json['address'],
       state: json['state'] != null ? StateEntity.fromJson(json['state']) : null,
-      district: json['district'] != null ? DistrictEntity.fromJson(json['district']) : null,
+      district: json['district'] != null
+          ? DistrictEntity.fromJson(json['district'])
+          : null,
       skills: parsedSkills,
       experienceYears: parseDouble(json['experienceYears']),
       designation: json['designation'],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
@@ -22,33 +23,45 @@ class EmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.xxl,
+          vertical: AppSpacing.xl,
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[
-              icon!,
-              const SizedBox(height: AppSpacing.md),
-            ],
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: colors.secondarySurface,
+                shape: BoxShape.circle,
+                border: Border.all(color: colors.border, width: 1),
+              ),
+              alignment: Alignment.center,
+              child: icon ??
+                  Icon(
+                    LucideIcons.inbox,
+                    size: 26,
+                    color: colors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.md),
             Text(
               title,
-              style: AppTypography.lg.copyWith(
-                fontWeight: AppFontWeight.semibold,
-                color: AppColors.textPrimary,
-              ),
+              style: AppTypography.title3(color: colors.textPrimary),
               textAlign: TextAlign.center,
             ),
             if (description != null) ...[
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: 6),
               Text(
                 description!,
-                style: AppTypography.md.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.4,
-                ),
+                style: AppTypography.subhead(color: colors.textSecondary),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -58,6 +71,8 @@ class EmptyStateWidget extends StatelessWidget {
                 label: actionLabel!,
                 onPress: onAction!,
                 fullWidth: false,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ],
           ],

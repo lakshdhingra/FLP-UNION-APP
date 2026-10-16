@@ -20,7 +20,8 @@ class AuthRepositoryImpl implements AuthRepository {
         _storage = storage;
 
   @override
-  Future<UserRole> login({required String email, required String password}) async {
+  Future<UserRole> login(
+      {required String email, required String password}) async {
     try {
       final response = await _apiClient.post(
         ApiConstants.login,
@@ -30,14 +31,18 @@ class AuthRepositoryImpl implements AuthRepository {
       final accessToken = response.data['accessToken'] as String;
       final refreshToken = response.data['refreshToken'] as String;
 
-      await _storage.setTokens(accessToken: accessToken, refreshToken: refreshToken);
+      await _storage.setTokens(
+          accessToken: accessToken, refreshToken: refreshToken);
 
       final payload = _decodeJwt(accessToken);
       return UserRole.fromString(payload['role'] ?? 'MANAGER');
     } on DioException catch (e) {
       final message = e.response?.data?['message'];
-      final errorMsg = message is List ? message.join('\n') : (message ?? 'Invalid email or password.');
-      throw ApiException(message: errorMsg.toString(), statusCode: e.response?.statusCode);
+      final errorMsg = message is List
+          ? message.join('\n')
+          : (message ?? 'Invalid email or password.');
+      throw ApiException(
+          message: errorMsg.toString(), statusCode: e.response?.statusCode);
     }
   }
 
@@ -66,8 +71,11 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     } on DioException catch (e) {
       final message = e.response?.data?['message'];
-      final errorMsg = message is List ? message.join('\n') : (message ?? 'Registration failed.');
-      throw ApiException(message: errorMsg.toString(), statusCode: e.response?.statusCode);
+      final errorMsg = message is List
+          ? message.join('\n')
+          : (message ?? 'Registration failed.');
+      throw ApiException(
+          message: errorMsg.toString(), statusCode: e.response?.statusCode);
     }
   }
 
@@ -116,7 +124,8 @@ class AuthRepositoryImpl implements AuthRepository {
           final newRefresh = refreshRes.data['refreshToken'] as String?;
 
           if (newAccess != null && newRefresh != null) {
-            await _storage.setTokens(accessToken: newAccess, refreshToken: newRefresh);
+            await _storage.setTokens(
+                accessToken: newAccess, refreshToken: newRefresh);
 
             final newPayload = _decodeJwt(newAccess);
             return AuthUser(
@@ -126,7 +135,8 @@ class AuthRepositoryImpl implements AuthRepository {
             );
           }
         } on DioException catch (refreshErr) {
-          if (refreshErr.response?.statusCode == 401 || refreshErr.response?.statusCode == 400) {
+          if (refreshErr.response?.statusCode == 401 ||
+              refreshErr.response?.statusCode == 400) {
             await _storage.clearTokens();
             return null;
           }

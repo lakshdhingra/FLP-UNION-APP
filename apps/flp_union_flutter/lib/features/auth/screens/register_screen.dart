@@ -6,9 +6,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
-import '../../../shared/models/district_entity.dart';
-import '../../../shared/models/state_entity.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_input.dart';
 import '../providers/auth_provider.dart';
 
@@ -72,7 +71,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       final confirmPassword = _confirmPasswordController.text;
 
       if (name.length < 2) {
-        _fullNameError = 'Full name required';
+        _fullNameError = 'Full name is required';
         isValid = false;
       }
 
@@ -84,23 +83,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
       if (!emailRegex.hasMatch(email)) {
-        _emailError = 'Enter a valid email';
+        _emailError = 'Enter a valid email address';
         isValid = false;
       }
 
       if (_selectedStateId == null || _selectedStateId!.isEmpty) {
-        _stateError = 'Select a state';
+        _stateError = 'Please select a state';
         isValid = false;
       }
 
       if (_selectedDistrictId == null || _selectedDistrictId!.isEmpty) {
-        _districtError = 'Select a district';
+        _districtError = 'Please select a district';
         isValid = false;
       }
 
       final passwordPattern = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)');
       if (password.length < 8 || !passwordPattern.hasMatch(password)) {
-        _passwordError = 'Must contain a letter and number (min 8 chars)';
+        _passwordError = 'Must contain at least 8 chars with letters & numbers';
         isValid = false;
       }
 
@@ -113,9 +112,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _onSubmit() async {
+    if (_isLoading) return;
     if (!_validate()) return;
 
     setState(() => _isLoading = true);
+    final colors = AppColors.of(context);
 
     try {
       await ref.read(authProvider.notifier).registerManager(
@@ -131,19 +132,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.card,
-          title: const Text('Success',
-              style: TextStyle(color: AppColors.textPrimary)),
-          content: const Text('Account created! Please log in.',
-              style: TextStyle(color: AppColors.textSecondary)),
+          backgroundColor: colors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sheet),
+            side: BorderSide(color: colors.border, width: 1),
+          ),
+          title: Row(
+            children: [
+              Icon(LucideIcons.checkCircle, color: colors.success, size: 22),
+              const SizedBox(width: 8),
+              Text('Account Created',
+                  style: AppTypography.title2(color: colors.textPrimary)),
+            ],
+          ),
+          content: Text(
+            'Your manager account has been registered successfully. Please sign in.',
+            style: AppTypography.body(color: colors.textSecondary),
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
                 context.go('/login');
               },
-              child:
-                  const Text('OK', style: TextStyle(color: AppColors.accent)),
+              child: Text(
+                'Sign In Now',
+                style: AppTypography.body(
+                    color: colors.primaryAction,
+                    weight: AppFontWeight.semibold),
+              ),
             ),
           ],
         ),
@@ -153,7 +170,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(err.toString().replaceAll('ApiException: ', '')),
-          backgroundColor: AppColors.danger,
+          backgroundColor: AppColors.darkDanger,
         ),
       );
     } finally {
@@ -165,333 +182,354 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final statesAsync = ref.watch(statesListProvider);
     final districtsAsync = _selectedStateId != null
         ? ref.watch(districtsListProvider(_selectedStateId!))
         : null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.only(
-                    top: AppSpacing.lg, bottom: AppSpacing.xl),
-                child: Column(
-                  children: const [
-                    Text(
-                      'Create Account',
-                      style: TextStyle(
-                        fontSize: AppFontSize.xxxl,
-                        fontWeight: AppFontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Join TASPU as a Manager',
-                      style: TextStyle(
-                        fontSize: AppFontSize.md,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding,
+              vertical: AppSpacing.lg,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                children: [
+                  // Header
+                  Text(
+                    'Create Manager Account',
+                    style: AppTypography.title1(color: colors.textPrimary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Join TASPU workforce network',
+                    style: AppTypography.subhead(color: colors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
 
-              // Form Container Card
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: AppRadius.borderXl,
-                  border: Border.all(color: AppColors.border, width: 1),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AppTextInput(
-                      label: 'Full Name',
-                      placeholder: 'Your full name',
-                      controller: _fullNameController,
-                      error: _fullNameError,
-                    ),
-
-                    AppTextInput(
-                      label: 'Mobile Number',
-                      placeholder: '+91 9999999999',
-                      keyboardType: TextInputType.phone,
-                      controller: _mobileController,
-                      error: _mobileError,
-                    ),
-
-                    AppTextInput(
-                      label: 'Email Address',
-                      placeholder: 'you@example.com',
-                      keyboardType: TextInputType.emailAddress,
-                      controller: _emailController,
-                      error: _emailError,
-                    ),
-
-                    // State Picker Dropdown
-                    Column(
+                  // Form Container Card
+                  AppCard(
+                    padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'State',
-                          style: TextStyle(
-                            fontSize: AppFontSize.sm,
-                            fontWeight: AppFontWeight.medium,
-                            color: AppColors.textSecondary,
-                          ),
+                        AppTextInput(
+                          label: 'Full Name *',
+                          placeholder: 'e.g. Ramesh Reddy',
+                          controller: _fullNameController,
+                          error: _fullNameError,
+                          prefixIcon: Icon(LucideIcons.user,
+                              size: 16, color: colors.textMuted),
                         ),
-                        const SizedBox(height: 6),
-                        GestureDetector(
-                          onTap: () => setState(
-                              () => _statePickerOpen = !_statePickerOpen),
-                          child: Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: AppSpacing.md),
-                            decoration: BoxDecoration(
-                              color: AppColors.surface,
-                              borderRadius: AppRadius.borderMd,
-                              border:
-                                  Border.all(color: AppColors.border, width: 1),
+
+                        AppTextInput(
+                          label: 'Mobile Number *',
+                          placeholder: '+91 9999999999',
+                          keyboardType: TextInputType.phone,
+                          controller: _mobileController,
+                          error: _mobileError,
+                          prefixIcon: Icon(LucideIcons.phone,
+                              size: 16, color: colors.textMuted),
+                        ),
+
+                        AppTextInput(
+                          label: 'Email Address *',
+                          placeholder: 'ramesh@example.com',
+                          keyboardType: TextInputType.emailAddress,
+                          controller: _emailController,
+                          error: _emailError,
+                          prefixIcon: Icon(LucideIcons.mail,
+                              size: 16, color: colors.textMuted),
+                        ),
+
+                        // State Picker Dropdown
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'State *',
+                              style: AppTypography.subhead(
+                                color: colors.textSecondary,
+                                weight: AppFontWeight.medium,
+                              ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    statesAsync.when(
-                                      data: (_) =>
-                                          _selectedStateName ?? 'Select State',
-                                      loading: () => 'Loading states...',
-                                      error: (_, __) => 'Failed to load',
-                                    ),
-                                    style: TextStyle(
-                                      color: _selectedStateName != null
-                                          ? AppColors.textPrimary
-                                          : AppColors.textMuted,
-                                      fontSize: AppFontSize.md,
-                                    ),
+                            const SizedBox(height: 6),
+                            GestureDetector(
+                              onTap: () => setState(
+                                  () => _statePickerOpen = !_statePickerOpen),
+                              child: Container(
+                                height: 48,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: colors.card,
+                                  borderRadius: AppRadius.inputRadius,
+                                  border: Border.all(
+                                    color: _stateError != null
+                                        ? colors.danger
+                                        : colors.border,
+                                    width: 1,
                                   ),
                                 ),
-                                const Icon(LucideIcons.chevronDown,
-                                    size: 18, color: AppColors.textMuted),
-                              ],
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(LucideIcons.building2,
+                                            size: 16, color: colors.textMuted),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          statesAsync.when(
+                                            data: (_) =>
+                                                _selectedStateName ??
+                                                'Select State',
+                                            loading: () => 'Loading states...',
+                                            error: (_, __) => 'Failed to load',
+                                          ),
+                                          style: AppTypography.body(
+                                            color: _selectedStateName != null
+                                                ? colors.textPrimary
+                                                : colors.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Icon(LucideIcons.chevronDown,
+                                        size: 18, color: colors.textMuted),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
+                            if (_stateError != null) ...[
+                              const SizedBox(height: 5),
+                              Text(_stateError!,
+                                  style: AppTypography.caption(
+                                      color: colors.danger)),
+                            ],
+                            if (_statePickerOpen)
+                              statesAsync.when(
+                                data: (states) => Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  decoration: BoxDecoration(
+                                    color: colors.secondarySurface,
+                                    borderRadius: AppRadius.cardRadius,
+                                    border: Border.all(
+                                        color: colors.border, width: 1),
+                                  ),
+                                  child: Column(
+                                    children: states
+                                        .map((s) => ListTile(
+                                              title: Text(s.name,
+                                                  style: AppTypography.body(
+                                                      color:
+                                                          colors.textPrimary)),
+                                              onTap: () {
+                                                setState(() {
+                                                  _selectedStateId = s.id;
+                                                  _selectedStateName = s.name;
+                                                  _selectedDistrictId = null;
+                                                  _selectedDistrictName = null;
+                                                  _statePickerOpen = false;
+                                                });
+                                              },
+                                            ))
+                                        .toList(),
+                                  ),
+                                ),
+                                loading: () => const SizedBox.shrink(),
+                                error: (_, __) => const SizedBox.shrink(),
+                              ),
+                            const SizedBox(height: 16),
+                          ],
                         ),
-                        if (_stateError != null) ...[
-                          const SizedBox(height: 4),
-                          Text(_stateError!,
-                              style: const TextStyle(
-                                  fontSize: 11, color: AppColors.danger)),
-                        ],
-                        if (_statePickerOpen)
-                          statesAsync.when(
-                            data: (states) => Container(
-                              margin: const EdgeInsets.only(top: 4),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: AppRadius.borderMd,
-                                border: Border.all(
-                                    color: AppColors.border, width: 1),
-                              ),
-                              child: Column(
-                                children: states
-                                    .map((s) => ListTile(
-                                          title: Text(s.name,
-                                              style: const TextStyle(
-                                                  color:
-                                                      AppColors.textPrimary)),
-                                          onTap: () {
-                                            setState(() {
-                                              _selectedStateId = s.id;
-                                              _selectedStateName = s.name;
-                                              _selectedDistrictId = null;
-                                              _selectedDistrictName = null;
-                                              _statePickerOpen = false;
-                                            });
-                                          },
-                                        ))
-                                    .toList(),
-                              ),
-                            ),
-                            loading: () => const SizedBox.shrink(),
-                            error: (_, __) => const SizedBox.shrink(),
-                          ),
-                        const SizedBox(height: 16),
-                      ],
-                    ),
 
-                    // District Picker Dropdown
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'District',
-                          style: TextStyle(
-                            fontSize: AppFontSize.sm,
-                            fontWeight: AppFontWeight.medium,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        GestureDetector(
-                          onTap: () {
-                            if (_selectedStateId != null) {
-                              setState(() =>
-                                  _districtPickerOpen = !_districtPickerOpen);
-                            }
-                          },
-                          child: Opacity(
-                            opacity: _selectedStateId != null ? 1.0 : 0.5,
-                            child: Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: AppSpacing.md),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: AppRadius.borderMd,
-                                border: Border.all(
-                                    color: AppColors.border, width: 1),
+                        // District Picker Dropdown
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'District *',
+                              style: AppTypography.subhead(
+                                color: colors.textSecondary,
+                                weight: AppFontWeight.medium,
                               ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _selectedStateId == null
-                                          ? 'Select State first'
-                                          : (districtsAsync?.when(
-                                                data: (_) =>
-                                                    _selectedDistrictName ??
-                                                    'Select District',
-                                                loading: () =>
-                                                    'Loading districts...',
-                                                error: (_, __) =>
-                                                    'Failed to load',
-                                              ) ??
-                                              'Select District'),
-                                      style: TextStyle(
-                                        color: _selectedDistrictName != null
-                                            ? AppColors.textPrimary
-                                            : AppColors.textMuted,
-                                        fontSize: AppFontSize.md,
-                                      ),
+                            ),
+                            const SizedBox(height: 6),
+                            GestureDetector(
+                              onTap: () {
+                                if (_selectedStateId != null) {
+                                  setState(() => _districtPickerOpen =
+                                      !_districtPickerOpen);
+                                }
+                              },
+                              child: Opacity(
+                                opacity: _selectedStateId != null ? 1.0 : 0.5,
+                                child: Container(
+                                  height: 48,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: colors.card,
+                                    borderRadius: AppRadius.inputRadius,
+                                    border: Border.all(
+                                      color: _districtError != null
+                                          ? colors.danger
+                                          : colors.border,
+                                      width: 1,
                                     ),
                                   ),
-                                  const Icon(LucideIcons.chevronDown,
-                                      size: 18, color: AppColors.textMuted),
-                                ],
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(LucideIcons.mapPin,
+                                              size: 16,
+                                              color: colors.textMuted),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            _selectedStateId == null
+                                                ? 'Select State first'
+                                                : (districtsAsync?.when(
+                                                      data: (_) =>
+                                                          _selectedDistrictName ??
+                                                          'Select District',
+                                                      loading: () =>
+                                                          'Loading districts...',
+                                                      error: (_, __) =>
+                                                          'Failed to load',
+                                                    ) ??
+                                                    'Select District'),
+                                            style: AppTypography.body(
+                                              color:
+                                                  _selectedDistrictName != null
+                                                      ? colors.textPrimary
+                                                      : colors.textMuted,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Icon(LucideIcons.chevronDown,
+                                          size: 18, color: colors.textMuted),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                            if (_districtError != null) ...[
+                              const SizedBox(height: 5),
+                              Text(_districtError!,
+                                  style: AppTypography.caption(
+                                      color: colors.danger)),
+                            ],
+                            if (_districtPickerOpen && districtsAsync != null)
+                              districtsAsync.when(
+                                data: (districts) => Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  constraints:
+                                      const BoxConstraints(maxHeight: 200),
+                                  decoration: BoxDecoration(
+                                    color: colors.secondarySurface,
+                                    borderRadius: AppRadius.cardRadius,
+                                    border: Border.all(
+                                        color: colors.border, width: 1),
+                                  ),
+                                  child: ListView(
+                                    shrinkWrap: true,
+                                    children: districts
+                                        .map((d) => ListTile(
+                                              title: Text(d.name,
+                                                  style: AppTypography.body(
+                                                      color:
+                                                          colors.textPrimary)),
+                                              onTap: () {
+                                                setState(() {
+                                                  _selectedDistrictId = d.id;
+                                                  _selectedDistrictName =
+                                                      d.name;
+                                                  _districtPickerOpen = false;
+                                                });
+                                              },
+                                            ))
+                                        .toList(),
+                                  ),
+                                ),
+                                loading: () => const SizedBox.shrink(),
+                                error: (_, __) => const SizedBox.shrink(),
+                              ),
+                            const SizedBox(height: 16),
+                          ],
                         ),
-                        if (_districtError != null) ...[
-                          const SizedBox(height: 4),
-                          Text(_districtError!,
-                              style: const TextStyle(
-                                  fontSize: 11, color: AppColors.danger)),
-                        ],
-                        if (_districtPickerOpen && districtsAsync != null)
-                          districtsAsync.when(
-                            data: (districts) => Container(
-                              margin: const EdgeInsets.only(top: 4),
-                              constraints: const BoxConstraints(maxHeight: 200),
-                              decoration: BoxDecoration(
-                                color: AppColors.surface,
-                                borderRadius: AppRadius.borderMd,
-                                border: Border.all(
-                                    color: AppColors.border, width: 1),
-                              ),
-                              child: ListView(
-                                shrinkWrap: true,
-                                children: districts
-                                    .map((d) => ListTile(
-                                          title: Text(d.name,
-                                              style: const TextStyle(
-                                                  color:
-                                                      AppColors.textPrimary)),
-                                          onTap: () {
-                                            setState(() {
-                                              _selectedDistrictId = d.id;
-                                              _selectedDistrictName = d.name;
-                                              _districtPickerOpen = false;
-                                            });
-                                          },
-                                        ))
-                                    .toList(),
+
+                        AppTextInput(
+                          label: 'Password *',
+                          placeholder:
+                              'Minimum 8 characters with letters & numbers',
+                          isPassword: true,
+                          controller: _passwordController,
+                          error: _passwordError,
+                          prefixIcon: Icon(LucideIcons.lock,
+                              size: 16, color: colors.textMuted),
+                        ),
+
+                        AppTextInput(
+                          label: 'Confirm Password *',
+                          placeholder: 'Repeat your password',
+                          isPassword: true,
+                          controller: _confirmPasswordController,
+                          error: _confirmPasswordError,
+                          prefixIcon: Icon(LucideIcons.shieldCheck,
+                              size: 16, color: colors.textMuted),
+                        ),
+
+                        const SizedBox(height: AppSpacing.sm),
+
+                        AppButton(
+                          label: 'Create Account',
+                          onPress: _onSubmit,
+                          loading: _isLoading,
+                        ),
+
+                        const SizedBox(height: AppSpacing.md),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Already have an account? ',
+                              style: AppTypography.subhead(
+                                  color: colors.textSecondary),
+                            ),
+                            GestureDetector(
+                              onTap: () => context.go('/login'),
+                              child: Text(
+                                'Sign in',
+                                style: AppTypography.subhead(
+                                  color: colors.primaryAction,
+                                  weight: AppFontWeight.semibold,
+                                ),
                               ),
                             ),
-                            loading: () => const SizedBox.shrink(),
-                            error: (_, __) => const SizedBox.shrink(),
-                          ),
-                        const SizedBox(height: 16),
+                          ],
+                        ),
                       ],
                     ),
-
-                    AppTextInput(
-                      label: 'Password',
-                      placeholder: 'Min 8 chars, letter + number',
-                      isPassword: true,
-                      controller: _passwordController,
-                      error: _passwordError,
-                    ),
-
-                    AppTextInput(
-                      label: 'Confirm Password',
-                      placeholder: 'Repeat your password',
-                      isPassword: true,
-                      controller: _confirmPasswordController,
-                      error: _confirmPasswordError,
-                    ),
-
-                    const SizedBox(height: AppSpacing.sm),
-
-                    AppButton(
-                      label: 'Create Account',
-                      onPress: _onSubmit,
-                      loading: _isLoading,
-                    ),
-
-                    const SizedBox(height: AppSpacing.md),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Already have an account? ',
-                          style: TextStyle(
-                            fontSize: AppFontSize.sm,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => context.go('/login'),
-                          child: const Text(
-                            'Sign in',
-                            style: TextStyle(
-                              fontSize: AppFontSize.sm,
-                              color: AppColors.accent,
-                              fontWeight: AppFontWeight.semibold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

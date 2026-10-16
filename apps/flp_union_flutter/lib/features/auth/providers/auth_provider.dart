@@ -24,7 +24,8 @@ final statesListProvider = FutureProvider<List<StateEntity>>((ref) async {
   final service = ref.watch(statesServiceProvider);
   try {
     final states = await service.getAllStates();
-    debugPrint('[statesListProvider] Successfully fetched ${states.length} states');
+    debugPrint(
+        '[statesListProvider] Successfully fetched ${states.length} states');
     return states;
   } catch (e, st) {
     debugPrint('[statesListProvider] Error loading states: $e');
@@ -33,15 +34,18 @@ final statesListProvider = FutureProvider<List<StateEntity>>((ref) async {
   }
 });
 
-final districtsListProvider = FutureProvider.family<List<DistrictEntity>, String>((ref, stateId) async {
+final districtsListProvider =
+    FutureProvider.family<List<DistrictEntity>, String>((ref, stateId) async {
   if (stateId.isEmpty) return [];
   final service = ref.watch(statesServiceProvider);
   try {
     final districts = await service.getDistricts(stateId);
-    debugPrint('[districtsListProvider] Successfully fetched ${districts.length} districts for stateId=$stateId');
+    debugPrint(
+        '[districtsListProvider] Successfully fetched ${districts.length} districts for stateId=$stateId');
     return districts;
   } catch (e, st) {
-    debugPrint('[districtsListProvider] Error loading districts for stateId=$stateId: $e');
+    debugPrint(
+        '[districtsListProvider] Error loading districts for stateId=$stateId: $e');
     debugPrint('[districtsListProvider] StackTrace:\n$st');
     rethrow;
   }
@@ -118,7 +122,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<UserRole> login({required String email, required String password}) async {
+  Future<UserRole> login(
+      {required String email, required String password}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final role = await _repository.login(email: email, password: password);

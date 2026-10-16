@@ -8,6 +8,8 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_filter_chip.dart';
+import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../models/admin_issue_dto.dart';
@@ -25,33 +27,40 @@ class AdminIssuesScreen extends ConsumerWidget {
 
     final nextStatus = item.status == 'OPEN' ? 'IN_PROGRESS' : 'RESOLVED';
     final displayStatus = nextStatus.replaceAll('_', ' ');
+    final colors = AppColors.of(context);
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
-        title: const Text(
-          'Update Status',
-          style: TextStyle(color: AppColors.textPrimary),
+        backgroundColor: colors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sheet),
+          side: BorderSide(color: colors.border, width: 1),
+        ),
+        title: Text(
+          'Update Issue Status',
+          style: AppTypography.title2(color: colors.textPrimary),
         ),
         content: Text(
-          'Mark this issue as $displayStatus?',
-          style: const TextStyle(color: AppColors.textSecondary),
+          'Mark "${item.title}" as $displayStatus?',
+          style: AppTypography.body(color: colors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: AppTypography.body(
+                    color: colors.textSecondary, weight: AppFontWeight.medium)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               'Update',
-              style: TextStyle(
+              style: AppTypography.body(
                 color: nextStatus == 'RESOLVED'
-                    ? AppColors.success
-                    : AppColors.accent,
+                    ? colors.success
+                    : colors.primaryAction,
+                weight: AppFontWeight.semibold,
               ),
             ),
           ),
@@ -68,8 +77,8 @@ class AdminIssuesScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to update issue status: $err'),
-              backgroundColor: AppColors.danger,
+              content: Text('Failed to update status: $err'),
+              backgroundColor: AppColors.darkDanger,
             ),
           );
         }
@@ -79,34 +88,40 @@ class AdminIssuesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final filter = ref.watch(adminIssuesFilterProvider);
     final issuesAsync = ref.watch(adminIssuesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         top: true,
         bottom: false,
         child: Column(
           children: [
-            // Page Header & Filter Tabs
+            // Header Bar & Filters
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: AppSpacing.md,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Support Issues',
-                    style: AppTypography.xxl.copyWith(
-                      fontWeight: AppFontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                    'Support Tickets',
+                    style: AppTypography.title1(color: colors.textPrimary),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Platform requests submitted by district managers',
+                    style: AppTypography.caption(color: colors.textMuted),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Row(
                     children: [
-                      _FilterTab(
-                        label: 'All',
+                      AppFilterChip(
+                        label: 'All Tickets',
                         isSelected: filter.isEmpty,
                         onTap: () {
                           ref.read(adminIssuesFilterProvider.notifier).state =
@@ -114,7 +129,7 @@ class AdminIssuesScreen extends ConsumerWidget {
                         },
                       ),
                       const SizedBox(width: 8),
-                      _FilterTab(
+                      AppFilterChip(
                         label: 'Open Only',
                         isSelected: filter == 'OPEN',
                         onTap: () {
@@ -128,31 +143,30 @@ class AdminIssuesScreen extends ConsumerWidget {
               ),
             ),
 
-            // Body Content
+            // Tickets List
             Expanded(
               child: issuesAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.accent),
-                ),
+                loading: () => const AppSkeletonList(count: 5),
                 error: (err, stack) => ErrorStateWidget(
-                  message: 'Unable to load issues.',
+                  message: 'Unable to load support issues.',
                   onRetry: () => ref.refresh(adminIssuesProvider),
                 ),
                 data: (response) {
                   if (response.data.isEmpty) {
                     return RefreshIndicator(
-                      color: AppColors.accent,
-                      backgroundColor: AppColors.card,
+                      color: colors.primaryAction,
+                      backgroundColor: colors.card,
                       onRefresh: () async =>
                           ref.refresh(adminIssuesProvider.future),
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.only(top: 100),
-                          child: const EmptyStateWidget(
-                            title: 'No issues',
-                            description: 'No support requests found.',
+                        child: SizedBox(
+                          height: 420,
+                          child: EmptyStateWidget(
+                            title: 'No issues found',
+                            description: filter == 'OPEN'
+                                ? 'No open tickets requiring resolution right now.'
+                                : 'No support requests recorded in the system.',
                           ),
                         ),
                       ),
@@ -160,22 +174,21 @@ class AdminIssuesScreen extends ConsumerWidget {
                   }
 
                   return RefreshIndicator(
-                    color: AppColors.accent,
-                    backgroundColor: AppColors.card,
+                    color: colors.primaryAction,
+                    backgroundColor: colors.card,
                     onRefresh: () async =>
                         ref.refresh(adminIssuesProvider.future),
                     child: ListView.separated(
-                      padding: const EdgeInsets.only(
-                        left: AppSpacing.md,
-                        right: AppSpacing.md,
-                        bottom: 40,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.screenPadding,
+                        vertical: AppSpacing.xs,
                       ),
                       itemCount: response.data.length,
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = response.data[index];
-                        return _IssueCard(
+                        return _AdminIssueCard(
                           item: item,
                           onUpdateStatus: () =>
                               _handleUpdateStatus(context, ref, item),
@@ -193,49 +206,11 @@ class AdminIssuesScreen extends ConsumerWidget {
   }
 }
 
-class _FilterTab extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterTab({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.accentSubtle : AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : AppColors.border,
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.xs.copyWith(
-            color: isSelected ? AppColors.accent : AppColors.textSecondary,
-            fontWeight:
-                isSelected ? AppFontWeight.semibold : AppFontWeight.regular,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _IssueCard extends StatelessWidget {
+class _AdminIssueCard extends StatelessWidget {
   final AdminIssueDto item;
   final VoidCallback onUpdateStatus;
 
-  const _IssueCard({
+  const _AdminIssueCard({
     required this.item,
     required this.onUpdateStatus,
   });
@@ -256,17 +231,17 @@ class _IssueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final showActionButton =
         item.status != 'RESOLVED' && item.status != 'CLOSED';
     final isOpen = item.status == 'OPEN';
-    final formattedDate = DateFormat.yMd().format(item.createdAt);
+    final formattedDate = DateFormat.yMMMd().format(item.createdAt);
 
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row (Type + Badge + Date)
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -274,98 +249,100 @@ class _IssueCard extends StatelessWidget {
                 children: [
                   Text(
                     item.type,
-                    style: AppTypography.xs.copyWith(
-                      fontWeight: AppFontWeight.bold,
-                      color: AppColors.textMuted,
-                      letterSpacing: 0.5,
-                    ),
+                    style: AppTypography.label(color: colors.primaryAction),
                   ),
                   const SizedBox(width: 8),
                   AppBadge(
                     label: item.status.replaceAll('_', ' '),
                     variant: _getBadgeVariant(item.status),
+                    showDot: true,
                   ),
                 ],
               ),
               Text(
                 formattedDate,
-                style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                style: AppTypography.caption(color: colors.textMuted),
               ),
             ],
           ),
           const SizedBox(height: 8),
-
-          // Title & Description
           Text(
             item.title,
-            style: AppTypography.md.copyWith(
-              fontWeight: AppFontWeight.semibold,
-              color: AppColors.textPrimary,
+            style: AppTypography.body(
+              color: colors.textPrimary,
+              weight: AppFontWeight.semibold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             item.description,
-            style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+            style: AppTypography.subhead(color: colors.textSecondary),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: 10),
 
-          // Reporter Box
+          // Reporter info pill
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: colors.secondarySurface,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
               children: [
+                Icon(LucideIcons.user, size: 12, color: colors.textMuted),
+                const SizedBox(width: 6),
                 Text(
                   'Reporter: ',
-                  style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                  style: AppTypography.caption(color: colors.textMuted),
                 ),
                 Expanded(
                   child: Text(
                     item.reporterName,
-                    style: AppTypography.xs.copyWith(
-                      color: AppColors.textPrimary,
-                      fontWeight: AppFontWeight.medium,
+                    style: AppTypography.caption(
+                      color: colors.textPrimary,
+                      weight: AppFontWeight.medium,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Action Button
           if (showActionButton) ...[
-            const SizedBox(height: AppSpacing.sm),
-            GestureDetector(
-              onTap: onUpdateStatus,
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  border: Border.all(color: AppColors.border, width: 1),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      isOpen ? LucideIcons.clock : LucideIcons.checkCircle,
-                      size: 16,
-                      color: isOpen ? AppColors.accent : AppColors.success,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      isOpen ? 'Mark In Progress' : 'Mark Resolved',
-                      style: AppTypography.sm.copyWith(
-                        fontWeight: AppFontWeight.semibold,
-                        color: isOpen ? AppColors.accent : AppColors.success,
+            const SizedBox(height: 10),
+            Material(
+              color: colors.secondarySurface,
+              borderRadius: AppRadius.buttonRadius,
+              child: InkWell(
+                onTap: onUpdateStatus,
+                borderRadius: AppRadius.buttonRadius,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: AppRadius.buttonRadius,
+                    border: Border.all(color: colors.border, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        isOpen ? LucideIcons.clock : LucideIcons.checkCircle,
+                        size: 15,
+                        color: isOpen ? colors.primaryAction : colors.success,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Text(
+                        isOpen ? 'Mark In Progress' : 'Mark Resolved',
+                        style: AppTypography.caption(
+                          color: isOpen ? colors.primaryAction : colors.success,
+                          weight: AppFontWeight.semibold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -7,8 +7,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
-import '../../../shared/models/district_entity.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_input.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../providers/engineer_provider.dart';
@@ -41,7 +41,6 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
 
   String? _selectedDistrictId;
   String? _selectedDistrictName;
-  bool _districtPickerOpen = false;
 
   String? _profilePhotoKey;
   String? _selectedFileName;
@@ -150,7 +149,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('File uploaded to S3 successfully'),
-            backgroundColor: AppColors.success,
+            backgroundColor: AppColors.darkSuccess,
           ),
         );
       }
@@ -160,7 +159,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Upload failed: $err'),
-            backgroundColor: AppColors.danger,
+            backgroundColor: AppColors.darkDanger,
           ),
         );
       }
@@ -180,26 +179,26 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       final email = _emailController.text.trim();
 
       if (name.length < 2) {
-        _fullNameError = 'Name required';
+        _fullNameError = 'Full name is required (min 2 characters)';
         isValid = false;
       }
 
       final phoneRegex = RegExp(r'^\+?[0-9]{7,15}$');
       if (!phoneRegex.hasMatch(phone)) {
-        _phoneError = 'Valid phone required';
+        _phoneError = 'Valid phone number is required';
         isValid = false;
       }
 
       if (email.isNotEmpty) {
         final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
         if (!emailRegex.hasMatch(email)) {
-          _emailError = 'Valid email required';
+          _emailError = 'Please enter a valid email address';
           isValid = false;
         }
       }
 
       if (_selectedDistrictId == null || _selectedDistrictId!.isEmpty) {
-        _districtError = 'Select district';
+        _districtError = 'Please select a district';
         isValid = false;
       }
     });
@@ -207,6 +206,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
   }
 
   Future<void> _onSubmit() async {
+    if (_isLoading) return; // Prevent accidental duplicate submissions
     if (!_validate()) return;
 
     setState(() => _isLoading = true);
@@ -259,6 +259,16 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       }
 
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.isEdit
+                  ? 'Engineer updated successfully'
+                  : 'Engineer created successfully',
+            ),
+            backgroundColor: AppColors.darkSuccess,
+          ),
+        );
         context.pop();
       }
     } catch (err) {
@@ -266,7 +276,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed: $err'),
-          backgroundColor: AppColors.danger,
+          backgroundColor: AppColors.darkDanger,
         ),
       );
     } finally {
@@ -276,8 +286,114 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
     }
   }
 
+  void _openDistrictPicker(BuildContext context, String stateId) {
+    final colors = AppColors.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors.card,
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheetRadius),
+      builder: (ctx) {
+        return Consumer(
+          builder: (context, ref, _) {
+            final districtsAsync = ref.watch(districtsListProvider(stateId));
+
+            return SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 4,
+                    margin: const EdgeInsets.only(top: 8, bottom: 12),
+                    decoration: BoxDecoration(
+                      color: colors.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Select District',
+                            style: AppTypography.title3(
+                                color: colors.textPrimary)),
+                        IconButton(
+                          icon: Icon(LucideIcons.x,
+                              size: 18, color: colors.textMuted),
+                          onPressed: () => Navigator.of(ctx).pop(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: districtsAsync.when(
+                      data: (districts) {
+                        if (districts.isEmpty) {
+                          return Center(
+                            child: Text('No districts available',
+                                style: AppTypography.subhead(
+                                    color: colors.textSecondary)),
+                          );
+                        }
+                        return ListView.separated(
+                          itemCount: districts.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (context, idx) {
+                            final d = districts[idx];
+                            final isSelected = d.id == _selectedDistrictId;
+                            return ListTile(
+                              title: Text(
+                                d.name,
+                                style: AppTypography.body(
+                                  color: isSelected
+                                      ? colors.primaryAction
+                                      : colors.textPrimary,
+                                  weight: isSelected
+                                      ? AppFontWeight.semibold
+                                      : AppFontWeight.normal,
+                                ),
+                              ),
+                              trailing: isSelected
+                                  ? Icon(LucideIcons.check,
+                                      size: 18, color: colors.primaryAction)
+                                  : null,
+                              onTap: () {
+                                setState(() {
+                                  _selectedDistrictId = d.id;
+                                  _selectedDistrictName = d.name;
+                                  _districtError = null;
+                                });
+                                Navigator.of(ctx).pop();
+                              },
+                            );
+                          },
+                        );
+                      },
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (err, _) => Center(
+                        child: Text('Error loading districts: $err',
+                            style: AppTypography.caption(color: colors.danger)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     // If edit, load existing engineer details
     if (widget.isEdit) {
       final engineerAsync =
@@ -289,183 +405,262 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
     final managerStateId = dashboardAsync.valueOrNull?.manager.state.id;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        title: Text(widget.isEdit ? 'Edit Engineer' : 'Add Engineer'),
+        title: Text(widget.isEdit ? 'Edit Engineer' : 'New Engineer'),
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _onSubmit,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(
+                    'Save',
+                    style: AppTypography.body(
+                      color: colors.primaryAction,
+                      weight: AppFontWeight.semibold,
+                    ),
+                  ),
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding,
+            vertical: AppSpacing.md,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppTextInput(
-                label: 'Full Name *',
-                placeholder: 'Engineer full name',
-                controller: _fullNameController,
-                error: _fullNameError,
+              // Section 1: Basic & Contact Information
+              const _FormSectionHeader(
+                title: 'Basic & Contact Information',
+                subtitle: 'Essential identity and contact credentials',
               ),
-
-              AppTextInput(
-                label: 'Phone *',
-                placeholder: '+91 9999999999',
-                keyboardType: TextInputType.phone,
-                controller: _phoneController,
-                error: _phoneError,
-              ),
-
-              AppTextInput(
-                label: 'Email',
-                placeholder: 'email@example.com',
-                keyboardType: TextInputType.emailAddress,
-                controller: _emailController,
-                error: _emailError,
-              ),
-
-              AppTextInput(
-                label: 'Designation',
-                placeholder: 'e.g. Senior Engineer',
-                controller: _designationController,
-              ),
-
-              AppTextInput(
-                label: 'Experience (years)',
-                placeholder: 'e.g. 5.5',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                controller: _experienceController,
-              ),
-
-              AppTextInput(
-                label: 'Skills (comma-separated)',
-                placeholder: 'e.g. React, Node.js, SQL',
-                controller: _skillsController,
-              ),
-
-              // District Picker Dropdown
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'District *',
-                    style: TextStyle(
-                      fontSize: AppFontSize.sm,
-                      fontWeight: AppFontWeight.medium,
-                      color: AppColors.textSecondary,
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                child: Column(
+                  children: [
+                    AppTextInput(
+                      label: 'Full Name *',
+                      placeholder: 'e.g. Rahul Sharma',
+                      controller: _fullNameController,
+                      error: _fullNameError,
+                      prefixIcon: Icon(LucideIcons.user,
+                          size: 16, color: colors.textMuted),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  GestureDetector(
-                    onTap: () => setState(
-                        () => _districtPickerOpen = !_districtPickerOpen),
-                    child: Container(
-                      height: 48,
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: AppRadius.borderMd,
-                        border: Border.all(
-                          color: _districtError != null
-                              ? AppColors.danger
-                              : AppColors.border,
-                          width: 1,
+                    AppTextInput(
+                      label: 'Phone Number *',
+                      placeholder: '+91 9876543210',
+                      keyboardType: TextInputType.phone,
+                      controller: _phoneController,
+                      error: _phoneError,
+                      prefixIcon: Icon(LucideIcons.phone,
+                          size: 16, color: colors.textMuted),
+                    ),
+                    AppTextInput(
+                      label: 'Email Address',
+                      placeholder: 'rahul.sharma@example.com',
+                      keyboardType: TextInputType.emailAddress,
+                      controller: _emailController,
+                      error: _emailError,
+                      prefixIcon: Icon(LucideIcons.mail,
+                          size: 16, color: colors.textMuted),
+                    ),
+
+                    // District Selector Field
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'District *',
+                          style: AppTypography.subhead(
+                            color: colors.textSecondary,
+                            weight: AppFontWeight.medium,
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _selectedDistrictName ?? 'Select District',
-                            style: TextStyle(
-                              color: _selectedDistrictName != null
-                                  ? AppColors.textPrimary
-                                  : AppColors.textMuted,
-                              fontSize: AppFontSize.md,
+                        const SizedBox(height: 6),
+                        GestureDetector(
+                          onTap: () {
+                            if (managerStateId != null) {
+                              _openDistrictPicker(context, managerStateId);
+                            }
+                          },
+                          child: Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: colors.card,
+                              borderRadius: AppRadius.inputRadius,
+                              border: Border.all(
+                                color: _districtError != null
+                                    ? colors.danger
+                                    : colors.border,
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(LucideIcons.mapPin,
+                                        size: 16, color: colors.textMuted),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      _selectedDistrictName ??
+                                          'Select assigned district',
+                                      style: AppTypography.body(
+                                        color: _selectedDistrictName != null
+                                            ? colors.textPrimary
+                                            : colors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Icon(LucideIcons.chevronDown,
+                                    size: 18, color: colors.textMuted),
+                              ],
                             ),
                           ),
-                          const Icon(LucideIcons.chevronDown,
-                              size: 18, color: AppColors.textMuted),
+                        ),
+                        if (_districtError != null) ...[
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Icon(LucideIcons.alertCircle,
+                                  size: 13, color: colors.danger),
+                              const SizedBox(width: 4),
+                              Text(
+                                _districtError!,
+                                style:
+                                    AppTypography.caption(color: colors.danger),
+                              ),
+                            ],
+                          ),
                         ],
-                      ),
+                      ],
                     ),
-                  ),
-                  if (_districtError != null) ...[
-                    const SizedBox(height: 4),
-                    Text(_districtError!,
-                        style: const TextStyle(
-                            fontSize: 11, color: AppColors.danger)),
                   ],
-                  if (_districtPickerOpen && managerStateId != null)
-                    _DistrictDropdownOptions(
-                      stateId: managerStateId,
-                      onSelected: (d) {
-                        setState(() {
-                          _selectedDistrictId = d.id;
-                          _selectedDistrictName = d.name;
-                          _districtPickerOpen = false;
-                        });
-                      },
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Section 2: Professional Profile
+              const _FormSectionHeader(
+                title: 'Professional Details',
+                subtitle: 'Role, experience level, and technical skills',
+              ),
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                child: Column(
+                  children: [
+                    AppTextInput(
+                      label: 'Designation / Title',
+                      placeholder: 'e.g. Senior Hardware Engineer',
+                      controller: _designationController,
+                      prefixIcon: Icon(LucideIcons.briefcase,
+                          size: 16, color: colors.textMuted),
                     ),
-                  const SizedBox(height: 16),
-                ],
+                    AppTextInput(
+                      label: 'Experience (in years)',
+                      placeholder: 'e.g. 4.5',
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      controller: _experienceController,
+                      prefixIcon: Icon(LucideIcons.calendar,
+                          size: 16, color: colors.textMuted),
+                    ),
+                    AppTextInput(
+                      label: 'Technical Skills (comma separated)',
+                      placeholder: 'e.g. PCB Repair, Soldering, Diagnostics',
+                      controller: _skillsController,
+                      prefixIcon: Icon(LucideIcons.wrench,
+                          size: 16, color: colors.textMuted),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: AppSpacing.lg),
 
-              AppTextInput(
-                label: 'Address',
-                placeholder: 'Full address',
-                multiline: true,
-                maxLines: 2,
-                controller: _addressController,
+              // Section 3: Identity Document & Photo Upload (AWS S3)
+              const _FormSectionHeader(
+                title: 'Photo / Certification Document',
+                subtitle: 'Uploads securely to AWS S3 bucket',
               ),
-
-              AppTextInput(
-                label: 'Salary (Rs.)',
-                placeholder: 'e.g. 50000',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                controller: _salaryController,
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                child: _PhotoPickerSection(
+                  profilePhotoKey: _profilePhotoKey,
+                  fileName: _selectedFileName,
+                  isUploading: _isUploadingPhoto,
+                  onPickPhoto: _pickAndUploadPhoto,
+                  onRemovePhoto: () {
+                    setState(() {
+                      _profilePhotoKey = null;
+                      _selectedFileName = null;
+                    });
+                  },
+                ),
               ),
+              const SizedBox(height: AppSpacing.lg),
 
-              AppTextInput(
-                label: 'Private Notes',
-                placeholder: 'Internal notes (not visible to others)',
-                multiline: true,
-                maxLines: 3,
-                controller: _notesController,
+              // Section 4: Confidential & Additional Details
+              const _FormSectionHeader(
+                title: 'Internal & Confidential Records',
+                subtitle:
+                    'Private data visible only to the managing supervisor',
               ),
-
-              _PhotoPickerField(
-                profilePhotoKey: _profilePhotoKey,
-                fileName: _selectedFileName,
-                isUploading: _isUploadingPhoto,
-                onPickPhoto: _pickAndUploadPhoto,
-                onRemovePhoto: () {
-                  setState(() {
-                    _profilePhotoKey = null;
-                    _selectedFileName = null;
-                  });
-                },
+              AppCard(
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                child: Column(
+                  children: [
+                    AppTextInput(
+                      label: 'Full Address',
+                      placeholder: 'Street, door no, city, pincode',
+                      multiline: true,
+                      maxLines: 2,
+                      controller: _addressController,
+                    ),
+                    AppTextInput(
+                      label: 'Monthly Compensation / Salary (₹)',
+                      placeholder: 'e.g. 45000',
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      controller: _salaryController,
+                      prefixIcon: Icon(LucideIcons.indianRupee,
+                          size: 16, color: colors.textMuted),
+                    ),
+                    AppTextInput(
+                      label: 'Private Internal Notes',
+                      placeholder:
+                          'Private supervisor notes (never shared externally)',
+                      multiline: true,
+                      maxLines: 3,
+                      controller: _notesController,
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(height: AppSpacing.xl),
 
-              const SizedBox(height: AppSpacing.md),
-
+              // Submit & Cancel Buttons
               AppButton(
-                label: widget.isEdit ? 'Save Changes' : 'Add Engineer',
+                label: widget.isEdit ? 'Save Changes' : 'Create Engineer',
                 onPress: _onSubmit,
                 loading: _isLoading,
               ),
-
               const SizedBox(height: AppSpacing.sm),
-
               AppButton(
                 label: 'Cancel',
                 onPress: () => context.pop(),
                 variant: AppButtonVariant.ghost,
+                disabled: _isLoading,
               ),
               const SizedBox(height: AppSpacing.xxl),
             ],
@@ -476,53 +671,47 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
   }
 }
 
-class _DistrictDropdownOptions extends ConsumerWidget {
-  final String stateId;
-  final ValueChanged<DistrictEntity> onSelected;
+class _FormSectionHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
 
-  const _DistrictDropdownOptions({
-    required this.stateId,
-    required this.onSelected,
+  const _FormSectionHeader({
+    required this.title,
+    required this.subtitle,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final districtsAsync = ref.watch(districtsListProvider(stateId));
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
 
-    return districtsAsync.when(
-      data: (districts) => Container(
-        margin: const EdgeInsets.only(top: 4),
-        constraints: const BoxConstraints(maxHeight: 200),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: AppRadius.borderMd,
-          border: Border.all(color: AppColors.border, width: 1),
-        ),
-        child: ListView(
-          shrinkWrap: true,
-          children: districts
-              .map((d) => ListTile(
-                    title: Text(d.name,
-                        style: const TextStyle(color: AppColors.textPrimary)),
-                    onTap: () => onSelected(d),
-                  ))
-              .toList(),
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTypography.title3(color: colors.textPrimary),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: AppTypography.caption(color: colors.textMuted),
+          ),
+        ],
       ),
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }
 
-class _PhotoPickerField extends StatelessWidget {
+class _PhotoPickerSection extends StatelessWidget {
   final String? profilePhotoKey;
   final String? fileName;
   final bool isUploading;
   final VoidCallback onPickPhoto;
   final VoidCallback onRemovePhoto;
 
-  const _PhotoPickerField({
+  const _PhotoPickerSection({
     required this.profilePhotoKey,
     required this.fileName,
     required this.isUploading,
@@ -532,115 +721,123 @@ class _PhotoPickerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final hasPhoto = profilePhotoKey != null && profilePhotoKey!.isNotEmpty;
     final isPdf = (profilePhotoKey ?? '').toLowerCase().contains('.pdf') ||
         (fileName ?? '').toLowerCase().endsWith('.pdf');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Profile Photo / Document',
-          style: TextStyle(
-            fontSize: AppFontSize.sm,
-            fontWeight: AppFontWeight.medium,
-            color: AppColors.textSecondary,
-          ),
+    if (isUploading) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: BoxDecoration(
+          color: colors.secondarySurface,
+          borderRadius: AppRadius.cardRadius,
+          border: Border.all(color: colors.border, width: 1),
         ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: AppRadius.borderMd,
-            border: Border.all(color: AppColors.border, width: 1),
-          ),
-          child: isUploading
-              ? const Row(
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: AppColors.accent),
-                    ),
-                    SizedBox(width: 12),
-                    Text(
-                      'Uploading directly to S3...',
-                      style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: AppFontSize.md),
-                    ),
-                  ],
-                )
-              : hasPhoto
-                  ? Row(
-                      children: [
-                        Icon(
-                          isPdf
-                              ? LucideIcons.fileText
-                              : LucideIcons.checkCircle2,
-                          color: AppColors.success,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                isPdf
-                                    ? 'PDF Document attached & uploaded'
-                                    : 'Photo attached & uploaded to S3',
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: AppFontWeight.medium,
-                                  fontSize: AppFontSize.md,
-                                ),
-                              ),
-                              if (fileName != null)
-                                Text(
-                                  fileName!,
-                                  style: const TextStyle(
-                                    color: AppColors.textMuted,
-                                    fontSize: AppFontSize.xs,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(LucideIcons.trash2,
-                              color: AppColors.danger, size: 18),
-                          onPressed: onRemovePhoto,
-                          tooltip: 'Remove photo/document',
-                        ),
-                      ],
-                    )
-                  : InkWell(
-                      onTap: onPickPhoto,
-                      borderRadius: AppRadius.borderMd,
-                      child: const Row(
-                        children: [
-                          Icon(LucideIcons.uploadCloud,
-                              color: AppColors.accent, size: 22),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Tap to select JPG/PNG photo or PDF document',
-                              style: TextStyle(
-                                color: AppColors.accent,
-                                fontWeight: AppFontWeight.medium,
-                                fontSize: AppFontSize.md,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colors.primaryAction,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Text(
+              'Uploading securely to S3 bucket...',
+              style: AppTypography.body(color: colors.textSecondary),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
-      ],
+      );
+    }
+
+    if (hasPhoto) {
+      return Container(
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        decoration: BoxDecoration(
+          color: colors.secondarySurface,
+          borderRadius: AppRadius.cardRadius,
+          border: Border.all(color: colors.border, width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: colors.successBg,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                isPdf ? LucideIcons.fileText : LucideIcons.checkCircle2,
+                color: colors.success,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isPdf
+                        ? 'PDF Document attached'
+                        : 'Photo attached & verified',
+                    style: AppTypography.body(
+                      color: colors.textPrimary,
+                      weight: AppFontWeight.semibold,
+                    ),
+                  ),
+                  Text(
+                    fileName ?? 'Saved in AWS S3',
+                    style: AppTypography.caption(color: colors.textMuted),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(LucideIcons.trash2, color: colors.danger, size: 18),
+              onPressed: onRemovePhoto,
+              tooltip: 'Remove',
+            ),
+          ],
+        ),
+      );
+    }
+
+    return InkWell(
+      onTap: onPickPhoto,
+      borderRadius: AppRadius.cardRadius,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: BoxDecoration(
+          color: colors.secondarySurface,
+          borderRadius: AppRadius.cardRadius,
+          border: Border.all(color: colors.border, width: 1),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(LucideIcons.uploadCloud,
+                color: colors.primaryAction, size: 22),
+            const SizedBox(width: 12),
+            Text(
+              'Select JPG / PNG photo or PDF document',
+              style: AppTypography.body(
+                color: colors.primaryAction,
+                weight: AppFontWeight.medium,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

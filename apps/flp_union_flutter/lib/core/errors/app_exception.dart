@@ -10,15 +10,15 @@ class ApiException implements Exception {
   });
 
   @override
-  String toString() => 'ApiException(statusCode: $statusCode, message: $message)';
+  String toString() =>
+      'ApiException(statusCode: $statusCode, message: $message)';
 }
 
 class UnauthorizedException extends ApiException {
-  UnauthorizedException({String message = 'Unauthorized session expired'})
-      : super(message: message, statusCode: 401);
+  UnauthorizedException({super.message = 'Unauthorized session expired'})
+      : super(statusCode: 401);
 }
 
 class NetworkException extends ApiException {
-  NetworkException({String message = 'Network connection failure'})
-      : super(message: message);
+  NetworkException({super.message = 'Network connection failure'});
 }

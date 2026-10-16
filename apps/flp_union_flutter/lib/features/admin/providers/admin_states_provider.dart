@@ -26,6 +26,7 @@ class AdminStatesMutationsNotifier extends StateNotifier<AsyncValue<void>> {
 }
 
 final adminStatesMutationsProvider =
-    StateNotifierProvider<AdminStatesMutationsNotifier, AsyncValue<void>>((ref) {
+    StateNotifierProvider<AdminStatesMutationsNotifier, AsyncValue<void>>(
+        (ref) {
   return AdminStatesMutationsNotifier(ref: ref);
 });

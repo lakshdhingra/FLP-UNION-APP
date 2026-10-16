@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -9,7 +10,10 @@ import '../../../shared/models/issue.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/app_text_input.dart';
+import '../../../shared/widgets/empty_state_widget.dart';
+import '../../../shared/widgets/error_state_widget.dart';
 import '../providers/issue_provider.dart';
 
 class ManagerHelpScreen extends ConsumerStatefulWidget {
@@ -47,12 +51,12 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
       final description = _descriptionController.text.trim();
 
       if (title.length < 3) {
-        _titleError = 'Title required';
+        _titleError = 'Subject is required (min 3 characters)';
         isValid = false;
       }
 
       if (description.length < 10) {
-        _descriptionError = 'Description required (min 10 chars)';
+        _descriptionError = 'Description is required (min 10 characters)';
         isValid = false;
       }
     });
@@ -60,9 +64,11 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
   }
 
   Future<void> _onSubmit() async {
+    if (_isSubmitting) return;
     if (!_validate()) return;
 
     setState(() => _isSubmitting = true);
+    final colors = AppColors.of(context);
 
     try {
       await ref.read(issueMutationsProvider.notifier).createIssue(
@@ -78,16 +84,36 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.card,
-          title: const Text('Submitted', style: TextStyle(color: AppColors.textPrimary)),
-          content: const Text(
-            'Your report has been submitted. We will get back to you.',
-            style: TextStyle(color: AppColors.textSecondary),
+          backgroundColor: colors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.sheet),
+            side: BorderSide(color: colors.border, width: 1),
+          ),
+          title: Row(
+            children: [
+              Icon(LucideIcons.checkCircle2, color: colors.success, size: 22),
+              const SizedBox(width: 10),
+              Text('Report Submitted',
+                  style: AppTypography.title2(color: colors.textPrimary)),
+            ],
+          ),
+          content: Text(
+            'Your ticket has been logged with TASPU administration. You can track progress under "My Reports".',
+            style: AppTypography.body(color: colors.textSecondary),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('OK', style: TextStyle(color: AppColors.accent)),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                setState(() => _activeTab = 'history');
+              },
+              child: Text(
+                'View Reports',
+                style: AppTypography.body(
+                  color: colors.primaryAction,
+                  weight: AppFontWeight.semibold,
+                ),
+              ),
             ),
           ],
         ),
@@ -96,8 +122,8 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed: $err'),
-          backgroundColor: AppColors.danger,
+          content: Text('Failed to submit report: $err'),
+          backgroundColor: AppColors.darkDanger,
         ),
       );
     } finally {
@@ -123,85 +149,66 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final issuesAsync = ref.watch(myIssuesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         top: true,
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header Bar
             Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.md,
-                right: AppSpacing.md,
-                top: AppSpacing.md,
-                bottom: AppSpacing.sm,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: AppSpacing.md,
               ),
-              child: Text(
-                'Help & Support',
-                style: AppTypography.xxl.copyWith(
-                  fontWeight: AppFontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Help & Support',
+                    style: AppTypography.title1(color: colors.textPrimary),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Submit inquiries or review existing requests',
+                    style: AppTypography.caption(color: colors.textMuted),
+                  ),
+                ],
               ),
             ),
 
-            // Segmented Control Tabs
+            // Apple-style Segmented Control Tabs
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              padding: const EdgeInsets.all(4),
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+              ),
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: AppRadius.borderMd,
+                color: colors.secondarySurface,
+                borderRadius: AppRadius.inputRadius,
+                border: Border.all(color: colors.border, width: 1),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
+                    child: _SegmentTab(
+                      label: 'New Request',
+                      isSelected: _activeTab == 'new',
+                      icon: LucideIcons.send,
                       onTap: () => setState(() => _activeTab = 'new'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: _activeTab == 'new' ? AppColors.accent : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'New Report',
-                          style: AppTypography.sm.copyWith(
-                            color: _activeTab == 'new'
-                                ? AppColors.textPrimary
-                                : AppColors.textMuted,
-                            fontWeight: AppFontWeight.medium,
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                   Expanded(
-                    child: GestureDetector(
+                    child: _SegmentTab(
+                      label: 'My Reports',
+                      isSelected: _activeTab == 'history',
+                      icon: LucideIcons.fileText,
                       onTap: () => setState(() => _activeTab = 'history'),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: _activeTab == 'history' ? AppColors.accent : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'My Reports',
-                          style: AppTypography.sm.copyWith(
-                            color: _activeTab == 'history'
-                                ? AppColors.textPrimary
-                                : AppColors.textMuted,
-                            fontWeight: AppFontWeight.medium,
-                          ),
-                        ),
-                      ),
                     ),
                   ),
                 ],
@@ -213,155 +220,135 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
             Expanded(
               child: _activeTab == 'new'
                   ? SingleChildScrollView(
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.screenPadding,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Type Row Selector
+                          // Type Toggle Row
+                          Text(
+                            'Request Type',
+                            style: AppTypography.subhead(
+                              color: colors.textSecondary,
+                              weight: AppFontWeight.medium,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           Row(
                             children: [
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _selectedType = 'ISSUE'),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: _selectedType == 'ISSUE'
-                                          ? AppColors.accentSubtle
-                                          : Colors.transparent,
-                                      borderRadius: AppRadius.borderMd,
-                                      border: Border.all(
-                                        color: _selectedType == 'ISSUE'
-                                            ? AppColors.accent
-                                            : AppColors.border,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      'Report Issue',
-                                      style: AppTypography.sm.copyWith(
-                                        color: _selectedType == 'ISSUE'
-                                            ? AppColors.accent
-                                            : AppColors.textSecondary,
-                                        fontWeight: _selectedType == 'ISSUE'
-                                            ? AppFontWeight.semibold
-                                            : AppFontWeight.normal,
-                                      ),
-                                    ),
-                                  ),
+                                child: _TypeOption(
+                                  label: 'Technical Issue',
+                                  icon: LucideIcons.alertCircle,
+                                  isSelected: _selectedType == 'ISSUE',
+                                  onTap: () =>
+                                      setState(() => _selectedType = 'ISSUE'),
                                 ),
                               ),
                               const SizedBox(width: AppSpacing.sm),
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: () => setState(() => _selectedType = 'SUPPORT'),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 10),
-                                    decoration: BoxDecoration(
-                                      color: _selectedType == 'SUPPORT'
-                                          ? AppColors.accentSubtle
-                                          : Colors.transparent,
-                                      borderRadius: AppRadius.borderMd,
-                                      border: Border.all(
-                                        color: _selectedType == 'SUPPORT'
-                                            ? AppColors.accent
-                                            : AppColors.border,
-                                        width: 1,
-                                      ),
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      'Request Support',
-                                      style: AppTypography.sm.copyWith(
-                                        color: _selectedType == 'SUPPORT'
-                                            ? AppColors.accent
-                                            : AppColors.textSecondary,
-                                        fontWeight: _selectedType == 'SUPPORT'
-                                            ? AppFontWeight.semibold
-                                            : AppFontWeight.normal,
-                                      ),
-                                    ),
-                                  ),
+                                child: _TypeOption(
+                                  label: 'General Support',
+                                  icon: LucideIcons.helpCircle,
+                                  isSelected: _selectedType == 'SUPPORT',
+                                  onTap: () =>
+                                      setState(() => _selectedType = 'SUPPORT'),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
 
-                          AppTextInput(
-                            label: 'Subject',
-                            placeholder: 'Brief summary',
-                            controller: _titleController,
-                            error: _titleError,
+                          // Form Card
+                          AppCard(
+                            padding:
+                                const EdgeInsets.all(AppSpacing.cardPadding),
+                            child: Column(
+                              children: [
+                                AppTextInput(
+                                  label: 'Subject / Title *',
+                                  placeholder: 'Brief summary of the inquiry',
+                                  controller: _titleController,
+                                  error: _titleError,
+                                  prefixIcon: Icon(LucideIcons.messageSquare,
+                                      size: 16, color: colors.textMuted),
+                                ),
+                                AppTextInput(
+                                  label: 'Detailed Description *',
+                                  placeholder:
+                                      'Provide comprehensive details or steps...',
+                                  multiline: true,
+                                  maxLines: 5,
+                                  controller: _descriptionController,
+                                  error: _descriptionError,
+                                ),
+                              ],
+                            ),
                           ),
-
-                          AppTextInput(
-                            label: 'Description',
-                            placeholder: 'Describe the issue in detail...',
-                            multiline: true,
-                            maxLines: 5,
-                            controller: _descriptionController,
-                            error: _descriptionError,
-                          ),
-
-                          const SizedBox(height: AppSpacing.sm),
+                          const SizedBox(height: AppSpacing.lg),
 
                           AppButton(
-                            label: 'Submit Report',
+                            label: 'Submit Ticket',
                             onPress: _onSubmit,
                             loading: _isSubmitting,
+                            icon: const Icon(LucideIcons.send, size: 16),
                           ),
-                          const SizedBox(height: 40),
+                          const SizedBox(height: AppSpacing.xxl),
                         ],
                       ),
                     )
                   : issuesAsync.when(
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(color: AppColors.accent),
-                      ),
-                      error: (err, stack) => Center(
-                        child: Text(
-                          'Unable to load reports.',
-                          style: AppTypography.md.copyWith(color: AppColors.textSecondary),
-                        ),
+                      loading: () => const AppSkeletonList(count: 4),
+                      error: (err, stack) => ErrorStateWidget(
+                        message: 'Unable to load tickets.',
+                        onRetry: () => ref.refresh(myIssuesProvider),
                       ),
                       data: (issues) {
                         if (issues.isEmpty) {
                           return RefreshIndicator(
-                            color: AppColors.accent,
-                            backgroundColor: AppColors.card,
-                            onRefresh: () async => ref.refresh(myIssuesProvider.future),
+                            color: colors.primaryAction,
+                            backgroundColor: colors.card,
+                            onRefresh: () async =>
+                                ref.refresh(myIssuesProvider.future),
                             child: SingleChildScrollView(
                               physics: const AlwaysScrollableScrollPhysics(),
                               child: SizedBox(
-                                height: 400,
-                                child: Center(
-                                  child: Text(
-                                    'No reports submitted yet.',
-                                    style: AppTypography.md.copyWith(color: AppColors.textMuted),
-                                  ),
+                                height: 420,
+                                child: EmptyStateWidget(
+                                  title: 'No requests yet',
+                                  description:
+                                      'Tickets submitted by you will be tracked here.',
+                                  actionLabel: 'Create Request',
+                                  onAction: () =>
+                                      setState(() => _activeTab = 'new'),
                                 ),
                               ),
                             ),
                           );
                         }
 
-                        final dateFormat = DateFormat('MM/dd/yyyy');
+                        final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
 
                         return RefreshIndicator(
-                          color: AppColors.accent,
-                          backgroundColor: AppColors.card,
-                          onRefresh: () async => ref.refresh(myIssuesProvider.future),
+                          color: colors.primaryAction,
+                          backgroundColor: colors.card,
+                          onRefresh: () async =>
+                              ref.refresh(myIssuesProvider.future),
                           child: ListView.separated(
-                            padding: const EdgeInsets.all(AppSpacing.md),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.screenPadding,
+                              vertical: AppSpacing.xs,
+                            ),
                             itemCount: issues.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: AppSpacing.sm),
                             itemBuilder: (context, index) {
                               final issue = issues[index];
                               return _IssueCard(
                                 issue: issue,
-                                dateFormat: dateFormat,
+                                formattedDate:
+                                    dateFormat.format(issue.createdAt),
                                 statusVariant: _statusVariant(issue.status),
                               );
                             },
@@ -377,54 +364,177 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
   }
 }
 
+class _SegmentTab extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _SegmentTab({
+    required this.label,
+    required this.isSelected,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 9),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.card : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(20),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? colors.primaryAction : colors.textMuted,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: AppTypography.subhead(
+                color: isSelected ? colors.textPrimary : colors.textMuted,
+                weight:
+                    isSelected ? AppFontWeight.semibold : AppFontWeight.medium,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TypeOption extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _TypeOption({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.primaryActionSubtle : colors.card,
+          borderRadius: AppRadius.cardRadius,
+          border: Border.all(
+            color: isSelected ? colors.primaryAction : colors.border,
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isSelected ? colors.primaryAction : colors.textMuted,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: AppTypography.caption(
+                color: isSelected ? colors.primaryAction : colors.textPrimary,
+                weight:
+                    isSelected ? AppFontWeight.semibold : AppFontWeight.medium,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _IssueCard extends StatelessWidget {
   final Issue issue;
-  final DateFormat dateFormat;
+  final String formattedDate;
   final AppBadgeVariant statusVariant;
 
   const _IssueCard({
     required this.issue,
-    required this.dateFormat,
+    required this.formattedDate,
     required this.statusVariant,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  issue.title,
-                  style: AppTypography.md.copyWith(
-                    fontWeight: AppFontWeight.semibold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  issue.description,
-                  style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  dateFormat.format(issue.createdAt),
-                  style: AppTypography.xs.copyWith(color: AppColors.textMuted),
-                ),
-              ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                issue.type.toUpperCase(),
+                style: AppTypography.label(color: colors.primaryAction),
+              ),
+              AppBadge(
+                label: issue.status.replaceAll('_', ' '),
+                variant: statusVariant,
+                showDot: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            issue.title,
+            style: AppTypography.body(
+              color: colors.textPrimary,
+              weight: AppFontWeight.semibold,
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          AppBadge(
-            label: issue.status.replaceAll('_', ' '),
-            variant: statusVariant,
+          const SizedBox(height: 4),
+          Text(
+            issue.description,
+            style: AppTypography.subhead(color: colors.textSecondary),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Icon(LucideIcons.clock, size: 12, color: colors.textMuted),
+              const SizedBox(width: 4),
+              Text(
+                formattedDate,
+                style: AppTypography.caption(color: colors.textMuted),
+              ),
+            ],
           ),
         ],
       ),

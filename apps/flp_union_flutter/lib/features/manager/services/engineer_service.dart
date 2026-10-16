@@ -15,10 +15,18 @@ class EngineerService {
     int? limit,
   }) async {
     final queryParams = <String, dynamic>{};
-    if (search != null && search.isNotEmpty) queryParams['search'] = search;
-    if (designation != null && designation.isNotEmpty) queryParams['designation'] = designation;
-    if (page != null) queryParams['page'] = page;
-    if (limit != null) queryParams['limit'] = limit;
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+    if (designation != null && designation.isNotEmpty) {
+      queryParams['designation'] = designation;
+    }
+    if (page != null) {
+      queryParams['page'] = page;
+    }
+    if (limit != null) {
+      queryParams['limit'] = limit;
+    }
 
     final response = await _apiClient.get(
       ApiConstants.managerEngineers,
@@ -34,11 +42,14 @@ class EngineerService {
       listData = [];
     }
 
-    return (listData as List).map((json) => Engineer.fromJson(json as Map<String, dynamic>)).toList();
+    return (listData as List)
+        .map((json) => Engineer.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Engineer> getEngineer(String id) async {
-    final response = await _apiClient.get('${ApiConstants.managerEngineers}/$id');
+    final response =
+        await _apiClient.get('${ApiConstants.managerEngineers}/$id');
     return Engineer.fromJson(response.data as Map<String, dynamic>);
   }
 

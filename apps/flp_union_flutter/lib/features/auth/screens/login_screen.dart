@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_button.dart';
+import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_text_input.dart';
 import '../providers/auth_provider.dart';
 
@@ -43,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
       if (email.isEmpty || !emailRegex.hasMatch(email)) {
-        _emailError = 'Enter a valid email';
+        _emailError = 'Please enter a valid email address';
         isValid = false;
       }
 
@@ -56,6 +57,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _onSubmit() async {
+    if (_isLoading) return;
     if (!_validate()) return;
 
     setState(() => _isLoading = true);
@@ -74,7 +76,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(err.toString().replaceAll('ApiException: ', '')),
-          backgroundColor: AppColors.danger,
+          backgroundColor: AppColors.darkDanger,
         ),
       );
     } finally {
@@ -86,147 +88,138 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Brand / Logo Header
-                Column(
-                  children: [
-                    Container(
-                      width: 64,
-                      height: 64,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'T',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: AppFontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    const Text(
-                      'TASPU',
-                      style: TextStyle(
-                        fontSize: AppFontSize.xxl,
-                        fontWeight: AppFontWeight.bold,
-                        color: AppColors.textPrimary,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Telangana Authorized Service Centre Proprietors Union',
-                      style: TextStyle(
-                        fontSize: AppFontSize.sm,
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xxl),
-
-                // Form Container Card
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: AppRadius.borderXl,
-                    border: Border.all(color: AppColors.border, width: 1),
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Welcome back',
-                          style: TextStyle(
-                            fontSize: AppFontSize.xl,
-                            fontWeight: AppFontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Sign in to your account',
-                          style: TextStyle(
-                            fontSize: AppFontSize.sm,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-
-                        // Email Input
-                        AppTextInput(
-                          label: 'Email Address',
-                          placeholder: 'you@example.com',
-                          keyboardType: TextInputType.emailAddress,
-                          controller: _emailController,
-                          error: _emailError,
-                        ),
-
-                        // Password Input
-                        AppTextInput(
-                          label: 'Password',
-                          placeholder: 'Enter your password',
-                          isPassword: true,
-                          controller: _passwordController,
-                          error: _passwordError,
-                        ),
-
-                        const SizedBox(height: AppSpacing.sm),
-
-                        // Submit Button
-                        AppButton(
-                          label: 'Sign In',
-                          onPress: _onSubmit,
-                          loading: _isLoading,
-                        ),
-
-                        const SizedBox(height: AppSpacing.md),
-
-                        // Register Navigation Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              'New manager? ',
-                              style: TextStyle(
-                                fontSize: AppFontSize.sm,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => context.push('/register'),
-                              child: const Text(
-                                'Create account',
-                                style: TextStyle(
-                                  fontSize: AppFontSize.sm,
-                                  color: AppColors.accent,
-                                  fontWeight: AppFontWeight.semibold,
-                                ),
-                              ),
-                            ),
-                          ],
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding,
+              vertical: AppSpacing.lg,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // App Brand Logo & Headline
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: colors.primaryAction,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colors.primaryAction.withAlpha(60),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'T',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: AppFontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Text(
+                    'TASPU UNION',
+                    style: AppTypography.title1(color: colors.textPrimary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Workforce Management Platform',
+                    style: AppTypography.subhead(color: colors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // Login Card
+                  AppCard(
+                    padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Sign In',
+                            style:
+                                AppTypography.title2(color: colors.textPrimary),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Enter your manager or administrator credentials',
+                            style:
+                                AppTypography.caption(color: colors.textMuted),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+
+                          AppTextInput(
+                            label: 'Email Address',
+                            placeholder: 'name@taspu.in',
+                            keyboardType: TextInputType.emailAddress,
+                            controller: _emailController,
+                            error: _emailError,
+                            prefixIcon: Icon(LucideIcons.mail,
+                                size: 16, color: colors.textMuted),
+                          ),
+
+                          AppTextInput(
+                            label: 'Password',
+                            placeholder: 'Enter your password',
+                            isPassword: true,
+                            controller: _passwordController,
+                            error: _passwordError,
+                            prefixIcon: Icon(LucideIcons.lock,
+                                size: 16, color: colors.textMuted),
+                          ),
+
+                          const SizedBox(height: AppSpacing.sm),
+
+                          AppButton(
+                            label: 'Sign In',
+                            onPress: _onSubmit,
+                            loading: _isLoading,
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // Register Navigation Link
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Need a manager account? ',
+                                style: AppTypography.subhead(
+                                    color: colors.textSecondary),
+                              ),
+                              GestureDetector(
+                                onTap: () => context.push('/register'),
+                                child: Text(
+                                  'Register here',
+                                  style: AppTypography.subhead(
+                                    color: colors.primaryAction,
+                                    weight: AppFontWeight.semibold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

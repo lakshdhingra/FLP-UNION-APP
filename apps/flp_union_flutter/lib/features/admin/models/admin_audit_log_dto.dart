@@ -22,7 +22,8 @@ class AdminAuditLogDto {
     String name = 'System';
     if (actorObj is Map) {
       final profileObj = actorObj['managerProfile'];
-      if (profileObj is Map && (profileObj['fullName'] as String?)?.isNotEmpty == true) {
+      if (profileObj is Map &&
+          (profileObj['fullName'] as String?)?.isNotEmpty == true) {
         name = profileObj['fullName'];
       } else if ((actorObj['email'] as String?)?.isNotEmpty == true) {
         name = actorObj['email'];
@@ -61,7 +62,10 @@ class AdminAuditLogsResponseDto {
   factory AdminAuditLogsResponseDto.fromJson(Map<String, dynamic> json) {
     final rawData = json['data'];
     final List<AdminAuditLogDto> list = rawData is List
-        ? rawData.map((item) => AdminAuditLogDto.fromJson(item as Map<String, dynamic>)).toList()
+        ? rawData
+            .map((item) =>
+                AdminAuditLogDto.fromJson(item as Map<String, dynamic>))
+            .toList()
         : [];
     final meta = json['meta'] as Map<String, dynamic>? ?? {};
 

@@ -22,11 +22,15 @@ class AdminService {
       ApiConstants.adminStates,
       queryParameters: {'includeInactive': includeInactive},
     );
-    final List<dynamic> listData = response.data is List ? response.data : (response.data['data'] ?? []);
-    return listData.map((json) => AdminStateDto.fromJson(json as Map<String, dynamic>)).toList();
+    final List<dynamic> listData =
+        response.data is List ? response.data : (response.data['data'] ?? []);
+    return listData
+        .map((json) => AdminStateDto.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 
-  Future<AdminStateDto> updateState(String id, Map<String, dynamic> data) async {
+  Future<AdminStateDto> updateState(
+      String id, Map<String, dynamic> data) async {
     final response = await _apiClient.patch(
       '${ApiConstants.adminStates}/$id',
       data: data,
@@ -47,7 +51,8 @@ class AdminService {
         'limit': limit,
       },
     );
-    return AdminManagersResponseDto.fromJson(response.data as Map<String, dynamic>);
+    return AdminManagersResponseDto.fromJson(
+        response.data as Map<String, dynamic>);
   }
 
   Future<AdminEngineersResponseDto> getEngineers({
@@ -63,7 +68,8 @@ class AdminService {
         'limit': limit,
       },
     );
-    return AdminEngineersResponseDto.fromJson(response.data as Map<String, dynamic>);
+    return AdminEngineersResponseDto.fromJson(
+        response.data as Map<String, dynamic>);
   }
 
   Future<AdminIssuesResponseDto> getIssues({
@@ -79,7 +85,8 @@ class AdminService {
         'limit': limit,
       },
     );
-    return AdminIssuesResponseDto.fromJson(response.data as Map<String, dynamic>);
+    return AdminIssuesResponseDto.fromJson(
+        response.data as Map<String, dynamic>);
   }
 
   Future<void> updateIssueStatus(String id, String status) async {
@@ -100,6 +107,7 @@ class AdminService {
         'limit': limit,
       },
     );
-    return AdminAuditLogsResponseDto.fromJson(response.data as Map<String, dynamic>);
+    return AdminAuditLogsResponseDto.fromJson(
+        response.data as Map<String, dynamic>);
   }
 }

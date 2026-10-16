@@ -35,7 +35,8 @@ class AuthInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     final path = err.requestOptions.path;
-    final isAuthEndpoint = path.contains(ApiConstants.login) || path.contains(ApiConstants.refresh);
+    final isAuthEndpoint = path.contains(ApiConstants.login) ||
+        path.contains(ApiConstants.refresh);
 
     if (err.response?.statusCode == 401 && !_isRefreshing && !isAuthEndpoint) {
       _isRefreshing = true;
@@ -57,8 +58,9 @@ class AuthInterceptor extends Interceptor {
         final newRefresh = refreshResponse.data['refreshToken'] as String?;
 
         if (newAccess != null && newRefresh != null) {
-          await _storage.setTokens(accessToken: newAccess, refreshToken: newRefresh);
-          
+          await _storage.setTokens(
+              accessToken: newAccess, refreshToken: newRefresh);
+
           // Retry original request
           final options = err.requestOptions;
           options.headers['Authorization'] = 'Bearer $newAccess';
@@ -70,7 +72,8 @@ class AuthInterceptor extends Interceptor {
         }
       } catch (refreshErr) {
         if (refreshErr is DioException &&
-            (refreshErr.response?.statusCode == 401 || refreshErr.response?.statusCode == 400)) {
+            (refreshErr.response?.statusCode == 401 ||
+                refreshErr.response?.statusCode == 400)) {
           await _storage.clearTokens();
           _onUnauthorized();
         }

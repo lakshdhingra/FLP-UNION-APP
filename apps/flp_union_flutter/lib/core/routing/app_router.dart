@@ -21,7 +21,6 @@ import '../../features/admin/screens/admin_issues_screen.dart';
 import '../../features/admin/screens/admin_states_screen.dart';
 import '../../features/admin/screens/admin_audit_logs_screen.dart';
 import '../../shared/models/user_role.dart';
-import '../constants/app_colors.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -56,8 +55,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const Scaffold(
-          backgroundColor: AppColors.background,
-          body: Center(child: CircularProgressIndicator(color: AppColors.accent)),
+          body: Center(child: CircularProgressIndicator()),
         ),
       ),
       GoRoute(

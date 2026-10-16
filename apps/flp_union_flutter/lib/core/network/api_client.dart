@@ -32,11 +32,13 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          debugPrint('[ApiClient] REQUEST[${options.method}] => URL: ${options.uri}');
+          debugPrint(
+              '[ApiClient] REQUEST[${options.method}] => URL: ${options.uri}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          debugPrint('[ApiClient] RESPONSE[${response.statusCode}] <= URL: ${response.requestOptions.uri}');
+          debugPrint(
+              '[ApiClient] RESPONSE[${response.statusCode}] <= URL: ${response.requestOptions.uri}');
           return handler.next(response);
         },
         onError: (DioException err, handler) {
@@ -45,7 +47,7 @@ class ApiClient {
           final errorType = err.type;
           final errorMessage = err.message ?? err.error ?? 'Unknown Dio error';
           final responseData = err.response?.data;
-          
+
           debugPrint('[ApiClient] HTTP FAILURE:');
           debugPrint('  -> Requested URL: $uri');
           debugPrint('  -> Status Code: $statusCode');
@@ -73,7 +75,8 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      dio.post<T>(path, data: data, queryParameters: queryParameters, options: options);
+      dio.post<T>(path,
+          data: data, queryParameters: queryParameters, options: options);
 
   Future<Response<T>> patch<T>(
     String path, {
@@ -81,7 +84,8 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      dio.patch<T>(path, data: data, queryParameters: queryParameters, options: options);
+      dio.patch<T>(path,
+          data: data, queryParameters: queryParameters, options: options);
 
   Future<Response<T>> delete<T>(
     String path, {
@@ -89,5 +93,6 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) =>
-      dio.delete<T>(path, data: data, queryParameters: queryParameters, options: options);
+      dio.delete<T>(path,
+          data: data, queryParameters: queryParameters, options: options);
 }

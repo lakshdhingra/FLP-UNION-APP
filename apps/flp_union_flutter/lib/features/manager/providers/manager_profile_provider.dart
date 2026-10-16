@@ -14,7 +14,8 @@ class ManagerProfileMutationsNotifier extends StateNotifier<AsyncValue<void>> {
       : _ref = ref,
         super(const AsyncValue.data(null));
 
-  Future<void> updateProfile({String? fullName, String? profilePhotoUrl}) async {
+  Future<void> updateProfile(
+      {String? fullName, String? profilePhotoUrl}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final service = _ref.read(managerServiceProvider);
@@ -30,6 +31,7 @@ class ManagerProfileMutationsNotifier extends StateNotifier<AsyncValue<void>> {
 }
 
 final managerProfileMutationsProvider =
-    StateNotifierProvider<ManagerProfileMutationsNotifier, AsyncValue<void>>((ref) {
+    StateNotifierProvider<ManagerProfileMutationsNotifier, AsyncValue<void>>(
+        (ref) {
   return ManagerProfileMutationsNotifier(ref: ref);
 });

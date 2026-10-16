@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../models/admin_state_dto.dart';
 import '../providers/admin_states_provider.dart';
@@ -15,31 +17,39 @@ class AdminStatesScreen extends ConsumerWidget {
 
   Future<void> _handleToggle(
       BuildContext context, WidgetRef ref, AdminStateDto item) async {
+    final colors = AppColors.of(context);
     final currentStatus = item.isActive;
     final actionText = currentStatus ? 'Deactivate' : 'Activate';
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
+        backgroundColor: colors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sheet),
+          side: BorderSide(color: colors.border, width: 1),
+        ),
         title: Text('$actionText State',
-            style: const TextStyle(color: AppColors.textPrimary)),
+            style: AppTypography.title2(color: colors.textPrimary)),
         content: Text(
-          'Are you sure you want to ${actionText.toLowerCase()} ${item.name}?',
-          style: const TextStyle(color: AppColors.textSecondary),
+          'Are you sure you want to ${actionText.toLowerCase()} coverage for ${item.name}?',
+          style: AppTypography.body(color: colors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: AppTypography.body(
+                    color: colors.textSecondary, weight: AppFontWeight.medium)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               actionText,
-              style: TextStyle(
-                  color: currentStatus ? AppColors.danger : AppColors.success),
+              style: AppTypography.body(
+                color: currentStatus ? colors.danger : colors.success,
+                weight: AppFontWeight.semibold,
+              ),
             ),
           ),
         ],
@@ -56,7 +66,7 @@ class AdminStatesScreen extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Failed to update state: $err'),
-              backgroundColor: AppColors.danger,
+              backgroundColor: AppColors.darkDanger,
             ),
           );
         }
@@ -65,20 +75,29 @@ class AdminStatesScreen extends ConsumerWidget {
   }
 
   void _showAddStateNotice(BuildContext context) {
+    final colors = AppColors.of(context);
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
-        title: const Text('Coming Soon',
-            style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text(
-          'Adding states from mobile will be available in next update.',
-          style: TextStyle(color: AppColors.textSecondary),
+        backgroundColor: colors.card,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.sheet),
+          side: BorderSide(color: colors.border, width: 1),
+        ),
+        title: Text('State Creation',
+            style: AppTypography.title2(color: colors.textPrimary)),
+        content: Text(
+          'Adding new administrative states is managed via web console to configure regional union policies.',
+          style: AppTypography.body(color: colors.textSecondary),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK', style: TextStyle(color: AppColors.accent)),
+            child: Text('Understood',
+                style: AppTypography.body(
+                    color: colors.primaryAction,
+                    weight: AppFontWeight.semibold)),
           ),
         ],
       ),
@@ -87,72 +106,79 @@ class AdminStatesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final statesAsync = ref.watch(adminStatesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         top: true,
         bottom: false,
         child: Column(
           children: [
-            // Header Row
+            // Header Bar
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
+                horizontal: AppSpacing.screenPadding,
                 vertical: AppSpacing.md,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'States & Regions',
-                    style: AppTypography.xxl.copyWith(
-                      fontWeight: AppFontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'States & Regions',
+                        style: AppTypography.title1(color: colors.textPrimary),
+                      ),
+                      statesAsync.when(
+                        data: (list) => Text(
+                          '${list.length} regional jurisdictions',
+                          style: AppTypography.caption(color: colors.textMuted),
+                        ),
+                        loading: () => Text(
+                          'Loading regions...',
+                          style: AppTypography.caption(color: colors.textMuted),
+                        ),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
                   ),
-                  GestureDetector(
-                    onTap: () => _showAddStateNotice(context),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        LucideIcons.plus,
-                        size: 20,
-                        color: AppColors.textPrimary,
-                      ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showAddStateNotice(context),
+                    icon: const Icon(LucideIcons.plus, size: 16),
+                    label: const Text('Add State'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primaryAction,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      minimumSize: const Size(0, 38),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // States List Body
+            // States List
             Expanded(
               child: statesAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.accent),
-                ),
+                loading: () => const AppSkeletonList(count: 4),
                 error: (err, stack) => ErrorStateWidget(
-                  message: 'Unable to load states.',
+                  message: 'Unable to load regional jurisdictions.',
                   onRetry: () => ref.refresh(adminStatesProvider),
                 ),
                 data: (states) {
                   return RefreshIndicator(
-                    color: AppColors.accent,
-                    backgroundColor: AppColors.card,
+                    color: colors.primaryAction,
+                    backgroundColor: colors.card,
                     onRefresh: () async =>
                         ref.refresh(adminStatesProvider.future),
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                        vertical: AppSpacing.sm,
+                        horizontal: AppSpacing.screenPadding,
+                        vertical: AppSpacing.xs,
                       ),
                       itemCount: states.length,
                       separatorBuilder: (context, index) =>
@@ -187,34 +213,33 @@ class _StateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: Row(
         children: [
-          // Icon Box
           Container(
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.accentSubtle,
-              borderRadius: BorderRadius.circular(12),
+              color: colors.primaryActionSubtle,
+              borderRadius: BorderRadius.circular(10),
             ),
             alignment: Alignment.center,
-            child: const Icon(LucideIcons.building2,
-                size: 20, color: AppColors.accent),
+            child: Icon(LucideIcons.building2,
+                size: 20, color: colors.primaryAction),
           ),
-          const SizedBox(width: AppSpacing.sm),
-
-          // Info Column
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   item.name,
-                  style: AppTypography.md.copyWith(
-                    fontWeight: AppFontWeight.semibold,
-                    color: AppColors.textPrimary,
+                  style: AppTypography.body(
+                    color: colors.textPrimary,
+                    weight: AppFontWeight.semibold,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -222,29 +247,23 @@ class _StateCard extends StatelessWidget {
                   children: [
                     Text(
                       '${item.count.districts} districts',
-                      style: AppTypography.xs
-                          .copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.caption(color: colors.textSecondary),
                     ),
                     const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        '•',
-                        style: TextStyle(
-                            color: AppColors.textSecondary, fontSize: 12),
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 5),
+                      child: Text('•',
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 10)),
                     ),
                     Text(
                       '${item.count.managerProfiles} managers',
-                      style: AppTypography.xs
-                          .copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.caption(color: colors.textSecondary),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-
-          // Actions Column
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -253,27 +272,44 @@ class _StateCard extends StatelessWidget {
                 variant: item.isActive
                     ? AppBadgeVariant.success
                     : AppBadgeVariant.defaultValue,
+                showDot: true,
               ),
               const SizedBox(height: 8),
               GestureDetector(
                 onTap: onToggle,
                 child: Container(
-                  padding: const EdgeInsets.all(6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: item.isActive
-                        ? AppColors.dangerBg
-                        : AppColors.successBg,
-                    borderRadius: BorderRadius.circular(8),
+                    color: item.isActive ? colors.dangerBg : colors.successBg,
+                    borderRadius: BorderRadius.circular(6),
                     border: Border.all(
-                      color:
-                          item.isActive ? AppColors.danger : AppColors.success,
+                      color: item.isActive
+                          ? colors.danger.withAlpha(50)
+                          : colors.success.withAlpha(50),
                       width: 1,
                     ),
                   ),
-                  child: Icon(
-                    item.isActive ? LucideIcons.powerOff : LucideIcons.power,
-                    size: 14,
-                    color: item.isActive ? AppColors.danger : AppColors.success,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        item.isActive
+                            ? LucideIcons.powerOff
+                            : LucideIcons.power,
+                        size: 11,
+                        color: item.isActive ? colors.danger : colors.success,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        item.isActive ? 'Disable' : 'Enable',
+                        style: AppTypography.font(
+                          fontSize: 10,
+                          fontWeight: AppFontWeight.semibold,
+                          color: item.isActive ? colors.danger : colors.success,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

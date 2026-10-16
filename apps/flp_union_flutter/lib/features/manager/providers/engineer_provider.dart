@@ -9,17 +9,20 @@ final engineerServiceProvider = Provider<EngineerService>((ref) {
   return EngineerService(apiClient: apiClient);
 });
 
-final myEngineersProvider = FutureProvider.family<List<Engineer>, String>((ref, search) async {
+final myEngineersProvider =
+    FutureProvider.family<List<Engineer>, String>((ref, search) async {
   final service = ref.watch(engineerServiceProvider);
   return service.getEngineers(search: search.isNotEmpty ? search : null);
 });
 
-final engineerDetailProvider = FutureProvider.family<Engineer, String>((ref, id) async {
+final engineerDetailProvider =
+    FutureProvider.family<Engineer, String>((ref, id) async {
   final service = ref.watch(engineerServiceProvider);
   return service.getEngineer(id);
 });
 
-final engineerDocumentUrlProvider = FutureProvider.family<String, String>((ref, key) async {
+final engineerDocumentUrlProvider =
+    FutureProvider.family<String, String>((ref, key) async {
   if (key.isEmpty) return '';
   final service = ref.watch(engineerServiceProvider);
   return service.getDocumentUrl(key);

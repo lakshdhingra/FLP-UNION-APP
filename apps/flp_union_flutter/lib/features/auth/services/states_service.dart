@@ -23,11 +23,13 @@ class StatesService {
         listData = [];
       }
       return listData
-          .map((json) => StateEntity.fromJson(Map<String, dynamic>.from(json as Map)))
+          .map((json) =>
+              StateEntity.fromJson(Map<String, dynamic>.from(json as Map)))
           .toList();
     } catch (e) {
       if (e is DioException) {
-        debugPrint('[StatesService] Failed fetching states from ${e.requestOptions.uri} (Status: ${e.response?.statusCode}): ${e.message ?? e.error}');
+        debugPrint(
+            '[StatesService] Failed fetching states from ${e.requestOptions.uri} (Status: ${e.response?.statusCode}): ${e.message ?? e.error}');
       } else {
         debugPrint('[StatesService] Failed fetching states: $e');
       }
@@ -37,7 +39,8 @@ class StatesService {
 
   Future<List<DistrictEntity>> getDistricts(String stateId) async {
     try {
-      final response = await _apiClient.get('${ApiConstants.states}/$stateId/districts');
+      final response =
+          await _apiClient.get('${ApiConstants.states}/$stateId/districts');
       final rawData = response.data;
       final List<dynamic> listData;
       if (rawData is List) {
@@ -48,13 +51,16 @@ class StatesService {
         listData = [];
       }
       return listData
-          .map((json) => DistrictEntity.fromJson(Map<String, dynamic>.from(json as Map)))
+          .map((json) =>
+              DistrictEntity.fromJson(Map<String, dynamic>.from(json as Map)))
           .toList();
     } catch (e) {
       if (e is DioException) {
-        debugPrint('[StatesService] Failed fetching districts for stateId=$stateId from ${e.requestOptions.uri} (Status: ${e.response?.statusCode}): ${e.message ?? e.error}');
+        debugPrint(
+            '[StatesService] Failed fetching districts for stateId=$stateId from ${e.requestOptions.uri} (Status: ${e.response?.statusCode}): ${e.message ?? e.error}');
       } else {
-        debugPrint('[StatesService] Failed fetching districts for stateId=$stateId: $e');
+        debugPrint(
+            '[StatesService] Failed fetching districts for stateId=$stateId: $e');
       }
       rethrow;
     }

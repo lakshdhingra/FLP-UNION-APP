@@ -8,7 +8,8 @@ final managerServiceProvider = Provider<ManagerService>((ref) {
   return ManagerService(apiClient: apiClient);
 });
 
-final managerDashboardProvider = FutureProvider<ManagerDashboardDto>((ref) async {
+final managerDashboardProvider =
+    FutureProvider<ManagerDashboardDto>((ref) async {
   final service = ref.watch(managerServiceProvider);
   return service.getDashboard();
 });

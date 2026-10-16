@@ -21,51 +21,202 @@ class ManagerShellScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final isWide = MediaQuery.of(context).size.width >= 768;
+
+    const navItems = [
+      _ShellNavItem(icon: LucideIcons.layoutDashboard, label: 'Dashboard'),
+      _ShellNavItem(icon: LucideIcons.users, label: 'Engineers'),
+      _ShellNavItem(icon: LucideIcons.userCheck, label: 'Managers'),
+      _ShellNavItem(icon: LucideIcons.helpCircle, label: 'Help'),
+      _ShellNavItem(icon: LucideIcons.user, label: 'Profile'),
+    ];
+
+    if (isWide) {
+      // Desktop / Web Linear-style Side Navigation
+      return Scaffold(
+        backgroundColor: colors.background,
+        body: Row(
+          children: [
+            Container(
+              width: 240,
+              decoration: BoxDecoration(
+                color: colors.surface,
+                border:
+                    Border(right: BorderSide(color: colors.border, width: 1)),
+              ),
+              child: SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 24),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: colors.primaryAction,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              'T',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: AppFontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'TASPU FLP',
+                                style: AppTypography.title3(
+                                    color: colors.textPrimary),
+                              ),
+                              Text(
+                                'Manager Portal',
+                                style: AppTypography.caption(
+                                    color: colors.textMuted),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: navItems.length,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        itemBuilder: (context, index) {
+                          final item = navItems[index];
+                          final isSelected =
+                              navigationShell.currentIndex == index;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Material(
+                              color: isSelected
+                                  ? colors.primaryActionSubtle
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                              child: InkWell(
+                                onTap: () => _onTap(index),
+                                borderRadius: BorderRadius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        item.icon,
+                                        size: 18,
+                                        color: isSelected
+                                            ? colors.primaryAction
+                                            : colors.textSecondary,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        item.label,
+                                        style: AppTypography.body(
+                                          color: isSelected
+                                              ? colors.primaryAction
+                                              : colors.textPrimary,
+                                          weight: isSelected
+                                              ? AppFontWeight.semibold
+                                              : AppFontWeight.normal,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(child: navigationShell),
+          ],
+        ),
+      );
+    }
+
+    // Mobile Apple-style Bottom Navigation
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: navigationShell,
       bottomNavigationBar: Container(
-        height: 64,
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          border: Border(top: BorderSide(color: colors.border, width: 1)),
         ),
-        child: BottomNavigationBar(
-          currentIndex: navigationShell.currentIndex,
-          onTap: _onTap,
-          backgroundColor: AppColors.surface,
-          selectedItemColor: AppColors.accent,
-          unselectedItemColor: AppColors.textMuted,
-          selectedLabelStyle:
-              AppTypography.xs.copyWith(fontWeight: AppFontWeight.medium),
-          unselectedLabelStyle:
-              AppTypography.xs.copyWith(fontWeight: AppFontWeight.medium),
-          type: BottomNavigationBarType.fixed,
-          elevation: 0,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(LucideIcons.layoutDashboard, size: 20),
-              label: 'Dashboard',
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 60,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(navItems.length, (index) {
+                final item = navItems[index];
+                final isSelected = navigationShell.currentIndex == index;
+                return Expanded(
+                  child: InkWell(
+                    onTap: () => _onTap(index),
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          item.icon,
+                          size: 20,
+                          color: isSelected
+                              ? colors.primaryAction
+                              : colors.textMuted,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          item.label,
+                          style: AppTypography.font(
+                            fontSize: 10.5,
+                            fontWeight: isSelected
+                                ? AppFontWeight.semibold
+                                : AppFontWeight.medium,
+                            color: isSelected
+                                ? colors.primaryAction
+                                : colors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(LucideIcons.users, size: 20),
-              label: 'Engineers',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(LucideIcons.userCheck, size: 20),
-              label: 'Managers',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(LucideIcons.helpCircle, size: 20),
-              label: 'Help',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(LucideIcons.user, size: 20),
-              label: 'Profile',
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _ShellNavItem {
+  final IconData icon;
+  final String label;
+
+  const _ShellNavItem({required this.icon, required this.label});
 }

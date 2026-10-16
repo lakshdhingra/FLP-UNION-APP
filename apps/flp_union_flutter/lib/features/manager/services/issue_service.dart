@@ -31,7 +31,10 @@ class IssueService {
 
   Future<List<Issue>> getMyIssues() async {
     final response = await _apiClient.get(ApiConstants.issuesMine);
-    final List<dynamic> listData = response.data is List ? response.data : (response.data['data'] ?? []);
-    return listData.map((json) => Issue.fromJson(json as Map<String, dynamic>)).toList();
+    final List<dynamic> listData =
+        response.data is List ? response.data : (response.data['data'] ?? []);
+    return listData
+        .map((json) => Issue.fromJson(json as Map<String, dynamic>))
+        .toList();
   }
 }

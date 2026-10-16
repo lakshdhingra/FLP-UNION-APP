@@ -54,7 +54,10 @@ class AdminManagersResponseDto {
   factory AdminManagersResponseDto.fromJson(Map<String, dynamic> json) {
     final rawData = json['data'];
     final List<AdminManagerDto> list = rawData is List
-        ? rawData.map((item) => AdminManagerDto.fromJson(item as Map<String, dynamic>)).toList()
+        ? rawData
+            .map((item) =>
+                AdminManagerDto.fromJson(item as Map<String, dynamic>))
+            .toList()
         : [];
     final meta = json['meta'] as Map<String, dynamic>? ?? {};
 

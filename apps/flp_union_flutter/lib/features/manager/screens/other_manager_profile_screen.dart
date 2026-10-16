@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
@@ -21,17 +22,15 @@ class OtherManagerProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = AppColors.of(context);
     final managerAsync = ref.watch(managerProfileByIdProvider(id));
     final engineersAsync = ref.watch(otherManagerEngineersProvider(id));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
         title: managerAsync.when(
-          data: (mgr) => Text(mgr.fullName, style: AppTypography.lg),
+          data: (mgr) => Text(mgr.fullName),
           loading: () => const Text('Loading...'),
           error: (_, __) => const Text('Manager Profile'),
         ),
@@ -40,132 +39,137 @@ class OtherManagerProfileScreen extends ConsumerWidget {
         top: false,
         child: managerAsync.when(
           loading: () => const Center(
-            child: CircularProgressIndicator(color: AppColors.accent),
+            child: CircularProgressIndicator(),
           ),
           error: (err, stack) => ErrorStateWidget(
-            message: 'Manager not found.',
+            title: 'Manager Not Found',
+            message: 'Unable to load profile information.',
             onRetry: () => ref.refresh(managerProfileByIdProvider(id)),
           ),
           data: (manager) {
             return RefreshIndicator(
-              color: AppColors.accent,
-              backgroundColor: AppColors.card,
+              color: colors.primaryAction,
+              backgroundColor: colors.card,
               onRefresh: () async {
-                ref.refresh(managerProfileByIdProvider(id));
-                ref.refresh(otherManagerEngineersProvider(id));
+                ref.invalidate(managerProfileByIdProvider(id));
+                ref.invalidate(otherManagerEngineersProvider(id));
               },
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding,
+                  vertical: AppSpacing.md,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Profile Header Section
-                    Center(
-                      child: Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                        child: Column(
-                          children: [
-                            AppAvatar(name: manager.fullName, size: 72),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              manager.fullName,
-                              style: AppTypography.xxl.copyWith(
-                                fontWeight: AppFontWeight.bold,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              manager.email,
-                              style: AppTypography.sm
-                                  .copyWith(color: AppColors.textSecondary),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              alignment: WrapAlignment.center,
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: [
-                                AppBadge(
-                                  label: manager.district.name.isNotEmpty
-                                      ? manager.district.name
-                                      : 'District',
-                                  variant: AppBadgeVariant.defaultValue,
-                                ),
-                                AppBadge(
-                                  label: manager.state.name.isNotEmpty
-                                      ? manager.state.name
-                                      : 'State',
-                                  variant: AppBadgeVariant.info,
-                                ),
-                                AppBadge(
-                                  label: '${manager.totalEngineers} engineers',
-                                  variant: AppBadgeVariant.success,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Contact Section Title
-                    Text(
-                      'CONTACT',
-                      style: AppTypography.xs.copyWith(
-                        fontWeight: AppFontWeight.semibold,
-                        color: AppColors.textMuted,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
+                    // Profile Header Card
                     AppCard(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                      padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              const Icon(LucideIcons.phone,
-                                  size: 14, color: AppColors.accent),
-                              const SizedBox(width: 10),
-                              Text(
-                                manager.mobile.isNotEmpty
-                                    ? manager.mobile
-                                    : 'N/A',
-                                style: AppTypography.md
-                                    .copyWith(color: AppColors.textPrimary),
-                              ),
-                            ],
+                          Center(
+                            child: AppAvatar(name: manager.fullName, size: 72),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          Text(
+                            manager.fullName,
+                            style:
+                                AppTypography.title1(color: colors.textPrimary),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            manager.email,
+                            style: AppTypography.subhead(
+                                color: colors.textSecondary),
                           ),
                           const SizedBox(height: 10),
-                          Row(
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            spacing: 8,
+                            runSpacing: 6,
                             children: [
-                              const Icon(LucideIcons.mail,
-                                  size: 14, color: AppColors.accent),
-                              const SizedBox(width: 10),
-                              Text(
-                                manager.email.isNotEmpty
-                                    ? manager.email
-                                    : 'N/A',
-                                style: AppTypography.md
-                                    .copyWith(color: AppColors.textPrimary),
+                              AppBadge(
+                                label: manager.district.name.isNotEmpty
+                                    ? manager.district.name
+                                    : 'District',
+                                variant: AppBadgeVariant.defaultValue,
+                              ),
+                              AppBadge(
+                                label: manager.state.name.isNotEmpty
+                                    ? manager.state.name
+                                    : 'State',
+                                variant: AppBadgeVariant.info,
+                              ),
+                              AppBadge(
+                                label: '${manager.totalEngineers} engineers',
+                                variant: AppBadgeVariant.success,
+                                showDot: true,
                               ),
                             ],
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: AppSpacing.lg),
 
-                    // Engineers Section Title & List
+                    // Contact Details Section
+                    Text(
+                      'Contact Information',
+                      style: AppTypography.title3(color: colors.textPrimary),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppCard(
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                      child: Column(
+                        children: [
+                          _ContactRow(
+                            icon: LucideIcons.phone,
+                            label: 'Mobile',
+                            value: manager.mobile.isNotEmpty
+                                ? manager.mobile
+                                : 'Not available',
+                            onTap: manager.mobile.isNotEmpty
+                                ? () {
+                                    Clipboard.setData(
+                                        ClipboardData(text: manager.mobile));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Phone number copied')),
+                                    );
+                                  }
+                                : null,
+                          ),
+                          const Divider(height: 16),
+                          _ContactRow(
+                            icon: LucideIcons.mail,
+                            label: 'Email',
+                            value: manager.email.isNotEmpty
+                                ? manager.email
+                                : 'Not available',
+                            onTap: manager.email.isNotEmpty
+                                ? () {
+                                    Clipboard.setData(
+                                        ClipboardData(text: manager.email));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Email copied')),
+                                    );
+                                  }
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Managed Engineers Section
                     engineersAsync.when(
                       loading: () => const Center(
                         child: Padding(
                           padding: EdgeInsets.all(24.0),
-                          child: CircularProgressIndicator(
-                              color: AppColors.accent),
+                          child: CircularProgressIndicator(),
                         ),
                       ),
                       error: (_, __) => const SizedBox.shrink(),
@@ -173,35 +177,51 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'ENGINEERS (${engineers.length})',
-                              style: AppTypography.xs.copyWith(
-                                fontWeight: AppFontWeight.semibold,
-                                color: AppColors.textMuted,
-                                letterSpacing: 0.5,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Engineers in District',
+                                  style: AppTypography.title3(
+                                      color: colors.textPrimary),
+                                ),
+                                Text(
+                                  '${engineers.length} total',
+                                  style: AppTypography.caption(
+                                      color: colors.textMuted),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             if (engineers.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.only(top: AppSpacing.xl),
+                              AppCard(
+                                padding: const EdgeInsets.all(
+                                    AppSpacing.cardPaddingLg),
                                 child: Center(
                                   child: Text(
-                                    'No engineers assigned to this manager.',
-                                    style: TextStyle(
-                                        color: AppColors.textMuted,
-                                        fontSize: AppFontSize.md),
+                                    'No engineers currently assigned to this manager.',
+                                    style: AppTypography.subhead(
+                                        color: colors.textMuted),
                                   ),
                                 ),
                               )
                             else
-                              ...engineers.map(
-                                  (eng) => _ManagerEngineerCard(engineer: eng)),
+                              ListView.separated(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: engineers.length,
+                                separatorBuilder: (_, __) =>
+                                    const SizedBox(height: AppSpacing.sm),
+                                itemBuilder: (context, index) {
+                                  final eng = engineers[index];
+                                  return _OtherEngineerCard(engineer: eng);
+                                },
+                              ),
                           ],
                         );
                       },
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: AppSpacing.xxl),
                   ],
                 ),
               ),
@@ -213,43 +233,92 @@ class OtherManagerProfileScreen extends ConsumerWidget {
   }
 }
 
-class _ManagerEngineerCard extends StatelessWidget {
-  final Engineer engineer;
+class _ContactRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final VoidCallback? onTap;
 
-  const _ManagerEngineerCard({required this.engineer});
+  const _ContactRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4.0),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: colors.primaryAction),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: AppTypography.caption(color: colors.textMuted),
+                  ),
+                  Text(
+                    value,
+                    style: AppTypography.body(
+                      color: colors.textPrimary,
+                      weight: AppFontWeight.medium,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (onTap != null)
+              Icon(LucideIcons.copy, size: 14, color: colors.textMuted),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _OtherEngineerCard extends StatelessWidget {
+  final Engineer engineer;
+
+  const _OtherEngineerCard({required this.engineer});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: Row(
         children: [
-          AppAvatar(name: engineer.fullName, size: 36),
-          const SizedBox(width: 10),
+          AppAvatar(name: engineer.fullName, size: 40),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   engineer.fullName,
-                  style: AppTypography.md.copyWith(
-                    fontWeight: AppFontWeight.medium,
-                    color: AppColors.textPrimary,
+                  style: AppTypography.body(
+                    color: colors.textPrimary,
+                    weight: AppFontWeight.semibold,
                   ),
                 ),
                 Text(
-                  engineer.phone,
-                  style:
-                      AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                  (engineer.designation != null &&
+                          engineer.designation!.isNotEmpty)
+                      ? engineer.designation!
+                      : 'Field Engineer',
+                  style: AppTypography.caption(color: colors.textSecondary),
                 ),
-                if (engineer.designation != null &&
-                    engineer.designation!.isNotEmpty)
-                  Text(
-                    engineer.designation!,
-                    style:
-                        AppTypography.xs.copyWith(color: AppColors.textMuted),
-                  ),
               ],
             ),
           ),
@@ -258,6 +327,7 @@ class _ManagerEngineerCard extends StatelessWidget {
             variant: engineer.isActive
                 ? AppBadgeVariant.success
                 : AppBadgeVariant.warning,
+            showDot: true,
           ),
         ],
       ),

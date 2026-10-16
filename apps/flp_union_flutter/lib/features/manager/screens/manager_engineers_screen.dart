@@ -3,13 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/models/engineer.dart';
 import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_filter_chip.dart';
+import '../../../shared/widgets/app_search_input.dart';
+import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../providers/engineer_provider.dart';
@@ -26,6 +28,7 @@ class _ManagerEngineersScreenState
     extends ConsumerState<ManagerEngineersScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
+  String _statusFilter = 'ALL'; // 'ALL' | 'ACTIVE' | 'INACTIVE'
 
   @override
   void dispose() {
@@ -37,97 +40,107 @@ class _ManagerEngineersScreenState
     setState(() => _searchQuery = val.trim());
   }
 
-  Future<void> _handleDelete(
-      BuildContext context, String id, String name) async {
+  Future<void> _handleDelete(String id, String name) async {
+    final colors = AppColors.of(context);
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
-        title: const Text('Delete Engineer',
-            style: TextStyle(color: AppColors.textPrimary)),
-        content: Text('Remove $name? This cannot be undone.',
-            style: const TextStyle(color: AppColors.textSecondary)),
+        backgroundColor: colors.card,
+        title: Text('Delete Engineer',
+            style: AppTypography.title2(color: colors.textPrimary)),
+        content: Text(
+            'Are you sure you want to remove $name? This action cannot be undone.',
+            style: AppTypography.body(color: colors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel',
-                style: TextStyle(color: AppColors.textSecondary)),
+            child: Text('Cancel',
+                style: AppTypography.body(
+                    color: colors.textSecondary, weight: AppFontWeight.medium)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child:
-                const Text('Delete', style: TextStyle(color: AppColors.danger)),
+            child: Text('Delete',
+                style: AppTypography.body(
+                    color: colors.danger, weight: AppFontWeight.semibold)),
           ),
         ],
       ),
     );
 
     if (confirm == true && mounted) {
+      final messenger = ScaffoldMessenger.of(context);
       try {
         await ref.read(engineerMutationsProvider.notifier).deleteEngineer(id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Engineer deleted successfully'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
+        messenger.showSnackBar(
+          const SnackBar(
+            content: Text('Engineer removed successfully'),
+            backgroundColor: AppColors.darkSuccess,
+          ),
+        );
       } catch (err) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to delete engineer: $err'),
-              backgroundColor: AppColors.danger,
-            ),
-          );
-        }
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete engineer: $err'),
+            backgroundColor: AppColors.darkDanger,
+          ),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final engineersAsync = ref.watch(myEngineersProvider(_searchQuery));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         top: true,
         bottom: false,
         child: Column(
           children: [
-            // Header Row
+            // Header Bar
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
+                horizontal: AppSpacing.screenPadding,
                 vertical: AppSpacing.md,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'My Engineers',
-                    style: AppTypography.xxl.copyWith(
-                      fontWeight: AppFontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Engineers',
+                        style: AppTypography.title1(color: colors.textPrimary),
+                      ),
+                      engineersAsync.when(
+                        data: (list) => Text(
+                          '${list.length} in your workforce',
+                          style: AppTypography.caption(color: colors.textMuted),
+                        ),
+                        loading: () => Text(
+                          'Loading directory...',
+                          style: AppTypography.caption(color: colors.textMuted),
+                        ),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
                   ),
-                  GestureDetector(
-                    onTap: () => context.push('/manager/engineers/create'),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        color: AppColors.accent,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        LucideIcons.plus,
-                        size: 20,
-                        color: AppColors.textPrimary,
-                      ),
+                  ElevatedButton.icon(
+                    onPressed: () => context.push('/manager/engineers/create'),
+                    icon: const Icon(LucideIcons.plus, size: 16),
+                    label: const Text('Add Engineer'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.primaryAction,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      minimumSize: const Size(0, 38),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
                     ),
                   ),
                 ],
@@ -135,81 +148,102 @@ class _ManagerEngineersScreenState
             ),
 
             // Search Bar
-            Container(
-              height: 44,
-              margin: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: AppRadius.borderMd,
-                border: Border.all(color: AppColors.border, width: 1),
-              ),
-              child: Row(
-                children: [
-                  const Icon(LucideIcons.search,
-                      size: 16, color: AppColors.textMuted),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      style: AppTypography.md
-                          .copyWith(color: AppColors.textPrimary),
-                      cursorColor: AppColors.accent,
-                      decoration: const InputDecoration(
-                        hintText: 'Search engineers...',
-                        hintStyle: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: AppFontSize.md),
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                    ),
-                  ),
-                ],
+              child: AppSearchInput(
+                controller: _searchController,
+                placeholder: 'Search by name, role, phone...',
+                onChanged: _onSearchChanged,
+                onClear: () => setState(() => _searchQuery = ''),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
 
-            // Engineers List / States
+            // Status Filter Chips Row
+            engineersAsync.maybeWhen(
+              data: (list) {
+                final activeCount = list.where((e) => e.isActive).length;
+                final inactiveCount = list.where((e) => !e.isActive).length;
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding,
+                    vertical: 4,
+                  ),
+                  child: Row(
+                    children: [
+                      AppFilterChip(
+                        label: 'All',
+                        isSelected: _statusFilter == 'ALL',
+                        count: list.length,
+                        onTap: () => setState(() => _statusFilter = 'ALL'),
+                      ),
+                      const SizedBox(width: 8),
+                      AppFilterChip(
+                        label: 'Active',
+                        isSelected: _statusFilter == 'ACTIVE',
+                        count: activeCount,
+                        onTap: () => setState(() => _statusFilter = 'ACTIVE'),
+                      ),
+                      const SizedBox(width: 8),
+                      AppFilterChip(
+                        label: 'Inactive',
+                        isSelected: _statusFilter == 'INACTIVE',
+                        count: inactiveCount,
+                        onTap: () => setState(() => _statusFilter = 'INACTIVE'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              orElse: () => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+
+            // List of Engineers
             Expanded(
               child: engineersAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.accent),
-                ),
+                loading: () => const AppSkeletonList(count: 6),
                 error: (err, stack) => ErrorStateWidget(
                   message: 'Unable to load engineers.',
                   onRetry: () => ref.refresh(myEngineersProvider(_searchQuery)),
                 ),
-                data: (engineers) {
+                data: (allEngineers) {
+                  // Apply active/inactive filter
+                  final engineers = allEngineers.where((e) {
+                    if (_statusFilter == 'ACTIVE') return e.isActive;
+                    if (_statusFilter == 'INACTIVE') return !e.isActive;
+                    return true;
+                  }).toList();
+
                   if (engineers.isEmpty) {
                     return RefreshIndicator(
-                      color: AppColors.accent,
-                      backgroundColor: AppColors.card,
+                      color: colors.primaryAction,
+                      backgroundColor: colors.card,
                       onRefresh: () async =>
                           ref.refresh(myEngineersProvider(_searchQuery).future),
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: SizedBox(
-                          height: 400,
+                          height: 420,
                           child: EmptyStateWidget(
                             title: _searchQuery.isNotEmpty
-                                ? 'No engineers found'
-                                : 'No engineers yet',
+                                ? 'No results found'
+                                : (_statusFilter != 'ALL'
+                                    ? 'No ${_statusFilter.toLowerCase()} engineers'
+                                    : 'No engineers yet'),
                             description: _searchQuery.isNotEmpty
-                                ? 'Try a different search term.'
-                                : 'Tap the + button to add your first engineer.',
+                                ? 'No engineers matched "$_searchQuery".'
+                                : 'Add engineers to manage assignments, documents, and credentials.',
                             actionLabel:
-                                _searchQuery.isEmpty ? 'Add Engineer' : null,
-                            onAction: _searchQuery.isEmpty
-                                ? () =>
-                                    context.push('/manager/engineers/create')
-                                : null,
+                                _searchQuery.isEmpty && _statusFilter == 'ALL'
+                                    ? 'Add First Engineer'
+                                    : null,
+                            onAction: () =>
+                                context.push('/manager/engineers/create'),
                           ),
                         ),
                       ),
@@ -217,13 +251,13 @@ class _ManagerEngineersScreenState
                   }
 
                   return RefreshIndicator(
-                    color: AppColors.accent,
-                    backgroundColor: AppColors.card,
+                    color: colors.primaryAction,
+                    backgroundColor: colors.card,
                     onRefresh: () async =>
                         ref.refresh(myEngineersProvider(_searchQuery).future),
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
+                        horizontal: AppSpacing.screenPadding,
                         vertical: AppSpacing.sm,
                       ),
                       itemCount: engineers.length,
@@ -231,14 +265,13 @@ class _ManagerEngineersScreenState
                           const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = engineers[index];
-                        return _EngineerCard(
+                        return _EngineerRowCard(
                           engineer: item,
                           onTap: () =>
                               context.push('/manager/engineers/${item.id}'),
                           onEdit: () => context
                               .push('/manager/engineers/edit?id=${item.id}'),
-                          onDelete: () =>
-                              _handleDelete(context, item.id, item.fullName),
+                          onDelete: () => _handleDelete(item.id, item.fullName),
                         );
                       },
                     ),
@@ -253,13 +286,13 @@ class _ManagerEngineersScreenState
   }
 }
 
-class _EngineerCard extends StatelessWidget {
+class _EngineerRowCard extends StatelessWidget {
   final Engineer engineer;
   final VoidCallback onTap;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
-  const _EngineerCard({
+  const _EngineerRowCard({
     required this.engineer,
     required this.onTap,
     required this.onEdit,
@@ -268,94 +301,102 @@ class _EngineerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return AppCard(
       onTap: onTap,
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           AppAvatar(name: engineer.fullName, size: 44),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  engineer.fullName,
-                  style: AppTypography.md.copyWith(
-                    fontWeight: AppFontWeight.semibold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                if (engineer.designation != null &&
-                    engineer.designation!.isNotEmpty) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    engineer.designation!,
-                    style: AppTypography.sm
-                        .copyWith(color: AppColors.textSecondary),
-                  ),
-                ],
-                const SizedBox(height: 4),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 6,
-                  runSpacing: 4,
+                Row(
                   children: [
-                    if (engineer.district?.name != null)
-                      Text(
-                        engineer.district!.name,
-                        style: AppTypography.xs
-                            .copyWith(color: AppColors.textMuted),
+                    Expanded(
+                      child: Text(
+                        engineer.fullName,
+                        style: AppTypography.body(
+                          color: colors.textPrimary,
+                          weight: AppFontWeight.semibold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    if (engineer.experienceYears != null)
-                      Text(
-                        '${engineer.experienceYears} yrs exp',
-                        style: AppTypography.xs
-                            .copyWith(color: AppColors.textMuted),
-                      ),
+                    ),
+                    const SizedBox(width: 6),
                     AppBadge(
                       label: engineer.isActive ? 'Active' : 'Inactive',
                       variant: engineer.isActive
                           ? AppBadgeVariant.success
                           : AppBadgeVariant.warning,
+                      showDot: true,
                     ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  (engineer.designation != null &&
+                          engineer.designation!.isNotEmpty)
+                      ? engineer.designation!
+                      : 'Field Engineer',
+                  style: AppTypography.subhead(color: colors.textSecondary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    if (engineer.district?.name != null) ...[
+                      Icon(LucideIcons.mapPin,
+                          size: 12, color: colors.textMuted),
+                      const SizedBox(width: 3),
+                      Text(
+                        engineer.district!.name,
+                        style: AppTypography.caption(color: colors.textMuted),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                    if (engineer.experienceYears != null) ...[
+                      Icon(LucideIcons.briefcase,
+                          size: 12, color: colors.textMuted),
+                      const SizedBox(width: 3),
+                      Text(
+                        '${engineer.experienceYears}y exp',
+                        style: AppTypography.caption(color: colors.textMuted),
+                      ),
+                    ],
                   ],
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
 
           // Action Buttons
           Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              GestureDetector(
-                onTap: onEdit,
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(LucideIcons.pencil,
-                      size: 16, color: AppColors.accent),
-                ),
+              IconButton(
+                icon: Icon(LucideIcons.pencil,
+                    size: 16, color: colors.textSecondary),
+                tooltip: 'Edit',
+                splashRadius: 18,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onPressed: onEdit,
               ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: onDelete,
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(LucideIcons.trash2,
-                      size: 16, color: AppColors.danger),
-                ),
+              IconButton(
+                icon: Icon(LucideIcons.trash2, size: 16, color: colors.danger),
+                tooltip: 'Delete',
+                splashRadius: 18,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onPressed: onDelete,
               ),
             ],
           ),

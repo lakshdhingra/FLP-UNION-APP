@@ -4,7 +4,8 @@ import '../constants/api_constants.dart';
 abstract class SecureStorageService {
   Future<String?> getAccessToken();
   Future<String?> getRefreshToken();
-  Future<void> setTokens({required String accessToken, required String refreshToken});
+  Future<void> setTokens(
+      {required String accessToken, required String refreshToken});
   Future<void> clearTokens();
 }
 
@@ -33,9 +34,11 @@ class SecureStorageServiceImpl implements SecureStorageService {
   }
 
   @override
-  Future<void> setTokens({required String accessToken, required String refreshToken}) async {
+  Future<void> setTokens(
+      {required String accessToken, required String refreshToken}) async {
     await _storage.write(key: ApiConstants.tokenKey, value: accessToken);
-    await _storage.write(key: ApiConstants.refreshTokenKey, value: refreshToken);
+    await _storage.write(
+        key: ApiConstants.refreshTokenKey, value: refreshToken);
   }
 
   @override
