@@ -14,6 +14,7 @@ import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -446,6 +447,40 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                           icon: const Icon(LucideIcons.logOut, size: 16),
                           onPress: _handleLogout,
                           variant: AppButtonVariant.danger,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+
+                      // Official Society Attribution
+                      StaggeredSlideFade(
+                        index: 5,
+                        child: Center(
+                          child: Column(
+                            children: [
+                              const AppLogo(size: 52),
+                              const SizedBox(height: 8),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                child: Text(
+                                  'Telangana Authorised Service Centre Proprietors Welfare Society',
+                                  style: AppTypography.caption(
+                                    color: colors.textSecondary,
+                                    weight: AppFontWeight.medium,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'Unity & Service • Version 1.0.0',
+                                style: AppTypography.font(
+                                  fontSize: 10.5,
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xxl),

@@ -11,6 +11,7 @@ import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../providers/manager_dashboard_provider.dart';
@@ -90,15 +91,8 @@ class _ManagerDashboardScreenState
                           children: [
                             Row(
                               children: [
-                                Container(
-                                  width: 7,
-                                  height: 7,
-                                  decoration: BoxDecoration(
-                                    color: colors.primaryAction,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 6),
+                                const AppLogo(size: 24),
+                                const SizedBox(width: 8),
                                 Text(
                                   'TASPU FLP UNION',
                                   style: AppTypography.font(

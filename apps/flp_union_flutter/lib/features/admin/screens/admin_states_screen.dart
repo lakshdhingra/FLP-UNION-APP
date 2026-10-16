@@ -8,6 +8,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../models/admin_state_dto.dart';
@@ -127,26 +128,32 @@ class AdminStatesScreen extends ConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          'States & Regions',
-                          style:
-                              AppTypography.title1(color: colors.textPrimary),
-                        ),
-                        statesAsync.when(
-                          data: (list) => Text(
-                            '${list.length} regional jurisdictions',
-                            style:
-                                AppTypography.caption(color: colors.textMuted),
-                          ),
-                          loading: () => Text(
-                            'Loading regions...',
-                            style:
-                                AppTypography.caption(color: colors.textMuted),
-                          ),
-                          error: (_, __) => const SizedBox.shrink(),
+                        const AppLogo(size: 34),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'States & Regions',
+                              style: AppTypography.title1(
+                                  color: colors.textPrimary),
+                            ),
+                            statesAsync.when(
+                              data: (list) => Text(
+                                '${list.length} regional jurisdictions',
+                                style: AppTypography.caption(
+                                    color: colors.textMuted),
+                              ),
+                              loading: () => Text(
+                                'Loading regions...',
+                                style: AppTypography.caption(
+                                    color: colors.textMuted),
+                              ),
+                              error: (_, __) => const SizedBox.shrink(),
+                            ),
+                          ],
                         ),
                       ],
                     ),

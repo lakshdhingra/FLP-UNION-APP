@@ -9,6 +9,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -92,19 +93,25 @@ class AdminDashboardScreen extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
                             children: [
-                              Text(
-                                'Admin Overview',
-                                style: AppTypography.title1(
-                                    color: colors.textPrimary),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Platform workforce and infrastructure stats',
-                                style: AppTypography.caption(
-                                    color: colors.textMuted),
+                              const AppLogo(size: 38),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Admin Overview',
+                                    style: AppTypography.title1(
+                                        color: colors.textPrimary),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Platform workforce and infrastructure stats',
+                                    style: AppTypography.caption(
+                                        color: colors.textMuted),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

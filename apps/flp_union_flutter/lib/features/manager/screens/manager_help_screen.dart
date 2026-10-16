@@ -12,6 +12,7 @@ import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/app_text_input.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
@@ -169,18 +170,26 @@ class _ManagerHelpScreenState extends ConsumerState<ManagerHelpScreen> {
                   horizontal: AppSpacing.screenPadding,
                   vertical: AppSpacing.md,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      'Help & Support',
-                      style: AppTypography.title1(color: colors.textPrimary),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Help & Support',
+                          style:
+                              AppTypography.title1(color: colors.textPrimary),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Submit inquiries or review existing requests',
+                          style: AppTypography.caption(color: colors.textMuted),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Submit inquiries or review existing requests',
-                      style: AppTypography.caption(color: colors.textMuted),
-                    ),
+                    const AppLogo(size: 38),
                   ],
                 ),
               ),

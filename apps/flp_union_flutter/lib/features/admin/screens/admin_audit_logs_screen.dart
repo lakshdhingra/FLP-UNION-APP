@@ -8,6 +8,7 @@ import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../../../shared/widgets/error_state_widget.dart';
@@ -26,7 +27,14 @@ class AdminAuditLogsScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('System Audit Logs'),
+          title: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppLogo(size: 26),
+              SizedBox(width: 8),
+              Text('System Audit Logs'),
+            ],
+          ),
         ),
         body: SafeArea(
           top: false,

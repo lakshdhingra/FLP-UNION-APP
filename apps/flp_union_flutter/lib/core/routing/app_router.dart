@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/widgets/app_animations.dart';
 import '../../shared/widgets/app_background.dart';
+import '../../shared/widgets/app_logo.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
@@ -59,7 +60,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AppBackground(
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppLogo(size: 96, heroTag: 'app_logo'),
+                  SizedBox(height: 24),
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.2),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

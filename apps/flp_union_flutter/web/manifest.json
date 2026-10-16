@@ -1,11 +1,11 @@
 {
-    "name": "flp_union_app",
-    "short_name": "flp_union_app",
+    "name": "TASPU FLP Union",
+    "short_name": "FLP Union",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#111315",
+    "theme_color": "#111315",
+    "description": "Telangana Authorised Service Centre Proprietors Welfare Society workforce management application.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

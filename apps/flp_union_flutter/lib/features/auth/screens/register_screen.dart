@@ -10,6 +10,7 @@ import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_text_input.dart';
 import '../providers/auth_provider.dart';
 
@@ -209,6 +210,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       index: 0,
                       child: Column(
                         children: [
+                          const AppLogo(
+                            size: 72,
+                            heroTag: 'app_logo',
+                          ),
+                          const SizedBox(height: 12),
                           Text(
                             'Create Manager Account',
                             style:

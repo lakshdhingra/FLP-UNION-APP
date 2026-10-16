@@ -9,6 +9,7 @@ import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_text_input.dart';
 import '../providers/auth_provider.dart';
 
@@ -112,29 +113,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       index: 0,
                       child: Column(
                         children: [
-                          Container(
-                            width: 56,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: colors.primaryAction,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withAlpha(35),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              'T',
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: AppFontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                          const AppLogo(
+                            size: 88,
+                            heroTag: 'app_logo',
                           ),
                           const SizedBox(height: 16),
                           Text(

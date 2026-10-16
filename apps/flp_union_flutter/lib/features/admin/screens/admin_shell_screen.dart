@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../shared/widgets/app_background.dart';
+import '../../../shared/widgets/app_logo.dart';
 
 class AdminShellScreen extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -55,23 +56,7 @@ class AdminShellScreen extends StatelessWidget {
                             horizontal: 20, vertical: 24),
                         child: Row(
                           children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: colors.primaryAction,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              alignment: Alignment.center,
-                              child: const Text(
-                                'A',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: AppFontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
+                            const AppLogo(size: 34),
                             const SizedBox(width: 10),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

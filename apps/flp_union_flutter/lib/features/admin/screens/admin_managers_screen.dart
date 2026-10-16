@@ -8,6 +8,7 @@ import '../../../shared/widgets/app_avatar.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_search_input.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
@@ -76,6 +77,7 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                         ),
                       ],
                     ),
+                    const AppLogo(size: 36),
                   ],
                 ),
               ),

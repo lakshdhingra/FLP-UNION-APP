@@ -10,6 +10,7 @@ import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../../../shared/widgets/error_state_widget.dart';
@@ -110,14 +111,28 @@ class AdminIssuesScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Support Tickets',
-                      style: AppTypography.title1(color: colors.textPrimary),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Platform requests submitted by district managers',
-                      style: AppTypography.caption(color: colors.textMuted),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Support Tickets',
+                              style: AppTypography.title1(
+                                  color: colors.textPrimary),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Platform requests submitted by district managers',
+                              style: AppTypography.caption(
+                                  color: colors.textMuted),
+                            ),
+                          ],
+                        ),
+                        const AppLogo(size: 38),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Row(

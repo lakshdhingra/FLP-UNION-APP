@@ -14,6 +14,7 @@ import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_badge.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_filter_chip.dart';
+import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_search_input.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
@@ -121,26 +122,32 @@ class _ManagerEngineersScreenState
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        Text(
-                          'Engineers',
-                          style:
-                              AppTypography.title1(color: colors.textPrimary),
-                        ),
-                        engineersAsync.when(
-                          data: (list) => Text(
-                            '${list.length} in your workforce',
-                            style:
-                                AppTypography.caption(color: colors.textMuted),
-                          ),
-                          loading: () => Text(
-                            'Loading directory...',
-                            style:
-                                AppTypography.caption(color: colors.textMuted),
-                          ),
-                          error: (_, __) => const SizedBox.shrink(),
+                        const AppLogo(size: 34),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Engineers',
+                              style: AppTypography.title1(
+                                  color: colors.textPrimary),
+                            ),
+                            engineersAsync.when(
+                              data: (list) => Text(
+                                '${list.length} in your workforce',
+                                style: AppTypography.caption(
+                                    color: colors.textMuted),
+                              ),
+                              loading: () => Text(
+                                'Loading directory...',
+                                style: AppTypography.caption(
+                                    color: colors.textMuted),
+                              ),
+                              error: (_, __) => const SizedBox.shrink(),
+                            ),
+                          ],
                         ),
                       ],
                     ),
