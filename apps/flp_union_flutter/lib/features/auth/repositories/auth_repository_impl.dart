@@ -106,21 +106,33 @@ class AuthRepositoryImpl implements AuthRepository {
           return null;
         }
 
-        final refreshRes = await _apiClient.post(
-          ApiConstants.refresh,
-          data: {'refreshToken': refreshToken},
-        );
+        try {
+          final refreshRes = await _apiClient.post(
+            ApiConstants.refresh,
+            data: {'refreshToken': refreshToken},
+          );
 
-        final newAccess = refreshRes.data['accessToken'] as String;
-        final newRefresh = refreshRes.data['refreshToken'] as String;
-        await _storage.setTokens(accessToken: newAccess, refreshToken: newRefresh);
+          final newAccess = refreshRes.data['accessToken'] as String?;
+          final newRefresh = refreshRes.data['refreshToken'] as String?;
 
-        final newPayload = _decodeJwt(newAccess);
-        return AuthUser(
-          userId: newPayload['sub'] ?? newPayload['userId'] ?? '',
-          role: UserRole.fromString(newPayload['role'] ?? 'MANAGER'),
-          email: newPayload['email'],
-        );
+          if (newAccess != null && newRefresh != null) {
+            await _storage.setTokens(accessToken: newAccess, refreshToken: newRefresh);
+
+            final newPayload = _decodeJwt(newAccess);
+            return AuthUser(
+              userId: newPayload['sub'] ?? newPayload['userId'] ?? '',
+              role: UserRole.fromString(newPayload['role'] ?? 'MANAGER'),
+              email: newPayload['email'],
+            );
+          }
+        } on DioException catch (refreshErr) {
+          if (refreshErr.response?.statusCode == 401 || refreshErr.response?.statusCode == 400) {
+            await _storage.clearTokens();
+            return null;
+          }
+          // Network error during refresh: return unexpired state or null without clearing tokens
+          return null;
+        }
       }
 
       return AuthUser(
@@ -129,7 +141,6 @@ class AuthRepositoryImpl implements AuthRepository {
         email: payload['email'],
       );
     } catch (_) {
-      await _storage.clearTokens();
       return null;
     }
   }

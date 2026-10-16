@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -18,10 +18,12 @@ class ManagerEngineersScreen extends ConsumerStatefulWidget {
   const ManagerEngineersScreen({super.key});
 
   @override
-  ConsumerState<ManagerEngineersScreen> createState() => _ManagerEngineersScreenState();
+  ConsumerState<ManagerEngineersScreen> createState() =>
+      _ManagerEngineersScreenState();
 }
 
-class _ManagerEngineersScreenState extends ConsumerState<ManagerEngineersScreen> {
+class _ManagerEngineersScreenState
+    extends ConsumerState<ManagerEngineersScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -35,21 +37,26 @@ class _ManagerEngineersScreenState extends ConsumerState<ManagerEngineersScreen>
     setState(() => _searchQuery = val.trim());
   }
 
-  Future<void> _handleDelete(BuildContext context, String id, String name) async {
+  Future<void> _handleDelete(
+      BuildContext context, String id, String name) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        title: const Text('Delete Engineer', style: TextStyle(color: AppColors.textPrimary)),
-        content: Text('Remove $name? This cannot be undone.', style: const TextStyle(color: AppColors.textSecondary)),
+        title: const Text('Delete Engineer',
+            style: TextStyle(color: AppColors.textPrimary)),
+        content: Text('Remove $name? This cannot be undone.',
+            style: const TextStyle(color: AppColors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete', style: TextStyle(color: AppColors.danger)),
+            child:
+                const Text('Delete', style: TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -142,17 +149,21 @@ class _ManagerEngineersScreenState extends ConsumerState<ManagerEngineersScreen>
               ),
               child: Row(
                 children: [
-                  const Icon(LucideIcons.search, size: 16, color: AppColors.textMuted),
+                  const Icon(LucideIcons.search,
+                      size: 16, color: AppColors.textMuted),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
                       controller: _searchController,
                       onChanged: _onSearchChanged,
-                      style: AppTypography.md.copyWith(color: AppColors.textPrimary),
+                      style: AppTypography.md
+                          .copyWith(color: AppColors.textPrimary),
                       cursorColor: AppColors.accent,
                       decoration: const InputDecoration(
                         hintText: 'Search engineers...',
-                        hintStyle: TextStyle(color: AppColors.textMuted, fontSize: AppFontSize.md),
+                        hintStyle: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: AppFontSize.md),
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
@@ -180,19 +191,24 @@ class _ManagerEngineersScreenState extends ConsumerState<ManagerEngineersScreen>
                     return RefreshIndicator(
                       color: AppColors.accent,
                       backgroundColor: AppColors.card,
-                      onRefresh: () async => ref.refresh(myEngineersProvider(_searchQuery).future),
+                      onRefresh: () async =>
+                          ref.refresh(myEngineersProvider(_searchQuery).future),
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: SizedBox(
                           height: 400,
                           child: EmptyStateWidget(
-                            title: _searchQuery.isNotEmpty ? 'No engineers found' : 'No engineers yet',
+                            title: _searchQuery.isNotEmpty
+                                ? 'No engineers found'
+                                : 'No engineers yet',
                             description: _searchQuery.isNotEmpty
                                 ? 'Try a different search term.'
                                 : 'Tap the + button to add your first engineer.',
-                            actionLabel: _searchQuery.isEmpty ? 'Add Engineer' : null,
+                            actionLabel:
+                                _searchQuery.isEmpty ? 'Add Engineer' : null,
                             onAction: _searchQuery.isEmpty
-                                ? () => context.push('/manager/engineers/create')
+                                ? () =>
+                                    context.push('/manager/engineers/create')
                                 : null,
                           ),
                         ),
@@ -203,21 +219,26 @@ class _ManagerEngineersScreenState extends ConsumerState<ManagerEngineersScreen>
                   return RefreshIndicator(
                     color: AppColors.accent,
                     backgroundColor: AppColors.card,
-                    onRefresh: () async => ref.refresh(myEngineersProvider(_searchQuery).future),
+                    onRefresh: () async =>
+                        ref.refresh(myEngineersProvider(_searchQuery).future),
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.md,
                         vertical: AppSpacing.sm,
                       ),
                       itemCount: engineers.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = engineers[index];
                         return _EngineerCard(
                           engineer: item,
-                          onTap: () => context.push('/manager/engineers/${item.id}'),
-                          onEdit: () => context.push('/manager/engineers/edit?id=${item.id}'),
-                          onDelete: () => _handleDelete(context, item.id, item.fullName),
+                          onTap: () =>
+                              context.push('/manager/engineers/${item.id}'),
+                          onEdit: () => context
+                              .push('/manager/engineers/edit?id=${item.id}'),
+                          onDelete: () =>
+                              _handleDelete(context, item.id, item.fullName),
                         );
                       },
                     ),
@@ -265,11 +286,13 @@ class _EngineerCard extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                if (engineer.designation != null && engineer.designation!.isNotEmpty) ...[
+                if (engineer.designation != null &&
+                    engineer.designation!.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     engineer.designation!,
-                    style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.sm
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                 ],
                 const SizedBox(height: 4),
@@ -281,12 +304,14 @@ class _EngineerCard extends StatelessWidget {
                     if (engineer.district?.name != null)
                       Text(
                         engineer.district!.name,
-                        style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                        style: AppTypography.xs
+                            .copyWith(color: AppColors.textMuted),
                       ),
                     if (engineer.experienceYears != null)
                       Text(
                         '${engineer.experienceYears} yrs exp',
-                        style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                        style: AppTypography.xs
+                            .copyWith(color: AppColors.textMuted),
                       ),
                     AppBadge(
                       label: engineer.isActive ? 'Active' : 'Inactive',
@@ -313,7 +338,8 @@ class _EngineerCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(LucideIcons.pencil, size: 16, color: AppColors.accent),
+                  child: const Icon(LucideIcons.pencil,
+                      size: 16, color: AppColors.accent),
                 ),
               ),
               const SizedBox(width: 8),
@@ -327,7 +353,8 @@ class _EngineerCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(LucideIcons.trash2, size: 16, color: AppColors.danger),
+                  child: const Icon(LucideIcons.trash2,
+                      size: 16, color: AppColors.danger),
                 ),
               ),
             ],

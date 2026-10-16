@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -18,16 +18,20 @@ class AdminDashboardScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        title: const Text('Sign Out', style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text('Sign out of admin?', style: TextStyle(color: AppColors.textSecondary)),
+        title: const Text('Sign Out',
+            style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text('Sign out of admin?',
+            style: TextStyle(color: AppColors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sign Out', style: TextStyle(color: AppColors.danger)),
+            child: const Text('Sign Out',
+                style: TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -84,17 +88,20 @@ class AdminDashboardScreen extends ConsumerWidget {
                             const SizedBox(height: 2),
                             Text(
                               'TASPU Platform Overview',
-                              style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.sm
+                                  .copyWith(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
                         Row(
                           children: [
                             GestureDetector(
-                              onTap: () => context.push('/admin/dashboard/audit-logs'),
+                              onTap: () =>
+                                  context.push('/admin/dashboard/audit-logs'),
                               child: const Padding(
                                 padding: EdgeInsets.all(AppSpacing.sm),
-                                child: Icon(LucideIcons.history, size: 20, color: AppColors.accent),
+                                child: Icon(LucideIcons.history,
+                                    size: 20, color: AppColors.accent),
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -102,7 +109,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                               onTap: () => _handleLogout(context, ref),
                               child: const Padding(
                                 padding: EdgeInsets.all(AppSpacing.sm),
-                                child: Icon(LucideIcons.logOut, size: 20, color: AppColors.danger),
+                                child: Icon(LucideIcons.logOut,
+                                    size: 20, color: AppColors.danger),
                               ),
                             ),
                           ],
@@ -119,25 +127,29 @@ class AdminDashboardScreen extends ConsumerWidget {
                         _StatGridCard(
                           label: 'States',
                           value: data.states,
-                          icon: const Icon(LucideIcons.map, size: 20, color: AppColors.info),
+                          icon: const Icon(LucideIcons.map,
+                              size: 20, color: AppColors.info),
                           color: AppColors.info,
                         ),
                         _StatGridCard(
                           label: 'Managers',
                           value: data.managers,
-                          icon: const Icon(LucideIcons.userCheck, size: 20, color: AppColors.accent),
+                          icon: const Icon(LucideIcons.userCheck,
+                              size: 20, color: AppColors.accent),
                           color: AppColors.accent,
                         ),
                         _StatGridCard(
                           label: 'Engineers',
                           value: data.engineers,
-                          icon: const Icon(LucideIcons.users, size: 20, color: AppColors.success),
+                          icon: const Icon(LucideIcons.users,
+                              size: 20, color: AppColors.success),
                           color: AppColors.success,
                         ),
                         _StatGridCard(
                           label: 'Open Issues',
                           value: data.openIssues,
-                          icon: const Icon(LucideIcons.alertCircle, size: 20, color: AppColors.warning),
+                          icon: const Icon(LucideIcons.alertCircle,
+                              size: 20, color: AppColors.warning),
                           color: AppColors.warning,
                         ),
                       ],
@@ -154,7 +166,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Active Engineers',
-                                  style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                                  style: AppTypography.xs
+                                      .copyWith(color: AppColors.textMuted),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -176,7 +189,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Inactive',
-                                  style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                                  style: AppTypography.xs
+                                      .copyWith(color: AppColors.textMuted),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -222,14 +236,16 @@ class AdminDashboardScreen extends ConsumerWidget {
                                   width: 80,
                                   child: Text(
                                     s.state,
-                                    style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                                    style: AppTypography.sm.copyWith(
+                                        color: AppColors.textSecondary),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 Expanded(
                                   child: Container(
                                     height: 6,
-                                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 8),
                                     decoration: BoxDecoration(
                                       color: AppColors.surface,
                                       borderRadius: BorderRadius.circular(3),
@@ -240,7 +256,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: AppColors.accent,
-                                          borderRadius: BorderRadius.circular(3),
+                                          borderRadius:
+                                              BorderRadius.circular(3),
                                         ),
                                       ),
                                     ),
@@ -250,7 +267,8 @@ class AdminDashboardScreen extends ConsumerWidget {
                                   width: 24,
                                   child: Text(
                                     '${s.count}',
-                                    style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                                    style: AppTypography.sm.copyWith(
+                                        color: AppColors.textSecondary),
                                     textAlign: TextAlign.right,
                                   ),
                                 ),
@@ -287,7 +305,10 @@ class _StatGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = (MediaQuery.of(context).size.width - (AppSpacing.md * 2) - AppSpacing.sm) / 2;
+    final width = (MediaQuery.of(context).size.width -
+            (AppSpacing.md * 2) -
+            AppSpacing.sm) /
+        2;
 
     return SizedBox(
       width: width,

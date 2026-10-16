@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -41,14 +41,17 @@ class AdminIssuesScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               'Update',
               style: TextStyle(
-                color: nextStatus == 'RESOLVED' ? AppColors.success : AppColors.accent,
+                color: nextStatus == 'RESOLVED'
+                    ? AppColors.success
+                    : AppColors.accent,
               ),
             ),
           ),
@@ -106,7 +109,8 @@ class AdminIssuesScreen extends ConsumerWidget {
                         label: 'All',
                         isSelected: filter.isEmpty,
                         onTap: () {
-                          ref.read(adminIssuesFilterProvider.notifier).state = '';
+                          ref.read(adminIssuesFilterProvider.notifier).state =
+                              '';
                         },
                       ),
                       const SizedBox(width: 8),
@@ -114,7 +118,8 @@ class AdminIssuesScreen extends ConsumerWidget {
                         label: 'Open Only',
                         isSelected: filter == 'OPEN',
                         onTap: () {
-                          ref.read(adminIssuesFilterProvider.notifier).state = 'OPEN';
+                          ref.read(adminIssuesFilterProvider.notifier).state =
+                              'OPEN';
                         },
                       ),
                     ],
@@ -138,7 +143,8 @@ class AdminIssuesScreen extends ConsumerWidget {
                     return RefreshIndicator(
                       color: AppColors.accent,
                       backgroundColor: AppColors.card,
-                      onRefresh: () async => ref.refresh(adminIssuesProvider.future),
+                      onRefresh: () async =>
+                          ref.refresh(adminIssuesProvider.future),
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: Container(
@@ -156,7 +162,8 @@ class AdminIssuesScreen extends ConsumerWidget {
                   return RefreshIndicator(
                     color: AppColors.accent,
                     backgroundColor: AppColors.card,
-                    onRefresh: () async => ref.refresh(adminIssuesProvider.future),
+                    onRefresh: () async =>
+                        ref.refresh(adminIssuesProvider.future),
                     child: ListView.separated(
                       padding: const EdgeInsets.only(
                         left: AppSpacing.md,
@@ -164,12 +171,14 @@ class AdminIssuesScreen extends ConsumerWidget {
                         bottom: 40,
                       ),
                       itemCount: response.data.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = response.data[index];
                         return _IssueCard(
                           item: item,
-                          onUpdateStatus: () => _handleUpdateStatus(context, ref, item),
+                          onUpdateStatus: () =>
+                              _handleUpdateStatus(context, ref, item),
                         );
                       },
                     ),
@@ -213,7 +222,8 @@ class _FilterTab extends StatelessWidget {
           label,
           style: AppTypography.xs.copyWith(
             color: isSelected ? AppColors.accent : AppColors.textSecondary,
-            fontWeight: isSelected ? AppFontWeight.semibold : AppFontWeight.regular,
+            fontWeight:
+                isSelected ? AppFontWeight.semibold : AppFontWeight.regular,
           ),
         ),
       ),
@@ -246,7 +256,8 @@ class _IssueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final showActionButton = item.status != 'RESOLVED' && item.status != 'CLOSED';
+    final showActionButton =
+        item.status != 'RESOLVED' && item.status != 'CLOSED';
     final isOpen = item.status == 'OPEN';
     final formattedDate = DateFormat.yMd().format(item.createdAt);
 

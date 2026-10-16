@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -17,7 +17,8 @@ class AdminManagersScreen extends ConsumerStatefulWidget {
   const AdminManagersScreen({super.key});
 
   @override
-  ConsumerState<AdminManagersScreen> createState() => _AdminManagersScreenState();
+  ConsumerState<AdminManagersScreen> createState() =>
+      _AdminManagersScreenState();
 }
 
 class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
@@ -67,7 +68,8 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                   ),
                   Text(
                     '${managersAsync.valueOrNull?.total ?? 0} total',
-                    style: AppTypography.sm.copyWith(color: AppColors.textMuted),
+                    style:
+                        AppTypography.sm.copyWith(color: AppColors.textMuted),
                   ),
                 ],
               ),
@@ -97,7 +99,8 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: AppTypography.md.copyWith(color: AppColors.textPrimary),
+                      style: AppTypography.md
+                          .copyWith(color: AppColors.textPrimary),
                       decoration: const InputDecoration(
                         hintText: 'Search...',
                         hintStyle: TextStyle(color: AppColors.textMuted),
@@ -106,7 +109,8 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                         contentPadding: EdgeInsets.zero,
                       ),
                       onChanged: (val) {
-                        ref.read(adminManagersSearchProvider.notifier).state = val;
+                        ref.read(adminManagersSearchProvider.notifier).state =
+                            val;
                       },
                     ),
                   ),
@@ -129,7 +133,8 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                     return RefreshIndicator(
                       color: AppColors.accent,
                       backgroundColor: AppColors.card,
-                      onRefresh: () async => ref.refresh(adminManagersProvider.future),
+                      onRefresh: () async =>
+                          ref.refresh(adminManagersProvider.future),
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: Container(
@@ -147,7 +152,8 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                   return RefreshIndicator(
                     color: AppColors.accent,
                     backgroundColor: AppColors.card,
-                    onRefresh: () async => ref.refresh(adminManagersProvider.future),
+                    onRefresh: () async =>
+                        ref.refresh(adminManagersProvider.future),
                     child: ListView.separated(
                       padding: const EdgeInsets.only(
                         left: AppSpacing.md,
@@ -155,7 +161,8 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                         bottom: 40,
                       ),
                       itemCount: response.data.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = response.data[index];
                         return _ManagerCard(item: item);
@@ -200,7 +207,8 @@ class _ManagerCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     item.email,
-                    style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.sm
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                 ],
                 const SizedBox(height: 4),

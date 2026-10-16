@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -36,14 +36,17 @@ class ManagerDashboardScreen extends ConsumerWidget {
             final stats = data.stats;
 
             // Sort designation entries to find top role
-            final sortedDesignations = stats.designationDistribution.entries.toList()
+            final sortedDesignations = stats.designationDistribution.entries
+                .toList()
               ..sort((a, b) => b.value.compareTo(a.value));
-            final topDesignation = sortedDesignations.isNotEmpty ? sortedDesignations.first : null;
+            final topDesignation =
+                sortedDesignations.isNotEmpty ? sortedDesignations.first : null;
 
             return RefreshIndicator(
               color: AppColors.accent,
               backgroundColor: AppColors.card,
-              onRefresh: () async => ref.refresh(managerDashboardProvider.future),
+              onRefresh: () async =>
+                  ref.refresh(managerDashboardProvider.future),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -87,7 +90,9 @@ class ManagerDashboardScreen extends ConsumerWidget {
                                           : 'District',
                                       variant: AppBadgeVariant.defaultValue,
                                     ),
-                                    const Text('•', style: TextStyle(color: AppColors.textMuted)),
+                                    const Text('•',
+                                        style: TextStyle(
+                                            color: AppColors.textMuted)),
                                     AppBadge(
                                       label: manager.state.name.isNotEmpty
                                           ? manager.state.name
@@ -116,7 +121,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _StatCard(
-                            icon: const Icon(LucideIcons.users, size: 20, color: AppColors.accent),
+                            icon: const Icon(LucideIcons.users,
+                                size: 20, color: AppColors.accent),
                             value: stats.totalEngineers,
                             label: 'Total',
                             color: AppColors.accent,
@@ -125,7 +131,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: _StatCard(
-                            icon: const Icon(LucideIcons.userCheck, size: 20, color: AppColors.success),
+                            icon: const Icon(LucideIcons.userCheck,
+                                size: 20, color: AppColors.success),
                             value: stats.activeEngineers,
                             label: 'Active',
                             color: AppColors.success,
@@ -134,7 +141,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: _StatCard(
-                            icon: const Icon(LucideIcons.award, size: 20, color: AppColors.warning),
+                            icon: const Icon(LucideIcons.award,
+                                size: 20, color: AppColors.warning),
                             value: stats.inactiveEngineers,
                             label: 'Inactive',
                             color: AppColors.warning,
@@ -157,7 +165,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(AppSpacing.md),
                       margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                       child: Column(
-                        children: stats.experienceDistribution.entries.map((entry) {
+                        children:
+                            stats.experienceDistribution.entries.map((entry) {
                           final range = entry.key;
                           final count = entry.value;
                           final fraction = stats.totalEngineers > 0
@@ -172,13 +181,15 @@ class ManagerDashboardScreen extends ConsumerWidget {
                                   width: 60,
                                   child: Text(
                                     '$range yrs',
-                                    style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                                    style: AppTypography.sm.copyWith(
+                                        color: AppColors.textSecondary),
                                   ),
                                 ),
                                 Expanded(
                                   child: Container(
                                     height: 6,
-                                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 8),
                                     decoration: BoxDecoration(
                                       color: AppColors.surface,
                                       borderRadius: BorderRadius.circular(3),
@@ -189,7 +200,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: AppColors.accent,
-                                          borderRadius: BorderRadius.circular(3),
+                                          borderRadius:
+                                              BorderRadius.circular(3),
                                         ),
                                       ),
                                     ),
@@ -199,7 +211,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                                   width: 24,
                                   child: Text(
                                     '$count',
-                                    style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                                    style: AppTypography.sm.copyWith(
+                                        color: AppColors.textSecondary),
                                     textAlign: TextAlign.right,
                                   ),
                                 ),
@@ -233,7 +246,8 @@ class ManagerDashboardScreen extends ConsumerWidget {
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                                  style: AppTypography.sm
+                                      .copyWith(color: AppColors.textSecondary),
                                   children: [
                                     const TextSpan(text: 'Most common role: '),
                                     TextSpan(
@@ -243,7 +257,9 @@ class ManagerDashboardScreen extends ConsumerWidget {
                                         fontWeight: AppFontWeight.semibold,
                                       ),
                                     ),
-                                    TextSpan(text: ' (${topDesignation.value} engineers)'),
+                                    TextSpan(
+                                        text:
+                                            ' (${topDesignation.value} engineers)'),
                                   ],
                                 ),
                               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -132,15 +132,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: AppColors.card,
-          title: const Text('Success', style: TextStyle(color: AppColors.textPrimary)),
-          content: const Text('Account created! Please log in.', style: TextStyle(color: AppColors.textSecondary)),
+          title: const Text('Success',
+              style: TextStyle(color: AppColors.textPrimary)),
+          content: const Text('Account created! Please log in.',
+              style: TextStyle(color: AppColors.textSecondary)),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(ctx).pop();
                 context.go('/login');
               },
-              child: const Text('OK', style: TextStyle(color: AppColors.accent)),
+              child:
+                  const Text('OK', style: TextStyle(color: AppColors.accent)),
             ),
           ],
         ),
@@ -176,7 +179,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               // Header
               Padding(
-                padding: const EdgeInsets.only(top: AppSpacing.lg, bottom: AppSpacing.xl),
+                padding: const EdgeInsets.only(
+                    top: AppSpacing.lg, bottom: AppSpacing.xl),
                 child: Column(
                   children: const [
                     Text(
@@ -247,14 +251,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         const SizedBox(height: 6),
                         GestureDetector(
-                          onTap: () => setState(() => _statePickerOpen = !_statePickerOpen),
+                          onTap: () => setState(
+                              () => _statePickerOpen = !_statePickerOpen),
                           child: Container(
                             height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
                               borderRadius: AppRadius.borderMd,
-                              border: Border.all(color: AppColors.border, width: 1),
+                              border:
+                                  Border.all(color: AppColors.border, width: 1),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -262,7 +269,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 Expanded(
                                   child: Text(
                                     statesAsync.when(
-                                      data: (_) => _selectedStateName ?? 'Select State',
+                                      data: (_) =>
+                                          _selectedStateName ?? 'Select State',
                                       loading: () => 'Loading states...',
                                       error: (_, __) => 'Failed to load',
                                     ),
@@ -274,14 +282,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     ),
                                   ),
                                 ),
-                                const Icon(LucideIcons.chevronDown, size: 18, color: AppColors.textMuted),
+                                const Icon(LucideIcons.chevronDown,
+                                    size: 18, color: AppColors.textMuted),
                               ],
                             ),
                           ),
                         ),
                         if (_stateError != null) ...[
                           const SizedBox(height: 4),
-                          Text(_stateError!, style: const TextStyle(fontSize: 11, color: AppColors.danger)),
+                          Text(_stateError!,
+                              style: const TextStyle(
+                                  fontSize: 11, color: AppColors.danger)),
                         ],
                         if (_statePickerOpen)
                           statesAsync.when(
@@ -290,21 +301,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
                                 borderRadius: AppRadius.borderMd,
-                                border: Border.all(color: AppColors.border, width: 1),
+                                border: Border.all(
+                                    color: AppColors.border, width: 1),
                               ),
                               child: Column(
-                                children: states.map((s) => ListTile(
-                                  title: Text(s.name, style: const TextStyle(color: AppColors.textPrimary)),
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedStateId = s.id;
-                                      _selectedStateName = s.name;
-                                      _selectedDistrictId = null;
-                                      _selectedDistrictName = null;
-                                      _statePickerOpen = false;
-                                    });
-                                  },
-                                )).toList(),
+                                children: states
+                                    .map((s) => ListTile(
+                                          title: Text(s.name,
+                                              style: const TextStyle(
+                                                  color:
+                                                      AppColors.textPrimary)),
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedStateId = s.id;
+                                              _selectedStateName = s.name;
+                                              _selectedDistrictId = null;
+                                              _selectedDistrictName = null;
+                                              _statePickerOpen = false;
+                                            });
+                                          },
+                                        ))
+                                    .toList(),
                               ),
                             ),
                             loading: () => const SizedBox.shrink(),
@@ -330,30 +347,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         GestureDetector(
                           onTap: () {
                             if (_selectedStateId != null) {
-                              setState(() => _districtPickerOpen = !_districtPickerOpen);
+                              setState(() =>
+                                  _districtPickerOpen = !_districtPickerOpen);
                             }
                           },
                           child: Opacity(
                             opacity: _selectedStateId != null ? 1.0 : 0.5,
                             child: Container(
                               height: 48,
-                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.md),
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
                                 borderRadius: AppRadius.borderMd,
-                                border: Border.all(color: AppColors.border, width: 1),
+                                border: Border.all(
+                                    color: AppColors.border, width: 1),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
                                       _selectedStateId == null
                                           ? 'Select State first'
                                           : (districtsAsync?.when(
-                                                data: (_) => _selectedDistrictName ?? 'Select District',
-                                                loading: () => 'Loading districts...',
-                                                error: (_, __) => 'Failed to load',
+                                                data: (_) =>
+                                                    _selectedDistrictName ??
+                                                    'Select District',
+                                                loading: () =>
+                                                    'Loading districts...',
+                                                error: (_, __) =>
+                                                    'Failed to load',
                                               ) ??
                                               'Select District'),
                                       style: TextStyle(
@@ -364,7 +389,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                       ),
                                     ),
                                   ),
-                                  const Icon(LucideIcons.chevronDown, size: 18, color: AppColors.textMuted),
+                                  const Icon(LucideIcons.chevronDown,
+                                      size: 18, color: AppColors.textMuted),
                                 ],
                               ),
                             ),
@@ -372,7 +398,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         if (_districtError != null) ...[
                           const SizedBox(height: 4),
-                          Text(_districtError!, style: const TextStyle(fontSize: 11, color: AppColors.danger)),
+                          Text(_districtError!,
+                              style: const TextStyle(
+                                  fontSize: 11, color: AppColors.danger)),
                         ],
                         if (_districtPickerOpen && districtsAsync != null)
                           districtsAsync.when(
@@ -382,20 +410,26 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
                                 borderRadius: AppRadius.borderMd,
-                                border: Border.all(color: AppColors.border, width: 1),
+                                border: Border.all(
+                                    color: AppColors.border, width: 1),
                               ),
                               child: ListView(
                                 shrinkWrap: true,
-                                children: districts.map((d) => ListTile(
-                                  title: Text(d.name, style: const TextStyle(color: AppColors.textPrimary)),
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedDistrictId = d.id;
-                                      _selectedDistrictName = d.name;
-                                      _districtPickerOpen = false;
-                                    });
-                                  },
-                                )).toList(),
+                                children: districts
+                                    .map((d) => ListTile(
+                                          title: Text(d.name,
+                                              style: const TextStyle(
+                                                  color:
+                                                      AppColors.textPrimary)),
+                                          onTap: () {
+                                            setState(() {
+                                              _selectedDistrictId = d.id;
+                                              _selectedDistrictName = d.name;
+                                              _districtPickerOpen = false;
+                                            });
+                                          },
+                                        ))
+                                    .toList(),
                               ),
                             ),
                             loading: () => const SizedBox.shrink(),

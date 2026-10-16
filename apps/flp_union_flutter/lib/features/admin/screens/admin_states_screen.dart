@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -13,7 +13,8 @@ import '../providers/admin_states_provider.dart';
 class AdminStatesScreen extends ConsumerWidget {
   const AdminStatesScreen({super.key});
 
-  Future<void> _handleToggle(BuildContext context, WidgetRef ref, AdminStateDto item) async {
+  Future<void> _handleToggle(
+      BuildContext context, WidgetRef ref, AdminStateDto item) async {
     final currentStatus = item.isActive;
     final actionText = currentStatus ? 'Deactivate' : 'Activate';
 
@@ -21,7 +22,8 @@ class AdminStatesScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        title: Text('$actionText State', style: const TextStyle(color: AppColors.textPrimary)),
+        title: Text('$actionText State',
+            style: const TextStyle(color: AppColors.textPrimary)),
         content: Text(
           'Are you sure you want to ${actionText.toLowerCase()} ${item.name}?',
           style: const TextStyle(color: AppColors.textSecondary),
@@ -29,13 +31,15 @@ class AdminStatesScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               actionText,
-              style: TextStyle(color: currentStatus ? AppColors.danger : AppColors.success),
+              style: TextStyle(
+                  color: currentStatus ? AppColors.danger : AppColors.success),
             ),
           ),
         ],
@@ -65,7 +69,8 @@ class AdminStatesScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        title: const Text('Coming Soon', style: TextStyle(color: AppColors.textPrimary)),
+        title: const Text('Coming Soon',
+            style: TextStyle(color: AppColors.textPrimary)),
         content: const Text(
           'Adding states from mobile will be available in next update.',
           style: TextStyle(color: AppColors.textSecondary),
@@ -142,14 +147,16 @@ class AdminStatesScreen extends ConsumerWidget {
                   return RefreshIndicator(
                     color: AppColors.accent,
                     backgroundColor: AppColors.card,
-                    onRefresh: () async => ref.refresh(adminStatesProvider.future),
+                    onRefresh: () async =>
+                        ref.refresh(adminStatesProvider.future),
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.md,
                         vertical: AppSpacing.sm,
                       ),
                       itemCount: states.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = states[index];
                         return _StateCard(
@@ -193,7 +200,8 @@ class _StateCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: const Icon(LucideIcons.building2, size: 20, color: AppColors.accent),
+            child: const Icon(LucideIcons.building2,
+                size: 20, color: AppColors.accent),
           ),
           const SizedBox(width: AppSpacing.sm),
 
@@ -214,18 +222,21 @@ class _StateCard extends StatelessWidget {
                   children: [
                     Text(
                       '${item.count.districts} districts',
-                      style: AppTypography.xs.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.xs
+                          .copyWith(color: AppColors.textSecondary),
                     ),
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 4),
                       child: Text(
                         '•',
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                        style: TextStyle(
+                            color: AppColors.textSecondary, fontSize: 12),
                       ),
                     ),
                     Text(
                       '${item.count.managerProfiles} managers',
-                      style: AppTypography.xs.copyWith(color: AppColors.textSecondary),
+                      style: AppTypography.xs
+                          .copyWith(color: AppColors.textSecondary),
                     ),
                   ],
                 ),
@@ -249,10 +260,13 @@ class _StateCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: item.isActive ? AppColors.dangerBg : AppColors.successBg,
+                    color: item.isActive
+                        ? AppColors.dangerBg
+                        : AppColors.successBg,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: item.isActive ? AppColors.danger : AppColors.success,
+                      color:
+                          item.isActive ? AppColors.danger : AppColors.success,
                       width: 1,
                     ),
                   ),

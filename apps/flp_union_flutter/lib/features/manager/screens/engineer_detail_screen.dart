@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -59,7 +59,8 @@ class EngineerDetailScreen extends ConsumerWidget {
             return RefreshIndicator(
               color: AppColors.accent,
               backgroundColor: AppColors.card,
-              onRefresh: () async => ref.refresh(engineerDetailProvider(id).future),
+              onRefresh: () async =>
+                  ref.refresh(engineerDetailProvider(id).future),
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -67,7 +68,8 @@ class EngineerDetailScreen extends ConsumerWidget {
                   children: [
                     // Profile Section
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Column(
                         children: [
                           AppAvatar(
@@ -83,11 +85,13 @@ class EngineerDetailScreen extends ConsumerWidget {
                               color: AppColors.textPrimary,
                             ),
                           ),
-                          if (engineer.designation != null && engineer.designation!.isNotEmpty) ...[
+                          if (engineer.designation != null &&
+                              engineer.designation!.isNotEmpty) ...[
                             const SizedBox(height: 4),
                             Text(
                               engineer.designation!,
-                              style: AppTypography.md.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.md
+                                  .copyWith(color: AppColors.textSecondary),
                             ),
                           ],
                           const SizedBox(height: 8),
@@ -95,7 +99,8 @@ class EngineerDetailScreen extends ConsumerWidget {
                             spacing: 8,
                             children: [
                               AppBadge(
-                                label: engineer.isActive ? 'Active' : 'Inactive',
+                                label:
+                                    engineer.isActive ? 'Active' : 'Inactive',
                                 variant: engineer.isActive
                                     ? AppBadgeVariant.success
                                     : AppBadgeVariant.warning,
@@ -124,12 +129,15 @@ class EngineerDetailScreen extends ConsumerWidget {
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Icon(LucideIcons.lock, size: 14, color: AppColors.textMuted),
+                                  const Icon(LucideIcons.lock,
+                                      size: 14, color: AppColors.textMuted),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       'Sensitive information is hidden because this engineer belongs to another manager.',
-                                      style: AppTypography.xs.copyWith(color: AppColors.textMuted, height: 1.3),
+                                      style: AppTypography.xs.copyWith(
+                                          color: AppColors.textMuted,
+                                          height: 1.3),
                                     ),
                                   ),
                                 ],
@@ -149,10 +157,14 @@ class EngineerDetailScreen extends ConsumerWidget {
                       child: Column(
                         children: [
                           _InfoRow(label: 'Phone', value: engineer.phone),
-                          if (engineer.email != null && engineer.email!.isNotEmpty)
+                          if (engineer.email != null &&
+                              engineer.email!.isNotEmpty)
                             _InfoRow(label: 'Email', value: engineer.email!),
-                          if (!isMasked && engineer.address != null && engineer.address!.isNotEmpty)
-                            _InfoRow(label: 'Address', value: engineer.address!),
+                          if (!isMasked &&
+                              engineer.address != null &&
+                              engineer.address!.isNotEmpty)
+                            _InfoRow(
+                                label: 'Address', value: engineer.address!),
                         ],
                       ),
                     ),
@@ -163,12 +175,20 @@ class EngineerDetailScreen extends ConsumerWidget {
                       margin: const EdgeInsets.only(bottom: AppSpacing.md),
                       child: Column(
                         children: [
-                          _InfoRow(label: 'District', value: engineer.district?.name ?? '-'),
-                          _InfoRow(label: 'State', value: engineer.state?.name ?? '-'),
+                          _InfoRow(
+                              label: 'District',
+                              value: engineer.district?.name ?? '-'),
+                          _InfoRow(
+                              label: 'State',
+                              value: engineer.state?.name ?? '-'),
                           if (engineer.experienceYears != null)
-                            _InfoRow(label: 'Experience', value: '${engineer.experienceYears} years'),
+                            _InfoRow(
+                                label: 'Experience',
+                                value: '${engineer.experienceYears} years'),
                           if (engineer.skills.isNotEmpty)
-                            _InfoRow(label: 'Skills', value: engineer.skills.join(', ')),
+                            _InfoRow(
+                                label: 'Skills',
+                                value: engineer.skills.join(', ')),
                         ],
                       ),
                     ),
@@ -177,7 +197,8 @@ class EngineerDetailScreen extends ConsumerWidget {
                     if (!isMasked &&
                         (engineer.govIdType != null ||
                             engineer.salary != null ||
-                            (engineer.privateNotes != null && engineer.privateNotes!.isNotEmpty)))
+                            (engineer.privateNotes != null &&
+                                engineer.privateNotes!.isNotEmpty)))
                       AppCard(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -191,10 +212,14 @@ class EngineerDetailScreen extends ConsumerWidget {
                             if (engineer.salary != null)
                               _InfoRow(
                                 label: 'Salary',
-                                value: 'Rs.${currencyFormat.format(engineer.salary)}',
+                                value:
+                                    'Rs.${currencyFormat.format(engineer.salary)}',
                               ),
-                            if (engineer.privateNotes != null && engineer.privateNotes!.isNotEmpty)
-                              _InfoRow(label: 'Notes', value: engineer.privateNotes!),
+                            if (engineer.privateNotes != null &&
+                                engineer.privateNotes!.isNotEmpty)
+                              _InfoRow(
+                                  label: 'Notes',
+                                  value: engineer.privateNotes!),
                           ],
                         ),
                       ),

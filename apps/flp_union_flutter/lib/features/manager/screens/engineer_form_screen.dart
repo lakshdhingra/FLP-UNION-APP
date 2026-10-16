@@ -2,7 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -87,11 +87,21 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
     }
     _isPopulated = true;
   }
+
   Future<void> _pickAndUploadPhoto() async {
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf', 'JPG', 'JPEG', 'PNG', 'PDF'],
+        allowedExtensions: [
+          'jpg',
+          'jpeg',
+          'png',
+          'pdf',
+          'JPG',
+          'JPEG',
+          'PNG',
+          'PDF'
+        ],
         withData: true,
       );
       if (result == null || result.files.isEmpty) return;
@@ -108,7 +118,9 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       });
 
       final fileName = file.name;
-      final ext = (file.extension ?? (fileName.contains('.') ? fileName.split('.').last : '')).toLowerCase();
+      final ext = (file.extension ??
+              (fileName.contains('.') ? fileName.split('.').last : ''))
+          .toLowerCase();
 
       String mimeType = 'image/jpeg';
       if (ext == 'png') {
@@ -118,14 +130,16 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       } else if (ext == 'jpg' || ext == 'jpeg') {
         mimeType = 'image/jpeg';
       } else {
-        throw Exception('Unsupported file format (.$ext). Please select a JPG, PNG, or PDF file.');
+        throw Exception(
+            'Unsupported file format (.$ext). Please select a JPG, PNG, or PDF file.');
       }
 
-      final key = await ref.read(engineerMutationsProvider.notifier).uploadFileToS3(
-        fileName: fileName,
-        mimeType: mimeType,
-        bytes: bytes,
-      );
+      final key =
+          await ref.read(engineerMutationsProvider.notifier).uploadFileToS3(
+                fileName: fileName,
+                mimeType: mimeType,
+                bytes: bytes,
+              );
 
       setState(() {
         _profilePhotoKey = key;
@@ -221,7 +235,8 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
             .toList();
       }
       if (_experienceController.text.trim().isNotEmpty) {
-        payload['experienceYears'] = double.tryParse(_experienceController.text.trim());
+        payload['experienceYears'] =
+            double.tryParse(_experienceController.text.trim());
       }
       if (_salaryController.text.trim().isNotEmpty) {
         payload['salary'] = double.tryParse(_salaryController.text.trim());
@@ -234,9 +249,13 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       }
 
       if (widget.isEdit) {
-        await ref.read(engineerMutationsProvider.notifier).updateEngineer(widget.engineerId!, payload);
+        await ref
+            .read(engineerMutationsProvider.notifier)
+            .updateEngineer(widget.engineerId!, payload);
       } else {
-        await ref.read(engineerMutationsProvider.notifier).createEngineer(payload);
+        await ref
+            .read(engineerMutationsProvider.notifier)
+            .createEngineer(payload);
       }
 
       if (mounted) {
@@ -261,7 +280,8 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
   Widget build(BuildContext context) {
     // If edit, load existing engineer details
     if (widget.isEdit) {
-      final engineerAsync = ref.watch(engineerDetailProvider(widget.engineerId!));
+      final engineerAsync =
+          ref.watch(engineerDetailProvider(widget.engineerId!));
       engineerAsync.whenData((eng) => _populateForm(eng));
     }
 
@@ -315,7 +335,8 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
               AppTextInput(
                 label: 'Experience (years)',
                 placeholder: 'e.g. 5.5',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 controller: _experienceController,
               ),
 
@@ -339,15 +360,19 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                   ),
                   const SizedBox(height: 6),
                   GestureDetector(
-                    onTap: () => setState(() => _districtPickerOpen = !_districtPickerOpen),
+                    onTap: () => setState(
+                        () => _districtPickerOpen = !_districtPickerOpen),
                     child: Container(
                       height: 48,
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                       decoration: BoxDecoration(
                         color: AppColors.card,
                         borderRadius: AppRadius.borderMd,
                         border: Border.all(
-                          color: _districtError != null ? AppColors.danger : AppColors.border,
+                          color: _districtError != null
+                              ? AppColors.danger
+                              : AppColors.border,
                           width: 1,
                         ),
                       ),
@@ -363,14 +388,17 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                               fontSize: AppFontSize.md,
                             ),
                           ),
-                          const Icon(LucideIcons.chevronDown, size: 18, color: AppColors.textMuted),
+                          const Icon(LucideIcons.chevronDown,
+                              size: 18, color: AppColors.textMuted),
                         ],
                       ),
                     ),
                   ),
                   if (_districtError != null) ...[
                     const SizedBox(height: 4),
-                    Text(_districtError!, style: const TextStyle(fontSize: 11, color: AppColors.danger)),
+                    Text(_districtError!,
+                        style: const TextStyle(
+                            fontSize: 11, color: AppColors.danger)),
                   ],
                   if (_districtPickerOpen && managerStateId != null)
                     _DistrictDropdownOptions(
@@ -398,7 +426,8 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
               AppTextInput(
                 label: 'Salary (Rs.)',
                 placeholder: 'e.g. 50000',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 controller: _salaryController,
               ),
 
@@ -471,10 +500,13 @@ class _DistrictDropdownOptions extends ConsumerWidget {
         ),
         child: ListView(
           shrinkWrap: true,
-          children: districts.map((d) => ListTile(
-            title: Text(d.name, style: const TextStyle(color: AppColors.textPrimary)),
-            onTap: () => onSelected(d),
-          )).toList(),
+          children: districts
+              .map((d) => ListTile(
+                    title: Text(d.name,
+                        style: const TextStyle(color: AppColors.textPrimary)),
+                    onTap: () => onSelected(d),
+                  ))
+              .toList(),
         ),
       ),
       loading: () => const SizedBox.shrink(),
@@ -529,12 +561,15 @@ class _PhotoPickerField extends StatelessWidget {
                     SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: AppColors.accent),
                     ),
                     SizedBox(width: 12),
                     Text(
                       'Uploading directly to S3...',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: AppFontSize.md),
+                      style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: AppFontSize.md),
                     ),
                   ],
                 )
@@ -542,7 +577,9 @@ class _PhotoPickerField extends StatelessWidget {
                   ? Row(
                       children: [
                         Icon(
-                          isPdf ? LucideIcons.fileText : LucideIcons.checkCircle2,
+                          isPdf
+                              ? LucideIcons.fileText
+                              : LucideIcons.checkCircle2,
                           color: AppColors.success,
                           size: 22,
                         ),
@@ -552,7 +589,9 @@ class _PhotoPickerField extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isPdf ? 'PDF Document attached & uploaded' : 'Photo attached & uploaded to S3',
+                                isPdf
+                                    ? 'PDF Document attached & uploaded'
+                                    : 'Photo attached & uploaded to S3',
                                 style: const TextStyle(
                                   color: AppColors.textPrimary,
                                   fontWeight: AppFontWeight.medium,
@@ -571,7 +610,8 @@ class _PhotoPickerField extends StatelessWidget {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(LucideIcons.trash2, color: AppColors.danger, size: 18),
+                          icon: const Icon(LucideIcons.trash2,
+                              color: AppColors.danger, size: 18),
                           onPressed: onRemovePhoto,
                           tooltip: 'Remove photo/document',
                         ),
@@ -582,7 +622,8 @@ class _PhotoPickerField extends StatelessWidget {
                       borderRadius: AppRadius.borderMd,
                       child: const Row(
                         children: [
-                          Icon(LucideIcons.uploadCloud, color: AppColors.accent, size: 22),
+                          Icon(LucideIcons.uploadCloud,
+                              color: AppColors.accent, size: 22),
                           SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -603,4 +644,3 @@ class _PhotoPickerField extends StatelessWidget {
     );
   }
 }
-

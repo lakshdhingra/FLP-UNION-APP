@@ -1,5 +1,5 @@
 abstract class ApiConstants {
-  static const String _defaultRemoteBaseUrl = 'http://3.109.49.84/api';
+  static const String _defaultRemoteBaseUrl = 'https://api.taspu.in/api';
 
   static String get baseUrl {
     const String overrideUrl = String.fromEnvironment('API_BASE_URL');

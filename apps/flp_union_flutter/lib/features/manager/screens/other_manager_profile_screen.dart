@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -63,7 +63,8 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                     // Profile Header Section
                     Center(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                        padding:
+                            const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                         child: Column(
                           children: [
                             AppAvatar(name: manager.fullName, size: 72),
@@ -78,7 +79,8 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                             const SizedBox(height: 4),
                             Text(
                               manager.email,
-                              style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                              style: AppTypography.sm
+                                  .copyWith(color: AppColors.textSecondary),
                             ),
                             const SizedBox(height: 8),
                             Wrap(
@@ -126,22 +128,30 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                         children: [
                           Row(
                             children: [
-                              const Icon(LucideIcons.phone, size: 14, color: AppColors.accent),
+                              const Icon(LucideIcons.phone,
+                                  size: 14, color: AppColors.accent),
                               const SizedBox(width: 10),
                               Text(
-                                manager.mobile.isNotEmpty ? manager.mobile : 'N/A',
-                                style: AppTypography.md.copyWith(color: AppColors.textPrimary),
+                                manager.mobile.isNotEmpty
+                                    ? manager.mobile
+                                    : 'N/A',
+                                style: AppTypography.md
+                                    .copyWith(color: AppColors.textPrimary),
                               ),
                             ],
                           ),
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Icon(LucideIcons.mail, size: 14, color: AppColors.accent),
+                              const Icon(LucideIcons.mail,
+                                  size: 14, color: AppColors.accent),
                               const SizedBox(width: 10),
                               Text(
-                                manager.email.isNotEmpty ? manager.email : 'N/A',
-                                style: AppTypography.md.copyWith(color: AppColors.textPrimary),
+                                manager.email.isNotEmpty
+                                    ? manager.email
+                                    : 'N/A',
+                                style: AppTypography.md
+                                    .copyWith(color: AppColors.textPrimary),
                               ),
                             ],
                           ),
@@ -154,7 +164,8 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                       loading: () => const Center(
                         child: Padding(
                           padding: EdgeInsets.all(24.0),
-                          child: CircularProgressIndicator(color: AppColors.accent),
+                          child: CircularProgressIndicator(
+                              color: AppColors.accent),
                         ),
                       ),
                       error: (_, __) => const SizedBox.shrink(),
@@ -177,12 +188,15 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                                 child: Center(
                                   child: Text(
                                     'No engineers assigned to this manager.',
-                                    style: TextStyle(color: AppColors.textMuted, fontSize: AppFontSize.md),
+                                    style: TextStyle(
+                                        color: AppColors.textMuted,
+                                        fontSize: AppFontSize.md),
                                   ),
                                 ),
                               )
                             else
-                              ...engineers.map((eng) => _ManagerEngineerCard(engineer: eng)),
+                              ...engineers.map(
+                                  (eng) => _ManagerEngineerCard(engineer: eng)),
                           ],
                         );
                       },
@@ -226,19 +240,24 @@ class _ManagerEngineerCard extends StatelessWidget {
                 ),
                 Text(
                   engineer.phone,
-                  style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                  style:
+                      AppTypography.sm.copyWith(color: AppColors.textSecondary),
                 ),
-                if (engineer.designation != null && engineer.designation!.isNotEmpty)
+                if (engineer.designation != null &&
+                    engineer.designation!.isNotEmpty)
                   Text(
                     engineer.designation!,
-                    style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                    style:
+                        AppTypography.xs.copyWith(color: AppColors.textMuted),
                   ),
               ],
             ),
           ),
           AppBadge(
             label: engineer.isActive ? 'Active' : 'Inactive',
-            variant: engineer.isActive ? AppBadgeVariant.success : AppBadgeVariant.warning,
+            variant: engineer.isActive
+                ? AppBadgeVariant.success
+                : AppBadgeVariant.warning,
           ),
         ],
       ),

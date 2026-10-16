@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
@@ -17,7 +17,8 @@ class AdminEngineersScreen extends ConsumerStatefulWidget {
   const AdminEngineersScreen({super.key});
 
   @override
-  ConsumerState<AdminEngineersScreen> createState() => _AdminEngineersScreenState();
+  ConsumerState<AdminEngineersScreen> createState() =>
+      _AdminEngineersScreenState();
 }
 
 class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
@@ -67,7 +68,8 @@ class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
                   ),
                   Text(
                     '${engineersAsync.valueOrNull?.total ?? 0} total',
-                    style: AppTypography.sm.copyWith(color: AppColors.textMuted),
+                    style:
+                        AppTypography.sm.copyWith(color: AppColors.textMuted),
                   ),
                 ],
               ),
@@ -97,7 +99,8 @@ class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      style: AppTypography.md.copyWith(color: AppColors.textPrimary),
+                      style: AppTypography.md
+                          .copyWith(color: AppColors.textPrimary),
                       decoration: const InputDecoration(
                         hintText: 'Search...',
                         hintStyle: TextStyle(color: AppColors.textMuted),
@@ -106,7 +109,8 @@ class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
                         contentPadding: EdgeInsets.zero,
                       ),
                       onChanged: (val) {
-                        ref.read(adminEngineersSearchProvider.notifier).state = val;
+                        ref.read(adminEngineersSearchProvider.notifier).state =
+                            val;
                       },
                     ),
                   ),
@@ -129,7 +133,8 @@ class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
                     return RefreshIndicator(
                       color: AppColors.accent,
                       backgroundColor: AppColors.card,
-                      onRefresh: () async => ref.refresh(adminEngineersProvider.future),
+                      onRefresh: () async =>
+                          ref.refresh(adminEngineersProvider.future),
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: Container(
@@ -147,7 +152,8 @@ class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
                   return RefreshIndicator(
                     color: AppColors.accent,
                     backgroundColor: AppColors.card,
-                    onRefresh: () async => ref.refresh(adminEngineersProvider.future),
+                    onRefresh: () async =>
+                        ref.refresh(adminEngineersProvider.future),
                     child: ListView.separated(
                       padding: const EdgeInsets.only(
                         left: AppSpacing.md,
@@ -155,7 +161,8 @@ class _AdminEngineersScreenState extends ConsumerState<AdminEngineersScreen> {
                         bottom: 40,
                       ),
                       itemCount: response.data.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final item = response.data[index];
                         return _EngineerCard(item: item);
@@ -196,11 +203,13 @@ class _EngineerCard extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                if (item.designation != null && item.designation!.isNotEmpty) ...[
+                if (item.designation != null &&
+                    item.designation!.isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
                     item.designation!,
-                    style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                    style: AppTypography.sm
+                        .copyWith(color: AppColors.textSecondary),
                   ),
                 ],
                 const SizedBox(height: 4),
@@ -214,15 +223,19 @@ class _EngineerCard extends StatelessWidget {
                     ),
                     AppBadge(
                       label: item.isActive ? 'Active' : 'Inactive',
-                      variant: item.isActive ? AppBadgeVariant.success : AppBadgeVariant.warning,
+                      variant: item.isActive
+                          ? AppBadgeVariant.success
+                          : AppBadgeVariant.warning,
                     ),
                   ],
                 ),
-                if (item.managerName != null && item.managerName!.isNotEmpty) ...[
+                if (item.managerName != null &&
+                    item.managerName!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     'Mgr: ${item.managerName}',
-                    style: AppTypography.xs.copyWith(color: AppColors.textMuted),
+                    style:
+                        AppTypography.xs.copyWith(color: AppColors.textMuted),
                   ),
                 ],
               ],

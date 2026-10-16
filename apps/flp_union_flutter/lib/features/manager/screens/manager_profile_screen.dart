@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -16,7 +16,8 @@ class ManagerProfileScreen extends ConsumerStatefulWidget {
   const ManagerProfileScreen({super.key});
 
   @override
-  ConsumerState<ManagerProfileScreen> createState() => _ManagerProfileScreenState();
+  ConsumerState<ManagerProfileScreen> createState() =>
+      _ManagerProfileScreenState();
 }
 
 class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
@@ -62,16 +63,20 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.card,
-        title: const Text('Sign Out', style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text('Are you sure you want to sign out?', style: TextStyle(color: AppColors.textSecondary)),
+        title: const Text('Sign Out',
+            style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text('Are you sure you want to sign out?',
+            style: TextStyle(color: AppColors.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sign Out', style: TextStyle(color: AppColors.danger)),
+            child: const Text('Sign Out',
+                style: TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -111,7 +116,8 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                   children: [
                     // Profile Header Section
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                       child: Column(
                         children: [
                           AppAvatar(name: profile.fullName, size: 80),
@@ -127,12 +133,14 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                                     Expanded(
                                       child: TextField(
                                         controller: _nameController,
-                                        style: AppTypography.md.copyWith(color: AppColors.textPrimary),
+                                        style: AppTypography.md.copyWith(
+                                            color: AppColors.textPrimary),
                                         cursorColor: AppColors.accent,
                                         decoration: const InputDecoration(
                                           hintText: 'Your name',
                                           isDense: true,
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 8),
                                         ),
                                       ),
                                     ),
@@ -140,14 +148,17 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                                       onTap: _saveEdit,
                                       child: const Padding(
                                         padding: EdgeInsets.all(8.0),
-                                        child: Icon(LucideIcons.check, size: 18, color: AppColors.success),
+                                        child: Icon(LucideIcons.check,
+                                            size: 18, color: AppColors.success),
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () => setState(() => _editing = false),
+                                      onTap: () =>
+                                          setState(() => _editing = false),
                                       child: const Padding(
                                         padding: EdgeInsets.all(8.0),
-                                        child: Icon(LucideIcons.x, size: 18, color: AppColors.danger),
+                                        child: Icon(LucideIcons.x,
+                                            size: 18, color: AppColors.danger),
                                       ),
                                     ),
                                   ],
@@ -156,7 +167,8 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                             )
                           else
                             Padding(
-                              padding: const EdgeInsets.only(top: AppSpacing.sm),
+                              padding:
+                                  const EdgeInsets.only(top: AppSpacing.sm),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
@@ -184,13 +196,16 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                           const SizedBox(height: 4),
                           Text(
                             profile.email,
-                            style: AppTypography.sm.copyWith(color: AppColors.textSecondary),
+                            style: AppTypography.sm
+                                .copyWith(color: AppColors.textSecondary),
                           ),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const AppBadge(label: 'Manager', variant: AppBadgeVariant.info),
+                              const AppBadge(
+                                  label: 'Manager',
+                                  variant: AppBadgeVariant.info),
                               const SizedBox(width: 8),
                               AppBadge(
                                 label: profile.state.name.isNotEmpty
@@ -218,9 +233,12 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                           const SizedBox(height: 12),
                           _InfoRow(label: 'State', value: profile.state.name),
                           const SizedBox(height: 12),
-                          _InfoRow(label: 'District', value: profile.district.name),
+                          _InfoRow(
+                              label: 'District', value: profile.district.name),
                           const SizedBox(height: 12),
-                          _InfoRow(label: 'Total Engineers', value: '${profile.totalEngineers}'),
+                          _InfoRow(
+                              label: 'Total Engineers',
+                              value: '${profile.totalEngineers}'),
                         ],
                       ),
                     ),

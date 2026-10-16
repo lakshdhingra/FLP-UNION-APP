@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_radius.dart';
 import '../../core/constants/app_typography.dart';
@@ -80,17 +80,22 @@ class _AppTextInputState extends State<AppTextInput> {
                   obscureText: widget.isPassword ? _obscureText : false,
                   readOnly: widget.readOnly,
                   onTap: widget.onTap,
-                  maxLines: widget.isPassword ? 1 : (widget.multiline ? widget.maxLines ?? 4 : 1),
-                  style: AppTypography.md.copyWith(color: AppColors.textPrimary),
+                  maxLines: widget.isPassword
+                      ? 1
+                      : (widget.multiline ? widget.maxLines ?? 4 : 1),
+                  style:
+                      AppTypography.md.copyWith(color: AppColors.textPrimary),
                   cursorColor: AppColors.accent,
                   decoration: InputDecoration(
                     hintText: widget.placeholder,
-                    hintStyle: AppTypography.md.copyWith(color: AppColors.textMuted),
+                    hintStyle:
+                        AppTypography.md.copyWith(color: AppColors.textMuted),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     errorBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
                   ),
                 ),
               ),

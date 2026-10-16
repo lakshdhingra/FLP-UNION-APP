@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_typography.dart';
 
@@ -36,8 +36,10 @@ class ManagerShellScreen extends StatelessWidget {
           backgroundColor: AppColors.surface,
           selectedItemColor: AppColors.accent,
           unselectedItemColor: AppColors.textMuted,
-          selectedLabelStyle: AppTypography.xs.copyWith(fontWeight: AppFontWeight.medium),
-          unselectedLabelStyle: AppTypography.xs.copyWith(fontWeight: AppFontWeight.medium),
+          selectedLabelStyle:
+              AppTypography.xs.copyWith(fontWeight: AppFontWeight.medium),
+          unselectedLabelStyle:
+              AppTypography.xs.copyWith(fontWeight: AppFontWeight.medium),
           type: BottomNavigationBarType.fixed,
           elevation: 0,
           items: const [

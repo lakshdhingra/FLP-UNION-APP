@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
@@ -42,7 +42,8 @@ class AdminAuditLogsScreen extends ConsumerWidget {
               return RefreshIndicator(
                 color: AppColors.accent,
                 backgroundColor: AppColors.card,
-                onRefresh: () async => ref.refresh(adminAuditLogsProvider.future),
+                onRefresh: () async =>
+                    ref.refresh(adminAuditLogsProvider.future),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Container(
@@ -64,7 +65,8 @@ class AdminAuditLogsScreen extends ConsumerWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 itemCount: response.data.length,
-                separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.sm),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (context, index) {
                   final log = response.data[index];
                   return _AuditLogCard(log: log);
@@ -137,7 +139,8 @@ class _AuditLogCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Row(
             children: [
-              const Icon(LucideIcons.user, size: 14, color: AppColors.textMuted),
+              const Icon(LucideIcons.user,
+                  size: 14, color: AppColors.textMuted),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
