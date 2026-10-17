@@ -7,6 +7,7 @@ class Engineer {
   final String phone;
   final String? email;
   final String? profilePhotoUrl;
+  final String? aadhaarCardUrl;
   final String? address;
   final StateEntity? state;
   final DistrictEntity? district;
@@ -26,6 +27,7 @@ class Engineer {
     required this.phone,
     this.email,
     this.profilePhotoUrl,
+    this.aadhaarCardUrl,
     this.address,
     this.state,
     this.district,
@@ -58,6 +60,7 @@ class Engineer {
       phone: json['phone'] ?? '',
       email: json['email'],
       profilePhotoUrl: json['profilePhotoUrl'],
+      aadhaarCardUrl: json['aadhaarCardUrl'],
       address: json['address'],
       state: json['state'] != null ? StateEntity.fromJson(json['state']) : null,
       district: json['district'] != null
@@ -81,6 +84,7 @@ class Engineer {
         'phone': phone,
         'email': email,
         'profilePhotoUrl': profilePhotoUrl,
+        'aadhaarCardUrl': aadhaarCardUrl,
         'address': address,
         'state': state?.toJson(),
         'district': district?.toJson(),

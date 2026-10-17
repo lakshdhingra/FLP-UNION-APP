@@ -173,6 +173,13 @@ class EngineerDetailScreen extends ConsumerWidget {
               final avatarUrl = avatarUrlAsync.valueOrNull;
               final isPdf = photoKey.toLowerCase().contains('.pdf');
 
+              final aadhaarKey = engineer.aadhaarCardUrl ?? '';
+              final aadhaarUrlAsync = (aadhaarKey.isNotEmpty && !isMasked)
+                  ? ref.watch(engineerDocumentUrlProvider(aadhaarKey))
+                  : const AsyncValue<String>.data('');
+              final aadhaarUrl = aadhaarUrlAsync.valueOrNull;
+              final isAadhaarPdf = aadhaarKey.toLowerCase().contains('.pdf');
+
               return RefreshIndicator(
                 color: colors.primaryAction,
                 backgroundColor: colors.card,
@@ -348,6 +355,77 @@ class EngineerDetailScreen extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.md),
                       ],
 
+                      // Aadhaar Document Card (Confidential, owned only)
+                      if (aadhaarKey.isNotEmpty && !isMasked) ...[
+                        AppCard(
+                          padding: const EdgeInsets.all(AppSpacing.cardPadding),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: colors.successBg,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  isAadhaarPdf
+                                      ? LucideIcons.fileText
+                                      : LucideIcons.fileCheck,
+                                  size: 20,
+                                  color: colors.success,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            isAadhaarPdf
+                                                ? 'Aadhaar Card (PDF)'
+                                                : 'Aadhaar Card (Image)',
+                                            style: AppTypography.body(
+                                              color: colors.textPrimary,
+                                              weight: AppFontWeight.semibold,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Icon(LucideIcons.lock,
+                                            size: 12, color: colors.textMuted),
+                                      ],
+                                    ),
+                                    Text(
+                                      'Private verification document (S3)',
+                                      style: AppTypography.caption(
+                                          color: colors.textMuted),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (aadhaarUrl != null && aadhaarUrl.isNotEmpty)
+                                TextButton.icon(
+                                  onPressed: () => _showDocumentPreview(
+                                      context, aadhaarUrl, isAadhaarPdf),
+                                  icon: const Icon(LucideIcons.externalLink,
+                                      size: 14),
+                                  label: const Text('View'),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: colors.primaryAction,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
+
                       // Contact Information Section
                       StaggeredSlideFade(
                         index: 2,
@@ -456,14 +534,14 @@ class EngineerDetailScreen extends ConsumerWidget {
                                           '${engineer.experienceYears} years',
                                     ),
                                   ],
-                                  if (engineer.skills.isNotEmpty) ...[
-                                    const Divider(height: 16),
-                                    Text(
-                                      'Technical Skills',
-                                      style: AppTypography.caption(
-                                          color: colors.textMuted),
-                                    ),
-                                    const SizedBox(height: 8),
+                                  const Divider(height: 16),
+                                  Text(
+                                    'Technical Skills',
+                                    style: AppTypography.caption(
+                                        color: colors.textMuted),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  if (engineer.skills.isNotEmpty)
                                     Wrap(
                                       spacing: 6,
                                       runSpacing: 6,
@@ -487,8 +565,14 @@ class EngineerDetailScreen extends ConsumerWidget {
                                           ),
                                         );
                                       }).toList(),
+                                    )
+                                  else
+                                    Text(
+                                      'No technical skills listed',
+                                      style: AppTypography.subhead(
+                                        color: colors.textMuted,
+                                      ),
                                     ),
-                                  ],
                                 ],
                               ),
                             ),

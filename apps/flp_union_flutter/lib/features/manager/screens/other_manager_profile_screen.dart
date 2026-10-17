@@ -14,6 +14,7 @@ import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../providers/manager_directory_provider.dart';
+import '../providers/manager_profile_provider.dart';
 
 class OtherManagerProfileScreen extends ConsumerWidget {
   final String id;
@@ -49,6 +50,11 @@ class OtherManagerProfileScreen extends ConsumerWidget {
               onRetry: () => ref.refresh(managerProfileByIdProvider(id)),
             ),
             data: (manager) {
+              final photoKey = manager.profilePhotoUrl ?? '';
+              final photoUrlAsync = photoKey.isNotEmpty
+                  ? ref.watch(managerDocumentUrlProvider(photoKey))
+                  : const AsyncValue<String>.data('');
+              final photoUrl = photoUrlAsync.valueOrNull;
               return RefreshIndicator(
                 color: colors.primaryAction,
                 backgroundColor: colors.card,
@@ -77,7 +83,10 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                                 child: Hero(
                                   tag: 'manager-avatar-${manager.id}',
                                   child: AppAvatar(
-                                      name: manager.fullName, size: 72),
+                                    name: manager.fullName,
+                                    size: 72,
+                                    url: photoUrl,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.md),
@@ -183,6 +192,59 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                                   ),
                                 ],
                               ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+
+                      // Brands Worked With Section
+                      StaggeredSlideFade(
+                        index: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Brands Worked With',
+                              style: AppTypography.title3(
+                                  color: colors.textPrimary),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            AppCard(
+                              padding:
+                                  const EdgeInsets.all(AppSpacing.cardPadding),
+                              child: manager.brandsWorkedWith.isNotEmpty
+                                  ? Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children:
+                                          manager.brandsWorkedWith.map((brand) {
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: colors.secondarySurface,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                            border: Border.all(
+                                                color: colors.border, width: 1),
+                                          ),
+                                          child: Text(
+                                            brand,
+                                            style: AppTypography.caption(
+                                              color: colors.textPrimary,
+                                              weight: AppFontWeight.medium,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    )
+                                  : Text(
+                                      'No brands listed',
+                                      style: AppTypography.subhead(
+                                        color: colors.textMuted,
+                                      ),
+                                    ),
                             ),
                           ],
                         ),

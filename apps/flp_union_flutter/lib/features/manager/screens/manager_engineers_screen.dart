@@ -387,7 +387,7 @@ class _ManagerEngineersScreenState
   }
 }
 
-class _EngineerRowCard extends StatelessWidget {
+class _EngineerRowCard extends ConsumerWidget {
   final Engineer engineer;
   final VoidCallback onTap;
   final VoidCallback onEdit;
@@ -401,8 +401,13 @@ class _EngineerRowCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = AppColors.of(context);
+    final photoKey = engineer.profilePhotoUrl ?? '';
+    final avatarUrlAsync = photoKey.isNotEmpty
+        ? ref.watch(engineerDocumentUrlProvider(photoKey))
+        : const AsyncValue<String>.data('');
+    final avatarUrl = avatarUrlAsync.valueOrNull;
 
     return AppCard(
       onTap: onTap,
@@ -412,7 +417,11 @@ class _EngineerRowCard extends StatelessWidget {
         children: [
           Hero(
             tag: 'engineer-avatar-${engineer.id}',
-            child: AppAvatar(name: engineer.fullName, size: 44),
+            child: AppAvatar(
+              name: engineer.fullName,
+              size: 44,
+              url: avatarUrl,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -453,27 +462,40 @@ class _EngineerRowCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6),
-                Row(
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    if (engineer.district?.name != null) ...[
-                      Icon(LucideIcons.mapPin,
-                          size: 12, color: colors.textMuted),
-                      const SizedBox(width: 3),
-                      Text(
-                        engineer.district!.name,
-                        style: AppTypography.caption(color: colors.textMuted),
+                    if (engineer.district?.name != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.mapPin,
+                              size: 12, color: colors.textMuted),
+                          const SizedBox(width: 3),
+                          Text(
+                            engineer.district!.name,
+                            style:
+                                AppTypography.caption(color: colors.textMuted),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                    ],
-                    if (engineer.experienceYears != null) ...[
-                      Icon(LucideIcons.briefcase,
-                          size: 12, color: colors.textMuted),
-                      const SizedBox(width: 3),
-                      Text(
-                        '${engineer.experienceYears}y exp',
-                        style: AppTypography.caption(color: colors.textMuted),
+                    if (engineer.experienceYears != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.briefcase,
+                              size: 12, color: colors.textMuted),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${engineer.experienceYears}y exp',
+                            style:
+                                AppTypography.caption(color: colors.textMuted),
+                          ),
+                        ],
                       ),
-                    ],
                   ],
                 ),
               ],

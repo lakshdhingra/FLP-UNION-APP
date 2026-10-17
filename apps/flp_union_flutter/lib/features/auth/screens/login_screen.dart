@@ -119,7 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'TASPU FLP UNION',
+                            'TAPSU',
                             style:
                                 AppTypography.title1(color: colors.textPrimary),
                             textAlign: TextAlign.center,

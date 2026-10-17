@@ -223,7 +223,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Join TASPU FLP workforce network',
+                            'Join TAPSU workforce network',
                             style: AppTypography.subhead(
                                 color: colors.textSecondary),
                             textAlign: TextAlign.center,

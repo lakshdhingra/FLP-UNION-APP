@@ -94,7 +94,7 @@ class _ManagerDashboardScreenState
                                 const AppLogo(size: 24),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'TASPU FLP UNION',
+                                  'TAPSU',
                                   style: AppTypography.font(
                                     fontSize: 11,
                                     fontWeight: AppFontWeight.bold,
