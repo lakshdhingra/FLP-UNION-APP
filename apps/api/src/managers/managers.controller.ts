@@ -1,9 +1,10 @@
 import {
-    Controller, Get, Patch, Body, Param, UseGuards,
+    Controller, Get, Post, Patch, Body, Param, UseGuards,
     ParseUUIDPipe, Query,
 } from '@nestjs/common';
 import { ManagersService } from './managers.service';
 import { UpdateManagerDto } from './dto/update-manager.dto';
+import { GetEngineerUploadUrlDto } from '../engineers/dto/get-upload-url.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -18,6 +19,21 @@ import { ApiTags } from '@nestjs/swagger';
 @Roles(Role.MANAGER)
 export class ManagersController {
     constructor(private readonly managersService: ManagersService) {}
+
+    /** POST /api/manager/upload-url - presigned S3 upload URL for manager profile photo */
+    @Post('upload-url')
+    getUploadUrl(@Body() dto: GetEngineerUploadUrlDto) {
+        return this.managersService.getUploadUrl(dto);
+    }
+
+    /** GET /api/manager/document-url - presigned S3 view/download URL */
+    @Get('document-url')
+    getDocumentUrl(
+        @CurrentUser() user: CurrentUserPayload,
+        @Query('key') key: string,
+    ) {
+        return this.managersService.getDocumentUrl(user.userId, key);
+    }
 
     /** GET /api/manager/profile */
     @Get('profile')

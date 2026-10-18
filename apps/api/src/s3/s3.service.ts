@@ -26,7 +26,25 @@ export class S3Service {
     mimeType: string,
   ) {
     const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-    const normalizedMime = (mimeType || '').toLowerCase().trim();
+    let normalizedMime = (mimeType || '').toLowerCase().trim();
+
+    // Auto-normalize image/jpg to image/jpeg
+    if (normalizedMime === 'image/jpg') {
+      normalizedMime = 'image/jpeg';
+    }
+
+    // If client provided application/octet-stream or empty mimeType, infer from file extension
+    if (!allowedMimeTypes.includes(normalizedMime)) {
+      const lastDot = originalName.lastIndexOf('.');
+      const ext = lastDot !== -1 ? originalName.slice(lastDot).toLowerCase() : '';
+      if (ext === '.jpg' || ext === '.jpeg') {
+        normalizedMime = 'image/jpeg';
+      } else if (ext === '.png') {
+        normalizedMime = 'image/png';
+      } else if (ext === '.pdf') {
+        normalizedMime = 'application/pdf';
+      }
+    }
 
     if (!allowedMimeTypes.includes(normalizedMime)) {
       throw new BadRequestException(

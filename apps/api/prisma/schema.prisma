@@ -119,6 +119,7 @@ model ManagerProfile {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName        String
   profilePhotoUrl String?
+  brandsWorkedWith String[] @default([])
   stateId         String
   state           State    @relation(fields: [stateId], references: [id], onDelete: Restrict)
   districtId      String
@@ -144,6 +145,7 @@ model Engineer {
   phone           String
   email           String?
   profilePhotoUrl String?
+  aadhaarCardUrl  String?
   address         String?
 
   stateId    String

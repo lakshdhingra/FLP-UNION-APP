@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/constants/app_typography.dart';
 import '../../../core/constants/predefined_options.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../shared/widgets/app_animations.dart';
 import '../../../shared/widgets/app_background.dart';
 import '../../../shared/widgets/app_button.dart';
@@ -30,6 +32,21 @@ class EngineerFormScreen extends ConsumerStatefulWidget {
   });
 
   bool get isEdit => engineerId != null && engineerId!.isNotEmpty;
+
+  /// Normalizes user-entered salary strings by stripping currency symbols,
+  /// comma separators, and whitespace, then parsing as a double.
+  static double? parseSalary(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return null;
+    final normalized = trimmed
+        .replaceAll('₹', '')
+        .replaceAll(RegExp(r'Rs\.?', caseSensitive: false), '')
+        .replaceAll(RegExp(r'INR', caseSensitive: false), '')
+        .replaceAll(',', '')
+        .replaceAll(' ', '')
+        .trim();
+    return double.tryParse(normalized);
+  }
 
   @override
   ConsumerState<EngineerFormScreen> createState() => _EngineerFormScreenState();
@@ -66,6 +83,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
   String? _phoneError;
   String? _emailError;
   String? _districtError;
+  String? _salaryError;
 
   bool _isLoading = false;
   bool _isPopulated = false;
@@ -92,7 +110,13 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
     _experienceController.text = engineer.experienceYears?.toString() ?? '';
     _selectedSkills = List<String>.from(engineer.skills);
     _addressController.text = engineer.address ?? '';
-    _salaryController.text = engineer.salary?.toString() ?? '';
+    if (engineer.salary != null) {
+      _salaryController.text = engineer.salary! % 1 == 0
+          ? engineer.salary!.toInt().toString()
+          : engineer.salary!.toString();
+    } else {
+      _salaryController.text = '';
+    }
     _notesController.text = engineer.privateNotes ?? '';
     _profilePhotoKey = engineer.profilePhotoUrl;
     _aadhaarKey = engineer.aadhaarCardUrl;
@@ -295,8 +319,49 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       _districtError = null;
     }
 
+    final salaryRaw = _salaryController.text.trim();
+    if (salaryRaw.isNotEmpty) {
+      final parsed = EngineerFormScreen.parseSalary(salaryRaw);
+      if (parsed == null) {
+        _salaryError = 'Enter a valid numeric salary amount';
+        isValid = false;
+      } else if (parsed < 0) {
+        _salaryError = 'Salary cannot be negative';
+        isValid = false;
+      } else if (parsed > 9999999999.99) {
+        _salaryError = 'Salary exceeds maximum allowed limit';
+        isValid = false;
+      } else {
+        _salaryError = null;
+      }
+    } else {
+      _salaryError = null;
+    }
+
     setState(() {});
     return isValid;
+  }
+
+  String _formatErrorMessage(dynamic err) {
+    if (err is ApiException) {
+      return err.message;
+    }
+    if (err is DioException) {
+      final data = err.response?.data;
+      if (data is Map) {
+        final message = data['message'];
+        if (message is List) {
+          return message.map((m) => m.toString()).join('\n');
+        } else if (message != null && message.toString().isNotEmpty) {
+          return message.toString();
+        }
+        if (data['error'] != null) {
+          return data['error'].toString();
+        }
+      }
+      return err.message ?? err.toString();
+    }
+    return err.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
   }
 
   Future<void> _onSubmit() async {
@@ -327,7 +392,12 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
             double.tryParse(_experienceController.text.trim());
       }
       if (_salaryController.text.trim().isNotEmpty) {
-        payload['salary'] = double.tryParse(_salaryController.text.trim());
+        final parsed = EngineerFormScreen.parseSalary(_salaryController.text);
+        if (parsed != null) {
+          payload['salary'] = parsed;
+        }
+      } else if (widget.isEdit) {
+        payload['salary'] = null;
       }
       if (_notesController.text.trim().isNotEmpty) {
         payload['privateNotes'] = _notesController.text.trim();
@@ -368,9 +438,10 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
       }
     } catch (err) {
       if (mounted) {
+        final displayMsg = _formatErrorMessage(err);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save engineer: $err'),
+            content: Text('Failed to save engineer: $displayMsg'),
             backgroundColor: AppColors.darkDanger,
           ),
         );
@@ -879,6 +950,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                                   const TextInputType.numberWithOptions(
                                       decimal: true),
                               controller: _salaryController,
+                              error: _salaryError,
                               prefixIcon: Icon(LucideIcons.indianRupee,
                                   size: 16, color: colors.textMuted),
                             ),

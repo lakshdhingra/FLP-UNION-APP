@@ -7,8 +7,12 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { maskPhone, maskEmail } from '../common/masking.util';
+import { extractS3Key } from '../common/s3.util';
 import { CreateEngineerDto } from './dto/create-engineer.dto';
 import { UpdateEngineerDto } from './dto/update-engineer.dto';
+import { AuditService } from '../audit/audit.service';
+import { S3Service } from '../s3/s3.service';
+import { GetEngineerUploadUrlDto } from './dto/get-upload-url.dto';
 
 interface FindMineOptions {
     search?: string;
@@ -16,10 +20,6 @@ interface FindMineOptions {
     page?: number;
     limit?: number;
 }
-
-import { AuditService } from '../audit/audit.service';
-import { S3Service } from '../s3/s3.service';
-import { GetEngineerUploadUrlDto } from './dto/get-upload-url.dto';
 
 @Injectable()
 export class EngineersService {
@@ -42,25 +42,37 @@ export class EngineersService {
             throw new BadRequestException('Key parameter is required');
         }
 
+        const cleanKey = extractS3Key(key) || key;
         const manager = await this.getManagerProfile(userId);
 
         // Verify key belongs to an engineer accessible to the manager
         const engineer = await this.prisma.engineer.findFirst({
-            where: { profilePhotoUrl: key },
+            where: {
+                OR: [
+                    { profilePhotoUrl: cleanKey },
+                    { aadhaarCardUrl: cleanKey },
+                    { profilePhotoUrl: key },
+                    { aadhaarCardUrl: key },
+                ],
+            },
         });
 
         if (engineer) {
+            const isAadhaar = engineer.aadhaarCardUrl === cleanKey || engineer.aadhaarCardUrl === key;
+            if (isAadhaar && engineer.managerId !== manager.id) {
+                throw new ForbiddenException('You do not have permission to access this Aadhaar document');
+            }
             if (engineer.stateId !== manager.stateId) {
                 throw new ForbiddenException('You do not have permission to access this document');
             }
         } else {
             // For keys not yet linked to an engineer record, restrict to sub-members folder
-            if (!key.startsWith('android/sub-members/')) {
+            if (manager.profilePhotoUrl !== cleanKey && !cleanKey.startsWith('android/sub-members/') && !cleanKey.startsWith('android/managers/')) {
                 throw new ForbiddenException('Access denied for this key path');
             }
         }
 
-        const signedUrl = await this.s3Service.getPresignedDownloadUrl(key, 3600);
+        const signedUrl = await this.s3Service.getPresignedDownloadUrl(cleanKey, 3600);
         return { signedUrl };
     }
 
@@ -125,17 +137,23 @@ export class EngineersService {
             throw new ForbiddenException('District does not belong to your state');
         }
 
-        const { 
-            districtId, fullName, phone, email, profilePhotoUrl, address, 
-            skills, experienceYears, designation, govIdType, govIdNumber, 
-            salary, privateNotes 
+        const {
+            districtId, fullName, phone, email, profilePhotoUrl, aadhaarCardUrl, address,
+            skills, experienceYears, designation, govIdType, govIdNumber,
+            salary, privateNotes
         } = dto;
+
+        const cleanProfilePhotoUrl = profilePhotoUrl ? (extractS3Key(profilePhotoUrl) || profilePhotoUrl) : null;
+        const cleanAadhaarCardUrl = aadhaarCardUrl ? (extractS3Key(aadhaarCardUrl) || aadhaarCardUrl) : null;
 
         try {
             const engineer = await this.prisma.engineer.create({
                 data: {
-                    fullName, phone, email, profilePhotoUrl, address, skills, 
-                    experienceYears, designation, govIdType, govIdNumber, 
+                    fullName, phone, email,
+                    profilePhotoUrl: cleanProfilePhotoUrl,
+                    aadhaarCardUrl: cleanAadhaarCardUrl,
+                    address, skills,
+                    experienceYears, designation, govIdType, govIdNumber,
                     salary, privateNotes,
                     stateId: manager.stateId,
                     districtId,
@@ -174,10 +192,18 @@ export class EngineersService {
             }
         }
 
+        const dataToUpdate: any = { ...dto };
+        if (dto.profilePhotoUrl !== undefined) {
+            dataToUpdate.profilePhotoUrl = dto.profilePhotoUrl ? (extractS3Key(dto.profilePhotoUrl) || dto.profilePhotoUrl) : null;
+        }
+        if (dto.aadhaarCardUrl !== undefined) {
+            dataToUpdate.aadhaarCardUrl = dto.aadhaarCardUrl ? (extractS3Key(dto.aadhaarCardUrl) || dto.aadhaarCardUrl) : null;
+        }
+
         try {
             const updated = await this.prisma.engineer.update({
                 where: { id: engineerId },
-                data: dto,
+                data: dataToUpdate,
                 include: {
                     district: { select: { name: true } },
                     state: { select: { name: true } },
@@ -253,7 +279,7 @@ export class EngineersService {
             isActive: engineer.isActive,
             createdAt: engineer.createdAt,
             manager: engineer.manager,
-            // Omitted: address, govIdType, govIdNumber, salary, privateNotes, managerId
+            // Omitted: address, govIdType, govIdNumber, salary, privateNotes, managerId, aadhaarCardUrl
         };
     }
 }

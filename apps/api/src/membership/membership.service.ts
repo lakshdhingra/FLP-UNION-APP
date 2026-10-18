@@ -21,6 +21,19 @@ export class MembershipService {
   }
 
   async submitApplication(dto: CreateApplicationDto) {
+    // Sanitize brands: filter out literal "Others" and empty strings, deduplicate
+    const sanitizedBrands = Array.from(
+      new Set(
+        (dto.brandsWorkedWith || [])
+          .map((b) => (typeof b === 'string' ? b.trim() : ''))
+          .filter((b) => b && b.toLowerCase() !== 'others'),
+      ),
+    );
+
+    if (sanitizedBrands.length === 0) {
+      throw new BadRequestException('At least one valid brand must be provided.');
+    }
+
     // Check existing pending application
     const existing = await this.prisma.membershipApplication.findFirst({
       where: {
@@ -53,7 +66,7 @@ export class MembershipService {
         serviceCenterName: dto.serviceCenterName,
         designation: dto.designation,
         yearsExperience: dto.yearsExperience,
-        brandsWorkedWith: dto.brandsWorkedWith,
+        brandsWorkedWith: sanitizedBrands,
         gstNo: dto.gstNo,
         district: dto.district,
         city: dto.city,

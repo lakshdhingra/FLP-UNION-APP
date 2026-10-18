@@ -51,7 +51,8 @@ class Engineer {
     double? parseDouble(dynamic val) {
       if (val == null) return null;
       if (val is num) return val.toDouble();
-      return double.tryParse(val.toString());
+      final str = val.toString().replaceAll(',', '').replaceAll('₹', '').trim();
+      return double.tryParse(str);
     }
 
     return Engineer(

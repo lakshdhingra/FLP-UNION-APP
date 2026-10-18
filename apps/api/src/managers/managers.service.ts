@@ -1,10 +1,14 @@
-import {
+﻿import {
     Injectable,
     NotFoundException,
     ForbiddenException,
+    BadRequestException,
 } from '@nestjs/common';
+import { S3Service } from '../s3/s3.service';
+import { GetEngineerUploadUrlDto } from '../engineers/dto/get-upload-url.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { maskPhone, maskEmail } from '../common/masking.util';
+import { extractS3Key } from '../common/s3.util';
 import { UpdateManagerDto } from './dto/update-manager.dto';
 
 interface FindManagersOptions {
@@ -21,6 +25,7 @@ export class ManagersService {
     constructor(
         private prisma: PrismaService,
         private audit: AuditService,
+        private s3Service: S3Service,
     ) {}
 
     private async getManagerProfile(userId: string) {
@@ -37,12 +42,52 @@ export class ManagersService {
         return profile;
     }
 
+    async getUploadUrl(dto: GetEngineerUploadUrlDto) {
+        return this.s3Service.getPresignedUploadUrl(
+            'android/managers',
+            dto.fileName,
+            dto.mimeType,
+        );
+    }
+
+    async getDocumentUrl(userId: string, key: string) {
+        if (!key) {
+            throw new BadRequestException('Key parameter is required');
+        }
+
+        const cleanKey = extractS3Key(key) || key;
+        const manager = await this.getManagerProfile(userId);
+
+        const targetManager = await this.prisma.managerProfile.findFirst({
+            where: {
+                OR: [
+                    { profilePhotoUrl: cleanKey },
+                    { profilePhotoUrl: key },
+                ],
+            },
+        });
+
+        if (targetManager) {
+            if (targetManager.stateId !== manager.stateId) {
+                throw new ForbiddenException('You do not have permission to access this document');
+            }
+        } else {
+            if (!cleanKey.startsWith('android/managers/') && !cleanKey.startsWith('android/sub-members/')) {
+                throw new ForbiddenException('Access denied for this key path');
+            }
+        }
+
+        const signedUrl = await this.s3Service.getPresignedDownloadUrl(cleanKey, 3600);
+        return { signedUrl };
+    }
+
     async getProfile(userId: string) {
         const profile = await this.getManagerProfile(userId);
         return {
             id: profile.id,
             fullName: profile.fullName,
             profilePhotoUrl: profile.profilePhotoUrl,
+            brandsWorkedWith: (profile as any).brandsWorkedWith ?? [],
             email: profile.user.email,
             mobile: profile.user.mobile,
             state: profile.state,
@@ -53,16 +98,37 @@ export class ManagersService {
 
     async updateProfile(userId: string, dto: UpdateManagerDto) {
         const profile = await this.getManagerProfile(userId);
+        const dataToUpdate: any = {};
+        if (dto.fullName !== undefined) dataToUpdate.fullName = dto.fullName;
+        if (dto.profilePhotoUrl !== undefined) {
+            dataToUpdate.profilePhotoUrl = dto.profilePhotoUrl
+                ? extractS3Key(dto.profilePhotoUrl)
+                : null;
+        }
+        if (dto.brandsWorkedWith !== undefined) dataToUpdate.brandsWorkedWith = dto.brandsWorkedWith;
+
         const updated = await this.prisma.managerProfile.update({
             where: { id: profile.id },
-            data: dto,
+            data: dataToUpdate,
             include: {
                 state: { select: { id: true, name: true } },
                 district: { select: { id: true, name: true } },
+                user: { select: { email: true, mobile: true } },
+                _count: { select: { engineers: true } },
             },
         });
         this.audit.log({ actorId: userId, action: 'UPDATE_PROFILE', targetType: 'MANAGER_PROFILE', targetId: profile.id, metadata: dto as any });
-        return updated;
+        return {
+            id: updated.id,
+            fullName: updated.fullName,
+            profilePhotoUrl: updated.profilePhotoUrl,
+            brandsWorkedWith: (updated as any).brandsWorkedWith ?? [],
+            email: updated.user.email,
+            mobile: updated.user.mobile,
+            state: updated.state,
+            district: updated.district,
+            totalEngineers: updated._count.engineers,
+        };
     }
 
     async getDashboard(userId: string) {
@@ -109,6 +175,7 @@ export class ManagersService {
                 id: manager.id,
                 fullName: manager.fullName,
                 profilePhotoUrl: manager.profilePhotoUrl,
+                brandsWorkedWith: (manager as any).brandsWorkedWith ?? [],
                 email: manager.user.email,
                 mobile: manager.user.mobile,
                 state: manager.state,
@@ -230,6 +297,7 @@ export class ManagersService {
             id: m.id,
             fullName: m.fullName,
             profilePhotoUrl: m.profilePhotoUrl,
+            brandsWorkedWith: (m as any).brandsWorkedWith ?? [],
             email: m.user.email,
             mobile: m.user.mobile,
             state: m.state,

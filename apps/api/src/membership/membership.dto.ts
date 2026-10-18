@@ -1,5 +1,5 @@
-import { IsString, IsEmail, IsNotEmpty, IsNumber, IsOptional, Min, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsEmail, IsNotEmpty, IsNumber, IsOptional, Min, IsArray, ValidateNested, ArrayNotEmpty } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 
 export class GetUploadUrlDto {
   @IsString() @IsNotEmpty() fileName!: string;
@@ -21,7 +21,19 @@ export class CreateApplicationDto {
   @IsString() @IsNotEmpty() serviceCenterName!: string;
   @IsString() @IsNotEmpty() designation!: string;
   @IsNumber() @Min(0) yearsExperience!: number;
-  @IsArray() brandsWorkedWith!: string[];
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      return value.split(',').map((s: string) => s.trim()).filter(Boolean);
+    }
+    if (Array.isArray(value)) {
+      return value.map((s: any) => String(s).trim()).filter(Boolean);
+    }
+    return value;
+  })
+  @IsArray()
+  @ArrayNotEmpty({ message: 'At least one brand must be provided.' })
+  @IsString({ each: true })
+  brandsWorkedWith!: string[];
   @IsString() gstNo!: string;
   @IsString() @IsNotEmpty() district!: string;
   @IsString() @IsNotEmpty() city!: string;

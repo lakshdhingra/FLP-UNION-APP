@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/errors/app_exception.dart';
 import '../../../core/network/api_client.dart';
 import '../../../shared/models/engineer.dart';
 
@@ -29,49 +30,69 @@ class EngineerService {
       queryParams['limit'] = limit;
     }
 
-    final response = await _apiClient.get(
-      ApiConstants.managerEngineers,
-      queryParameters: queryParams,
-    );
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.managerEngineers,
+        queryParameters: queryParams,
+      );
 
-    dynamic listData;
-    if (response.data is Map && response.data['data'] is List) {
-      listData = response.data['data'];
-    } else if (response.data is List) {
-      listData = response.data;
-    } else {
-      listData = [];
+      dynamic listData;
+      if (response.data is Map && response.data['data'] is List) {
+        listData = response.data['data'];
+      } else if (response.data is List) {
+        listData = response.data;
+      } else {
+        listData = [];
+      }
+
+      return (listData as List)
+          .map((json) => Engineer.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
     }
-
-    return (listData as List)
-        .map((json) => Engineer.fromJson(json as Map<String, dynamic>))
-        .toList();
   }
 
   Future<Engineer> getEngineer(String id) async {
-    final response =
-        await _apiClient.get('${ApiConstants.managerEngineers}/$id');
-    return Engineer.fromJson(response.data as Map<String, dynamic>);
+    try {
+      final response =
+          await _apiClient.get('${ApiConstants.managerEngineers}/$id');
+      return Engineer.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
   }
 
   Future<Engineer> createEngineer(Map<String, dynamic> data) async {
-    final response = await _apiClient.post(
-      ApiConstants.managerEngineers,
-      data: data,
-    );
-    return Engineer.fromJson(response.data as Map<String, dynamic>);
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.managerEngineers,
+        data: data,
+      );
+      return Engineer.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
   }
 
   Future<Engineer> updateEngineer(String id, Map<String, dynamic> data) async {
-    final response = await _apiClient.patch(
-      '${ApiConstants.managerEngineers}/$id',
-      data: data,
-    );
-    return Engineer.fromJson(response.data as Map<String, dynamic>);
+    try {
+      final response = await _apiClient.patch(
+        '${ApiConstants.managerEngineers}/$id',
+        data: data,
+      );
+      return Engineer.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
   }
 
   Future<void> deleteEngineer(String id) async {
-    await _apiClient.delete('${ApiConstants.managerEngineers}/$id');
+    try {
+      await _apiClient.delete('${ApiConstants.managerEngineers}/$id');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
   }
 
   Future<Map<String, dynamic>> getPresignedUploadUrl({

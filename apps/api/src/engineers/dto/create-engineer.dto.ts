@@ -1,8 +1,8 @@
-﻿import {
+import {
     IsString, IsNotEmpty, IsOptional, IsEmail,
     IsArray, IsUUID, Matches,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { IsNumber, Min, Max } from 'class-validator';
 
 export class CreateEngineerDto {
@@ -17,6 +17,9 @@ export class CreateEngineerDto {
 
     @IsOptional() @IsString()
     profilePhotoUrl?: string;
+
+    @IsOptional() @IsString()
+    aadhaarCardUrl?: string;
 
     @IsOptional() @IsString()
     address?: string;
@@ -39,7 +42,19 @@ export class CreateEngineerDto {
     @IsOptional() @IsString()
     govIdNumber?: string;
 
-    @IsOptional() @IsNumber() @Min(0) @Type(() => Number)
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (value === '' || value === null || value === undefined) return null;
+        if (typeof value === 'string') {
+            const clean = value.replace(/[₹\u20B9\s,]|Rs\.?|INR/gi, '').trim();
+            if (clean === '') return null;
+            const parsed = Number(clean);
+            return isNaN(parsed) ? value : parsed;
+        }
+        return value;
+    })
+    @IsNumber()
+    @Min(0)
     salary?: number;
 
     @IsOptional() @IsString()

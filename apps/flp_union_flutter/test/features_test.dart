@@ -1,7 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flp_union_app/core/constants/predefined_options.dart';
+import 'package:flp_union_app/core/errors/app_exception.dart';
 import 'package:flp_union_app/features/manager/models/manager_profile_dto.dart';
+import 'package:flp_union_app/features/manager/screens/engineer_form_screen.dart';
 import 'package:flp_union_app/shared/models/engineer.dart';
 import 'package:flp_union_app/shared/models/other_manager.dart';
 import 'package:flp_union_app/shared/widgets/app_multi_select.dart';
@@ -134,6 +137,67 @@ void main() {
       expect(
           serialized['aadhaarCardUrl'], 'engineers/aadhaar/eng_1_aadhaar.pdf');
     });
+
+    test('Engineer.fromJson handles null and omitted aadhaarCardUrl gracefully', () {
+      final json = {
+        'id': 'eng_2',
+        'fullName': 'Suresh Kumar',
+        'phone': '9876543211',
+      };
+
+      final eng = Engineer.fromJson(json);
+      expect(eng.fullName, 'Suresh Kumar');
+      expect(eng.aadhaarCardUrl, isNull);
+      expect(eng.profilePhotoUrl, isNull);
+      expect(eng.toJson()['aadhaarCardUrl'], isNull);
+    });
+
+    test('Engineer payload construction respects optional Aadhaar on create and edit', () {
+      Map<String, dynamic> buildPayload({
+        required String name,
+        required String phone,
+        String? aadhaarKey,
+        bool isEdit = false,
+      }) {
+        final payload = <String, dynamic>{
+          'fullName': name,
+          'phone': phone,
+        };
+        if (aadhaarKey != null && aadhaarKey.isNotEmpty) {
+          payload['aadhaarCardUrl'] = aadhaarKey;
+        } else if (isEdit) {
+          payload['aadhaarCardUrl'] = null;
+        }
+        return payload;
+      }
+
+      // 1. Create engineer without Aadhaar document
+      final createNoAadhaar = buildPayload(
+        name: 'No Aadhaar Engineer',
+        phone: '+919876543210',
+        aadhaarKey: null,
+        isEdit: false,
+      );
+      expect(createNoAadhaar.containsKey('aadhaarCardUrl'), isFalse);
+
+      // 2. Create engineer with Aadhaar document
+      final createWithAadhaar = buildPayload(
+        name: 'With Aadhaar Engineer',
+        phone: '+919876543210',
+        aadhaarKey: 'android/sub-members/eng_aadhaar.pdf',
+        isEdit: false,
+      );
+      expect(createWithAadhaar['aadhaarCardUrl'], 'android/sub-members/eng_aadhaar.pdf');
+
+      // 3. Edit engineer removing Aadhaar document
+      final editRemoveAadhaar = buildPayload(
+        name: 'Edit Engineer',
+        phone: '+919876543210',
+        aadhaarKey: null,
+        isEdit: true,
+      );
+      expect(editRemoveAadhaar['aadhaarCardUrl'], isNull);
+    });
   });
 
   group('AppMultiSelect UI Widget', () {
@@ -203,6 +267,117 @@ void main() {
 
     test('handles empty string gracefully', () {
       expect(ManagerService.extractS3Key(''), '');
+    });
+  });
+
+  group('Salary Normalization and Parsing Tests', () {
+    test('parses clean integer strings', () {
+      expect(EngineerFormScreen.parseSalary('25000'), 25000.0);
+      expect(EngineerFormScreen.parseSalary('50000'), 50000.0);
+    });
+
+    test('parses decimal values accurately', () {
+      expect(EngineerFormScreen.parseSalary('25000.50'), 25000.50);
+      expect(EngineerFormScreen.parseSalary('12345.75'), 12345.75);
+    });
+
+    test('strips commas from formatted salary inputs', () {
+      expect(EngineerFormScreen.parseSalary('25,000'), 25000.0);
+      expect(EngineerFormScreen.parseSalary('1,50,000'), 150000.0);
+      expect(EngineerFormScreen.parseSalary('1,50,000.50'), 150000.50);
+    });
+
+    test('strips Indian rupee symbols and whitespace', () {
+      expect(EngineerFormScreen.parseSalary('₹25000'), 25000.0);
+      expect(EngineerFormScreen.parseSalary('₹ 25,000'), 25000.0);
+      expect(EngineerFormScreen.parseSalary(' ₹ 50,000.00 '), 50000.0);
+    });
+
+    test('strips Rs and INR prefixes', () {
+      expect(EngineerFormScreen.parseSalary('Rs. 25,000'), 25000.0);
+      expect(EngineerFormScreen.parseSalary('Rs 30000'), 30000.0);
+      expect(EngineerFormScreen.parseSalary('INR 45,000'), 45000.0);
+    });
+
+    test('returns null for empty or whitespace-only inputs without defaulting to zero', () {
+      expect(EngineerFormScreen.parseSalary(''), isNull);
+      expect(EngineerFormScreen.parseSalary('   '), isNull);
+    });
+
+    test('returns null for non-numeric input text', () {
+      expect(EngineerFormScreen.parseSalary('abc'), isNull);
+      expect(EngineerFormScreen.parseSalary('twenty thousand'), isNull);
+    });
+
+    test('parses negative numbers for validation to inspect', () {
+      expect(EngineerFormScreen.parseSalary('-500'), -500.0);
+      expect(EngineerFormScreen.parseSalary('₹ -1,000'), -1000.0);
+    });
+  });
+
+  group('Engineer Model Salary Serialization Tests', () {
+    test('parses integer, decimal, and string salaries in json', () {
+      final eng1 = Engineer.fromJson({'salary': 35000});
+      expect(eng1.salary, 35000.0);
+
+      final eng2 = Engineer.fromJson({'salary': 35000.75});
+      expect(eng2.salary, 35000.75);
+
+      final eng3 = Engineer.fromJson({'salary': '35,000.50'});
+      expect(eng3.salary, 35000.50);
+
+      final eng4 = Engineer.fromJson({'salary': null});
+      expect(eng4.salary, isNull);
+    });
+  });
+
+  group('ApiException DioException Visibility Tests', () {
+    test('extracts NestJS message array joined with newlines', () {
+      final dioException = DioException(
+        requestOptions: RequestOptions(path: '/api/manager/engineers'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/api/manager/engineers'),
+          statusCode: 400,
+          data: {
+            'statusCode': 400,
+            'message': [
+              'salary must not be less than 0',
+              'salary must be a number conforming to the specified constraints'
+            ],
+            'error': 'Bad Request',
+          },
+        ),
+      );
+
+      final apiException = ApiException.fromDioException(dioException);
+      expect(apiException.statusCode, 400);
+      expect(
+        apiException.message,
+        'salary must not be less than 0\nsalary must be a number conforming to the specified constraints',
+      );
+      expect(apiException.toString(), apiException.message);
+    });
+
+    test('extracts single message string from response data', () {
+      final dioException = DioException(
+        requestOptions: RequestOptions(path: '/api/manager/engineers'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/api/manager/engineers'),
+          statusCode: 400,
+          data: {
+            'statusCode': 400,
+            'message': 'An engineer with this phone number already exists in your directory.',
+            'error': 'Bad Request',
+          },
+        ),
+      );
+
+      final apiException = ApiException.fromDioException(dioException);
+      expect(apiException.statusCode, 400);
+      expect(
+        apiException.message,
+        'An engineer with this phone number already exists in your directory.',
+      );
     });
   });
 }
