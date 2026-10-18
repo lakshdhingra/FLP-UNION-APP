@@ -1,6 +1,6 @@
 {
-    "name": "TAPSU",
-    "short_name": "TAPSU",
+    "name": "TASPU",
+    "short_name": "TASPU",
     "id": "/",
     "start_url": "./",
     "scope": "./",
@@ -58,7 +58,7 @@
         {
             "name": "Dashboard",
             "short_name": "Dashboard",
-            "description": "Access TAPSU workforce dashboard",
+            "description": "Access TASPU workforce dashboard",
             "url": "./",
             "icons": [
                 {

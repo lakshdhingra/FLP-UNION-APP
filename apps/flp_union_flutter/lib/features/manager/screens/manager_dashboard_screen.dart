@@ -101,7 +101,7 @@ class _ManagerDashboardScreenState
                                 const AppLogo(size: 24),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'TAPSU',
+                                  'TASPU',
                                   style: AppTypography.font(
                                     fontSize: 11,
                                     fontWeight: AppFontWeight.bold,

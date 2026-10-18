@@ -62,7 +62,7 @@ class AdminShellScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'TAPSU Admin',
+                                  'TASPU Admin',
                                   style: AppTypography.title3(
                                       color: colors.textPrimary),
                                 ),

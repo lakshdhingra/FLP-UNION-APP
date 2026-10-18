@@ -1,5 +1,5 @@
 /**
- * TAPSU Progressive Web App Service Worker
+ * TASPU Progressive Web App Service Worker
  * Designed for Flutter Web (3.22+)
  *
  * Caching Policy:
@@ -8,7 +8,7 @@
  *   issues, audit logs, uploaded documents/photos, presigned URLs, or requests with Authorization headers.
  */
 
-const CACHE_VERSION = 'tapsu-pwa-v1';
+const CACHE_VERSION = 'taspu-pwa-v1';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -35,7 +35,7 @@ self.addEventListener('install', (event) => {
       return Promise.allSettled(
         PRECACHE_ASSETS.map((url) =>
           cache.add(url).catch((err) => {
-            console.warn(`[TAPSU SW] Could not pre-cache ${url}:`, err);
+            console.warn(`[TASPU SW] Could not pre-cache ${url}:`, err);
           })
         )
       );
@@ -49,9 +49,9 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
-          .filter((name) => name.startsWith('tapsu-pwa-') && name !== STATIC_CACHE && name !== RUNTIME_CACHE)
+          .filter((name) => (name.startsWith('taspu-pwa-') || name.startsWith('tapsu-pwa-')) && name !== STATIC_CACHE && name !== RUNTIME_CACHE)
           .map((name) => {
-            console.log(`[TAPSU SW] Removing legacy cache: ${name}`);
+            console.log(`[TASPU SW] Removing legacy cache: ${name}`);
             return caches.delete(name);
           })
       );

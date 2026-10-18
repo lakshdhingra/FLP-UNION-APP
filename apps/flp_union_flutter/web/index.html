@@ -17,7 +17,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TAPSU">
+  <meta name="apple-mobile-web-app-title" content="TASPU">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
   <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
@@ -27,7 +27,7 @@
   <link rel="shortcut icon" href="favicon.png" type="image/png">
 
   <!-- Title & Web App Manifest -->
-  <title>TAPSU</title>
+  <title>TASPU</title>
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -73,10 +73,10 @@
       border: 2.5px solid rgba(108, 140, 255, 0.2);
       border-top-color: #6C8CFF;
       border-radius: 50%;
-      animation: tapsu-spin 0.8s linear infinite;
+      animation: taspu-spin 0.8s linear infinite;
     }
 
-    @keyframes tapsu-spin {
+    @keyframes taspu-spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
@@ -88,18 +88,18 @@
       window.addEventListener('load', function () {
         navigator.serviceWorker.register('sw.js', { scope: './' })
           .then(function (reg) {
-            console.log('[TAPSU PWA] Service Worker registered with scope:', reg.scope);
+            console.log('[TASPU PWA] Service Worker registered with scope:', reg.scope);
           })
           .catch(function (err) {
-            console.warn('[TAPSU PWA] Service Worker registration failed:', err);
+            console.warn('[TASPU PWA] Service Worker registration failed:', err);
           });
       });
     }
   </script>
 </head>
 <body>
-  <div id="loading-container" aria-label="Loading TAPSU">
-    <img class="loading-emblem" src="icons/Icon-192.png" alt="TAPSU Society Logo" width="88" height="88">
+  <div id="loading-container" aria-label="Loading TASPU">
+    <img class="loading-emblem" src="icons/Icon-192.png" alt="TASPU Society Logo" width="88" height="88">
     <div class="loading-spinner" role="status" aria-label="Loading application"></div>
   </div>
 

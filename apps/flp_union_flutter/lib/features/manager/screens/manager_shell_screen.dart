@@ -108,7 +108,7 @@ class ManagerShellScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'TAPSU',
+                                  'TASPU',
                                   style: AppTypography.title3(
                                       color: colors.textPrimary),
                                 ),
