@@ -32,14 +32,28 @@ class ManagerService {
     required String fileName,
     required String mimeType,
   }) async {
-    final response = await _apiClient.post(
-      '/manager/upload-url',
-      data: {
-        'fileName': fileName,
-        'mimeType': mimeType,
-      },
-    );
-    return Map<String, dynamic>.from(response.data as Map);
+    try {
+      final response = await _apiClient.post(
+        '${ApiConstants.managerEngineers}/upload-url',
+        data: {
+          'fileName': fileName,
+          'mimeType': mimeType,
+        },
+      );
+      return Map<String, dynamic>.from(response.data as Map);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        final fallback = await _apiClient.post(
+          '/manager/upload-url',
+          data: {
+            'fileName': fileName,
+            'mimeType': mimeType,
+          },
+        );
+        return Map<String, dynamic>.from(fallback.data as Map);
+      }
+      rethrow;
+    }
   }
 
   Future<void> uploadFileToS3({
@@ -69,22 +83,92 @@ class ManagerService {
     }
   }
 
-  Future<String> getDocumentUrl(String key) async {
-    if (key.startsWith('http://') || key.startsWith('https://')) {
-      return key;
-    }
-    final response = await _apiClient.get(
-      '/manager/document-url',
-      queryParameters: {'key': key},
-    );
-    if (response.data is Map) {
-      final map = response.data as Map;
-      final url = map['signedUrl'] ??
-          map['url'] ??
-          (map['data'] is Map ? map['data']['signedUrl'] : null);
-      if (url is String && url.isNotEmpty) {
-        return url;
+  /// Extracts the clean S3 object key from a full canonical or path-style S3 URL.
+  /// If [keyOrUrl] is already a clean key or an external URL, returns appropriate key/URL.
+  static String extractS3Key(String keyOrUrl) {
+    if (keyOrUrl.isEmpty) return '';
+    try {
+      if (keyOrUrl.startsWith('http://') || keyOrUrl.startsWith('https://')) {
+        final uri = Uri.parse(keyOrUrl);
+        // If it is already a signed URL with active authentication parameters, return as-is
+        if (uri.queryParameters.containsKey('X-Amz-Signature') ||
+            uri.queryParameters.containsKey('Signature') ||
+            uri.queryParameters.containsKey('sig')) {
+          return keyOrUrl;
+        }
+        // If it points to an S3 bucket or amazonaws host, extract the clean object key
+        if (uri.host.contains('amazonaws.com') ||
+            uri.host.contains('taspu-membership-documents')) {
+          var path = uri.path;
+          if (path.startsWith('/')) path = path.substring(1);
+          if (path.startsWith('taspu-membership-documents-prod/')) {
+            path = path.substring('taspu-membership-documents-prod/'.length);
+          }
+          return Uri.decodeComponent(path);
+        }
+        // Other external HTTP URLs (not AWS S3)
+        return keyOrUrl;
       }
+    } catch (_) {
+      // Fallback
+    }
+    return keyOrUrl;
+  }
+
+  Future<String> getDocumentUrl(String key) async {
+    if (key.isEmpty) return '';
+
+    // If it's already a signed download URL or an external non-S3 URL, return directly
+    if (key.startsWith('http://') || key.startsWith('https://')) {
+      final uri = Uri.tryParse(key);
+      if (uri != null) {
+        if (uri.queryParameters.containsKey('X-Amz-Signature') ||
+            uri.queryParameters.containsKey('Signature') ||
+            uri.queryParameters.containsKey('sig')) {
+          return key;
+        }
+        // If it is NOT an AWS S3 URL, return as-is (e.g. third-party image/CDN)
+        if (!uri.host.contains('amazonaws.com') &&
+            !uri.host.contains('taspu-membership-documents')) {
+          return key;
+        }
+      }
+    }
+
+    final cleanKey = extractS3Key(key);
+    if (cleanKey.isEmpty) return '';
+
+    try {
+      final response = await _apiClient.get(
+        '${ApiConstants.managerEngineers}/document-url',
+        queryParameters: {'key': cleanKey},
+      );
+      if (response.data is Map) {
+        final map = response.data as Map;
+        final url = map['signedUrl'] ??
+            map['url'] ??
+            (map['data'] is Map ? map['data']['signedUrl'] : null);
+        if (url is String && url.isNotEmpty) {
+          return url;
+        }
+      }
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        final fallback = await _apiClient.get(
+          '/manager/document-url',
+          queryParameters: {'key': cleanKey},
+        );
+        if (fallback.data is Map) {
+          final map = fallback.data as Map;
+          final url = map['signedUrl'] ??
+              map['url'] ??
+              (map['data'] is Map ? map['data']['signedUrl'] : null);
+          if (url is String && url.isNotEmpty) {
+            return url;
+          }
+        }
+      }
+      rethrow;
     }
     return key;
   }

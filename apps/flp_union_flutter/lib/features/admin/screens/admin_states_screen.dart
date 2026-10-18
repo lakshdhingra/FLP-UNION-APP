@@ -269,7 +269,7 @@ class _StateCard extends StatelessWidget {
                               color: AppColors.textMuted, fontSize: 10)),
                     ),
                     Text(
-                      '${item.count.managerProfiles} managers',
+                      '${item.count.managerProfiles} proprietors',
                       style: AppTypography.caption(color: colors.textSecondary),
                     ),
                   ],

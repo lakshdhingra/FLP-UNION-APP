@@ -37,7 +37,7 @@ class OtherManagerProfileScreen extends ConsumerWidget {
           title: managerAsync.when(
             data: (mgr) => Text(mgr.fullName),
             loading: () => const Text('Loading...'),
-            error: (_, __) => const Text('Manager Profile'),
+            error: (_, __) => const Text('Proprietor Profile'),
           ),
         ),
         body: SafeArea(
@@ -45,7 +45,7 @@ class OtherManagerProfileScreen extends ConsumerWidget {
           child: managerAsync.when(
             loading: () => const AppDetailSkeleton(),
             error: (err, stack) => ErrorStateWidget(
-              title: 'Manager Not Found',
+              title: 'Proprietor Not Found',
               message: 'Unable to load profile information.',
               onRetry: () => ref.refresh(managerProfileByIdProvider(id)),
             ),
@@ -287,7 +287,7 @@ class OtherManagerProfileScreen extends ConsumerWidget {
                                       AppSpacing.cardPaddingLg),
                                   child: Center(
                                     child: Text(
-                                      'No engineers currently assigned to this manager.',
+                                      'No engineers currently assigned to this proprietor.',
                                       style: AppTypography.subhead(
                                           color: colors.textMuted),
                                     ),

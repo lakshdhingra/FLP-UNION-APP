@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/manager_profile_dto.dart';
 import 'manager_dashboard_provider.dart';
@@ -25,18 +26,46 @@ class ManagerProfileMutationsNotifier extends StateNotifier<AsyncValue<void>> {
     String? fullName,
     String? profilePhotoUrl,
     List<String>? brandsWorkedWith,
+    bool clearPhoto = false,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final service = _ref.read(managerServiceProvider);
       final payload = <String, dynamic>{};
       if (fullName != null) payload['fullName'] = fullName;
-      if (profilePhotoUrl != null) payload['profilePhotoUrl'] = profilePhotoUrl;
+      if (clearPhoto) {
+        payload['profilePhotoUrl'] = null;
+      } else if (profilePhotoUrl != null) {
+        if (profilePhotoUrl.isEmpty) {
+          payload['profilePhotoUrl'] = null;
+        } else {
+          final formattedUrl = profilePhotoUrl.startsWith('http')
+              ? profilePhotoUrl
+              : 'https://taspu-membership-documents-prod.s3.ap-south-1.amazonaws.com/$profilePhotoUrl';
+          payload['profilePhotoUrl'] = formattedUrl;
+        }
+      }
       if (brandsWorkedWith != null) {
         payload['brandsWorkedWith'] = brandsWorkedWith;
       }
 
-      await service.updateProfile(payload);
+      try {
+        await service.updateProfile(payload);
+      } on DioException catch (dioErr) {
+        // Fallback: if server rejected the canonical URL format (400), try sending the raw key
+        if (dioErr.response?.statusCode == 400 &&
+            payload.containsKey('profilePhotoUrl') &&
+            payload['profilePhotoUrl'] != null &&
+            profilePhotoUrl != null &&
+            profilePhotoUrl.isNotEmpty &&
+            !profilePhotoUrl.startsWith('http')) {
+          payload['profilePhotoUrl'] = profilePhotoUrl;
+          await service.updateProfile(payload);
+        } else {
+          rethrow;
+        }
+      }
+
       _ref.invalidate(managerProfileProvider);
       _ref.invalidate(managerDashboardProvider);
     });

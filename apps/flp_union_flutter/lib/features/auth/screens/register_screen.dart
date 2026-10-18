@@ -149,7 +149,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ],
           ),
           content: Text(
-            'Your manager account has been registered successfully. Please sign in.',
+            'Your proprietor account has been registered successfully. Please sign in.',
             style: AppTypography.body(color: colors.textSecondary),
           ),
           actions: [
@@ -216,7 +216,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Create Manager Account',
+                            'Create Proprietor Account',
                             style:
                                 AppTypography.title1(color: colors.textPrimary),
                             textAlign: TextAlign.center,

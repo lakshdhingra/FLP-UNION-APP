@@ -67,12 +67,12 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'District Managers',
+                          'District Proprietors',
                           style:
                               AppTypography.title1(color: colors.textPrimary),
                         ),
                         Text(
-                          '${managersAsync.valueOrNull?.total ?? 0} registered managers',
+                          '${managersAsync.valueOrNull?.total ?? 0} registered proprietors',
                           style: AppTypography.caption(color: colors.textMuted),
                         ),
                       ],
@@ -89,7 +89,7 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                 ),
                 child: AppSearchInput(
                   controller: _searchController,
-                  placeholder: 'Search managers by name, district, state...',
+                  placeholder: 'Search proprietors by name, district, state...',
                   onChanged: (val) {
                     ref.read(adminManagersSearchProvider.notifier).state = val;
                   },
@@ -105,7 +105,7 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                 child: managersAsync.when(
                   loading: () => const AppSkeletonList(count: 6),
                   error: (err, stack) => ErrorStateWidget(
-                    message: 'Unable to load managers.',
+                    message: 'Unable to load proprietors.',
                     onRetry: () => ref.refresh(adminManagersProvider),
                   ),
                   data: (response) {
@@ -120,9 +120,9 @@ class _AdminManagersScreenState extends ConsumerState<AdminManagersScreen> {
                           child: SizedBox(
                             height: 420,
                             child: EmptyStateWidget(
-                              title: 'No managers found',
+                              title: 'No proprietors found',
                               description:
-                                  'No district managers registered matching your search criteria.',
+                                  'No district proprietors registered matching your search criteria.',
                             ),
                           ),
                         ),

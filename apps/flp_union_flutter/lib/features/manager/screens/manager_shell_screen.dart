@@ -40,7 +40,7 @@ class ManagerShellScreen extends StatelessWidget {
       const _ShellNavItem(
           icon: LucideIcons.users, label: 'Engineers', branchIndex: 1),
       const _ShellNavItem(
-          icon: LucideIcons.userCheck, label: 'Managers', branchIndex: 2),
+          icon: LucideIcons.userCheck, label: 'Proprietors', branchIndex: 2),
       const _ShellNavItem(
           icon: LucideIcons.helpCircle,
           label: 'Help & Support',
@@ -49,7 +49,7 @@ class ManagerShellScreen extends StatelessWidget {
           icon: LucideIcons.user, label: 'Profile', branchIndex: 4),
     ];
 
-    // Phone Bottom Navigation (Dashboard, Engineers, Managers, Profile)
+    // Phone Bottom Navigation (Dashboard, Engineers, Proprietors, Profile)
     final phoneNavItems = [
       const _ShellNavItem(
           icon: LucideIcons.layoutDashboard,
@@ -58,7 +58,7 @@ class ManagerShellScreen extends StatelessWidget {
       const _ShellNavItem(
           icon: LucideIcons.users, label: 'Engineers', branchIndex: 1),
       const _ShellNavItem(
-          icon: LucideIcons.userCheck, label: 'Managers', branchIndex: 2),
+          icon: LucideIcons.userCheck, label: 'Proprietors', branchIndex: 2),
       const _ShellNavItem(
           icon: LucideIcons.user, label: 'Profile', branchIndex: 4),
     ];
@@ -113,7 +113,7 @@ class ManagerShellScreen extends StatelessWidget {
                                       color: colors.textPrimary),
                                 ),
                                 Text(
-                                  'Manager Portal',
+                                  'Proprietor Portal',
                                   style: AppTypography.caption(
                                       color: colors.textMuted),
                                 ),
@@ -269,7 +269,11 @@ class ManagerShellScreen extends StatelessWidget {
                                     ? colors.primaryAction
                                     : colors.textMuted,
                               ),
-                              child: Text(item.label),
+                              child: Text(
+                                item.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),

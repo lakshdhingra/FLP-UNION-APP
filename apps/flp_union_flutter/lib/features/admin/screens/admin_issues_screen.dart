@@ -125,7 +125,7 @@ class AdminIssuesScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Platform requests submitted by district managers',
+                              'Platform requests submitted by district proprietors',
                               style: AppTypography.caption(
                                   color: colors.textMuted),
                             ),

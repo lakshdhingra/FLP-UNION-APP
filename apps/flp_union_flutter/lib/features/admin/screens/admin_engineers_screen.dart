@@ -240,7 +240,7 @@ class _AdminEngineerRowCard extends StatelessWidget {
                               size: 12, color: colors.textMuted),
                           const SizedBox(width: 3),
                           Text(
-                            'Mgr: ${item.managerName}',
+                            'Proprietor: ${item.managerName}',
                             style:
                                 AppTypography.caption(color: colors.textMuted),
                           ),

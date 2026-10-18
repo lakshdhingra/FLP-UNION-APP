@@ -153,7 +153,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Enter your manager or administrator credentials',
+                                'Enter your proprietor or administrator credentials',
                                 style: AppTypography.caption(
                                     color: colors.textMuted),
                               ),
@@ -193,7 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Need a manager account? ',
+                                    'Need a proprietor account? ',
                                     style: AppTypography.subhead(
                                         color: colors.textSecondary),
                                   ),

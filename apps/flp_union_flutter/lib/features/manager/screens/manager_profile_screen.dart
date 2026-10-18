@@ -177,7 +177,7 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
       try {
         await ref
             .read(managerProfileMutationsProvider.notifier)
-            .updateProfile(profilePhotoUrl: '');
+            .updateProfile(clearPhoto: true);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -473,7 +473,7 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                                 runSpacing: 6,
                                 children: [
                                   const AppBadge(
-                                    label: 'District Manager',
+                                    label: 'District Proprietor',
                                     variant: AppBadgeVariant.info,
                                     showDot: true,
                                   ),
@@ -536,7 +536,7 @@ class _ManagerProfileScreenState extends ConsumerState<ManagerProfileScreen> {
                                   const Divider(height: 16),
                                   _ProfileInfoRow(
                                     icon: LucideIcons.users,
-                                    label: 'Managed Engineers',
+                                    label: 'Engineers Managed',
                                     value: '${profile.totalEngineers}',
                                   ),
                                 ],

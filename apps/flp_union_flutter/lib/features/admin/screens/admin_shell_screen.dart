@@ -28,7 +28,7 @@ class AdminShellScreen extends StatelessWidget {
 
     const navItems = [
       _AdminNavItem(icon: LucideIcons.layoutDashboard, label: 'Dashboard'),
-      _AdminNavItem(icon: LucideIcons.userCheck, label: 'Managers'),
+      _AdminNavItem(icon: LucideIcons.userCheck, label: 'Proprietors'),
       _AdminNavItem(icon: LucideIcons.users, label: 'Engineers'),
       _AdminNavItem(icon: LucideIcons.helpCircle, label: 'Issues'),
       _AdminNavItem(icon: LucideIcons.building2, label: 'States'),
@@ -178,6 +178,8 @@ class AdminShellScreen extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             item.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: AppTypography.font(
                               fontSize: 10.5,
                               fontWeight: isSelected

@@ -15,6 +15,7 @@ import '../../../shared/widgets/app_logo.dart';
 import '../../../shared/widgets/app_skeleton.dart';
 import '../../../shared/widgets/error_state_widget.dart';
 import '../providers/manager_dashboard_provider.dart';
+import '../providers/manager_profile_provider.dart';
 
 class ManagerDashboardScreen extends ConsumerStatefulWidget {
   const ManagerDashboardScreen({super.key});
@@ -65,6 +66,12 @@ class _ManagerDashboardScreenState
               final sortedDesignations = stats.designationDistribution.entries
                   .toList()
                 ..sort((a, b) => b.value.compareTo(a.value));
+
+              final photoKey = manager.profilePhotoUrl ?? '';
+              final photoUrlAsync = photoKey.isNotEmpty
+                  ? ref.watch(managerDocumentUrlProvider(photoKey))
+                  : const AsyncValue<String>.data('');
+              final photoUrl = photoUrlAsync.valueOrNull;
 
               return RefreshIndicator(
                 color: colors.primaryAction,
@@ -128,7 +135,7 @@ class _ManagerDashboardScreenState
                                           const SizedBox(width: 4),
                                           Expanded(
                                             child: Text(
-                                              '${manager.district.name.isNotEmpty ? manager.district.name : 'District'}, ${manager.state.name.isNotEmpty ? manager.state.name : 'State'} • Regional Manager',
+                                              '${manager.district.name.isNotEmpty ? manager.district.name : 'District'}, ${manager.state.name.isNotEmpty ? manager.state.name : 'State'} • Regional Proprietor',
                                               style: AppTypography.subhead(
                                                   color: colors.textSecondary),
                                               overflow: TextOverflow.ellipsis,
@@ -152,6 +159,7 @@ class _ManagerDashboardScreenState
                                       ),
                                     ),
                                     child: AppAvatar(
+                                      url: photoUrl,
                                       name: manager.fullName,
                                       size: 46,
                                     ),

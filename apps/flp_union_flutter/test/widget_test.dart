@@ -31,7 +31,7 @@ void main() {
                 children: const [
                   _TestTabContent(title: 'Dashboard Page', tabIndex: 0),
                   _TestTabContent(title: 'Engineers Page', tabIndex: 1),
-                  _TestTabContent(title: 'Managers Page', tabIndex: 2),
+                  _TestTabContent(title: 'Proprietors Page', tabIndex: 2),
                 ],
               ),
               bottomNavigationBar: Row(

@@ -279,7 +279,7 @@ class EngineerDetailScreen extends ConsumerWidget {
                                       const SizedBox(width: 8),
                                       Expanded(
                                         child: Text(
-                                          'Private fields hidden (belongs to another manager).',
+                                          'Private fields hidden (belongs to another proprietor).',
                                           style: AppTypography.caption(
                                               color: colors.textMuted),
                                         ),

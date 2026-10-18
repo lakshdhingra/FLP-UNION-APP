@@ -5,6 +5,7 @@ import 'package:flp_union_app/features/manager/models/manager_profile_dto.dart';
 import 'package:flp_union_app/shared/models/engineer.dart';
 import 'package:flp_union_app/shared/models/other_manager.dart';
 import 'package:flp_union_app/shared/widgets/app_multi_select.dart';
+import 'package:flp_union_app/features/manager/services/manager_service.dart';
 
 void main() {
   group('Predefined Constants Requirements', () {
@@ -33,7 +34,8 @@ void main() {
       expect(PredefinedOptions.brands.contains('Daikin'), isTrue);
       expect(PredefinedOptions.brands.contains('Amazon'), isTrue);
       expect(PredefinedOptions.brands.contains('Flipkart'), isTrue);
-      expect(PredefinedOptions.brands.contains('Others'), isFalse); // "Others" handled dynamically in form
+      expect(PredefinedOptions.brands.contains('Others'),
+          isFalse); // "Others" handled dynamically in form
     });
   });
 
@@ -59,7 +61,9 @@ void main() {
       expect(dto.totalEngineers, 5);
     });
 
-    test('backward compatibility: parses legacy comma-separated string for brandsWorkedWith', () {
+    test(
+        'backward compatibility: parses legacy comma-separated string for brandsWorkedWith',
+        () {
       final legacyJson = {
         'id': 'mgr_2',
         'userId': 'usr_2',
@@ -74,7 +78,8 @@ void main() {
       };
 
       final dto = ManagerProfileDto.fromJson(legacyJson);
-      expect(dto.brandsWorkedWith, ['Samsung', 'Haier', 'Bluestar', 'Custom Brand']);
+      expect(dto.brandsWorkedWith,
+          ['Samsung', 'Haier', 'Bluestar', 'Custom Brand']);
       expect(dto.profilePhotoUrl, isNull);
     });
   });
@@ -118,18 +123,22 @@ void main() {
 
       final eng = Engineer.fromJson(json);
       expect(eng.fullName, 'Ramesh Kumar');
-      expect(eng.skills, ['Air Conditioner', 'Refrigerator', 'Washing Machine']);
+      expect(
+          eng.skills, ['Air Conditioner', 'Refrigerator', 'Washing Machine']);
       expect(eng.profilePhotoUrl, 'engineers/photos/eng_1_avatar.jpg');
       expect(eng.aadhaarCardUrl, 'engineers/aadhaar/eng_1_aadhaar.pdf');
 
       final serialized = eng.toJson();
-      expect(serialized['profilePhotoUrl'], 'engineers/photos/eng_1_avatar.jpg');
-      expect(serialized['aadhaarCardUrl'], 'engineers/aadhaar/eng_1_aadhaar.pdf');
+      expect(
+          serialized['profilePhotoUrl'], 'engineers/photos/eng_1_avatar.jpg');
+      expect(
+          serialized['aadhaarCardUrl'], 'engineers/aadhaar/eng_1_aadhaar.pdf');
     });
   });
 
   group('AppMultiSelect UI Widget', () {
-    testWidgets('renders placeholder when empty and selected chips when populated',
+    testWidgets(
+        'renders placeholder when empty and selected chips when populated',
         (WidgetTester tester) async {
       List<String> selected = ['Television', 'Washing Machine'];
 
@@ -158,6 +167,42 @@ void main() {
       // Verify selected chips are rendered
       expect(find.text('Television'), findsOneWidget);
       expect(find.text('Washing Machine'), findsOneWidget);
+    });
+  });
+
+  group('ManagerService S3 Key Extraction', () {
+    test('extracts clean key from canonical virtual-hosted S3 bucket URL', () {
+      const url =
+          'https://taspu-membership-documents-prod.s3.ap-south-1.amazonaws.com/android/sub-members/1729210000-xyz.jpg';
+      expect(
+          ManagerService.extractS3Key(url), 'android/sub-members/1729210000-xyz.jpg');
+    });
+
+    test('extracts clean key from path-style S3 URL', () {
+      const url =
+          'https://s3.ap-south-1.amazonaws.com/taspu-membership-documents-prod/android/managers/manager_123.jpg';
+      expect(
+          ManagerService.extractS3Key(url), 'android/managers/manager_123.jpg');
+    });
+
+    test('preserves already signed presigned URLs', () {
+      const signedUrl =
+          'https://taspu-membership-documents-prod.s3.ap-south-1.amazonaws.com/android/sub-members/123.jpg?X-Amz-Signature=abc12345';
+      expect(ManagerService.extractS3Key(signedUrl), signedUrl);
+    });
+
+    test('preserves clean S3 keys without URL scheme', () {
+      const key = 'android/sub-members/1729210000-xyz.jpg';
+      expect(ManagerService.extractS3Key(key), key);
+    });
+
+    test('preserves external third-party URLs', () {
+      const externalUrl = 'https://images.unsplash.com/photo-123.jpg';
+      expect(ManagerService.extractS3Key(externalUrl), externalUrl);
+    });
+
+    test('handles empty string gracefully', () {
+      expect(ManagerService.extractS3Key(''), '');
     });
   });
 }

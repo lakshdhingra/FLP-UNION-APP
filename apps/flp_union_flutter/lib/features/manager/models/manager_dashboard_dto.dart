@@ -6,6 +6,7 @@ class ManagerProfileData {
   final String fullName;
   final String email;
   final String mobile;
+  final String? profilePhotoUrl;
   final StateEntity state;
   final DistrictEntity district;
 
@@ -14,6 +15,7 @@ class ManagerProfileData {
     required this.fullName,
     required this.email,
     required this.mobile,
+    this.profilePhotoUrl,
     required this.state,
     required this.district,
   });
@@ -21,9 +23,10 @@ class ManagerProfileData {
   factory ManagerProfileData.fromJson(Map<String, dynamic> json) {
     return ManagerProfileData(
       id: json['id'] ?? '',
-      fullName: json['fullName'] ?? json['user']?['email'] ?? 'Manager',
+      fullName: json['fullName'] ?? json['user']?['email'] ?? 'Proprietor',
       email: json['email'] ?? json['user']?['email'] ?? '',
       mobile: json['mobile'] ?? json['user']?['mobile'] ?? '',
+      profilePhotoUrl: json['profilePhotoUrl'],
       state: StateEntity.fromJson(json['state'] ?? {}),
       district: DistrictEntity.fromJson(json['district'] ?? {}),
     );

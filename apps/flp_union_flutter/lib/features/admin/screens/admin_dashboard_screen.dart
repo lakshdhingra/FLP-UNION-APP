@@ -174,7 +174,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                               ),
                               _StatGridCard(
                                 width: cardWidth,
-                                label: 'District Managers',
+                                label: 'District Proprietors',
                                 value: data.managers,
                                 icon: LucideIcons.userCheck,
                                 accentColor: colors.primaryAction,

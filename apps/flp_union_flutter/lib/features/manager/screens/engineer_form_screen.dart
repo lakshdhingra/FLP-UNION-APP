@@ -686,7 +686,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       content: Text(
-                                          'Loading manager territory data. Please try again in a moment.'),
+                                          'Loading proprietor territory data. Please try again in a moment.'),
                                     ),
                                   );
                                 }
@@ -866,7 +866,7 @@ class _EngineerFormScreenState extends ConsumerState<EngineerFormScreen> {
                       const _FormSectionHeader(
                         title: 'Confidential Information',
                         subtitle:
-                            'Strictly visible to you only (manager privileged)',
+                            'Strictly visible to you only (proprietor privileged)',
                       ),
                       AppCard(
                         padding: const EdgeInsets.all(AppSpacing.cardPadding),

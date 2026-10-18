@@ -69,14 +69,14 @@ class _ManagerDirectoryScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Managers Directory',
+                          'Proprietors Directory',
                           style:
                               AppTypography.title1(color: colors.textPrimary),
                         ),
                         const SizedBox(height: 2),
                         managersAsync.when(
                           data: (list) => Text(
-                            '${list.length} managers in your state',
+                            '${list.length} proprietors in your state',
                             style:
                                 AppTypography.caption(color: colors.textMuted),
                           ),
@@ -101,7 +101,7 @@ class _ManagerDirectoryScreenState
                 ),
                 child: AppSearchInput(
                   controller: _searchController,
-                  placeholder: 'Search managers by name, district...',
+                  placeholder: 'Search proprietors by name, district...',
                   onChanged: _onSearchChanged,
                   onClear: () => setState(() => _searchQuery = ''),
                 ),
@@ -113,7 +113,7 @@ class _ManagerDirectoryScreenState
                 child: managersAsync.when(
                   loading: () => const AppSkeletonList(count: 5),
                   error: (err, stack) => ErrorStateWidget(
-                    message: 'Unable to load manager directory.',
+                    message: 'Unable to load proprietor directory.',
                     onRetry: () =>
                         ref.refresh(sameStateManagersProvider(_searchQuery)),
                   ),
@@ -130,11 +130,11 @@ class _ManagerDirectoryScreenState
                             height: 420,
                             child: EmptyStateWidget(
                               title: _searchQuery.isNotEmpty
-                                  ? 'No managers found'
-                                  : 'No other managers',
+                                  ? 'No proprietors found'
+                                  : 'No other proprietors',
                               description: _searchQuery.isNotEmpty
-                                  ? 'No managers match "$_searchQuery".'
-                                  : 'No other registered managers found in your state yet.',
+                                  ? 'No proprietors match "$_searchQuery".'
+                                  : 'No other registered proprietors found in your state yet.',
                             ),
                           ),
                         ),
